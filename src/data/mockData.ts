@@ -532,14 +532,14 @@ export const obituaries: Obituary[] = [
 ];
 
 // Categorias do app
-export const categories = [
-  { id: 'comer-agora', name: 'Comer Agora', icon: '🍔', color: 'category-food' },
-  { id: 'classificados', name: 'Classificados', icon: '🛍️', color: 'category-classifieds' },
-  { id: 'ofertas', name: 'Ofertas', icon: '🛒', color: 'category-deals' },
-  { id: 'servicos', name: 'Serviços', icon: '🧭', color: 'category-services' },
-  { id: 'agenda', name: 'Agenda', icon: '🎉', color: 'category-events' },
-  { id: 'falecimentos', name: 'Falecimentos', icon: '⚰️', color: 'category-obituary' },
-  { id: 'noticias', name: 'Notícias', icon: '📰', color: 'category-news' },
+export const categories: Array<{ id: string; name: string; iconKey: CategoryIconKey; color: string }> = [
+  { id: 'comer-agora', name: 'Comer Agora', iconKey: 'food', color: 'category-food' },
+  { id: 'classificados', name: 'Classificados', iconKey: 'classifieds', color: 'category-classifieds' },
+  { id: 'ofertas', name: 'Ofertas', iconKey: 'deals', color: 'category-deals' },
+  { id: 'servicos', name: 'Serviços', iconKey: 'services', color: 'category-services' },
+  { id: 'agenda', name: 'Agenda', iconKey: 'events', color: 'category-events' },
+  { id: 'falecimentos', name: 'Falecimentos', iconKey: 'obituary', color: 'category-obituary' },
+  { id: 'noticias', name: 'Notícias', iconKey: 'news', color: 'category-news' },
 ];
 
 // Filtros por categoria
@@ -559,13 +559,4 @@ export type CategoryIconKey =
   | 'obituary'
   | 'news'
   | 'store';
-
-export const categories: Array<{ id: string; name: string; iconKey: CategoryIconKey; color: string }> = [
-  { id: 'comer-agora', name: 'Comer Agora', iconKey: 'food', color: 'category-food' },
-  { id: 'classificados', name: 'Classificados', iconKey: 'classifieds', color: 'category-classifieds' },
-  { id: 'ofertas', name: 'Ofertas', iconKey: 'deals', color: 'category-deals' },
-  { id: 'servicos', name: 'Serviços', iconKey: 'services', color: 'category-services' },
-  { id: 'agenda', name: 'Agenda', iconKey: 'events', color: 'category-events' },
-  { id: 'falecimentos', name: 'Falecimentos', iconKey: 'obituary', color: 'category-obituary' },
-  { id: 'noticias', name: 'Notícias', iconKey: 'news', color: 'category-news' },
 ];
