@@ -1,5 +1,15 @@
 // Mock Data - Monte de Tudo
 
+export type CategoryIconKey =
+  | 'food'
+  | 'classifieds'
+  | 'deals'
+  | 'services'
+  | 'events'
+  | 'obituary'
+  | 'news'
+  | 'store';
+
 export interface Business {
   id: string;
   name: string;
@@ -91,7 +101,7 @@ export const businesses: Business[] = [
     isOpenNow: true,
     isVerified: true,
     description: 'A melhor pizza da cidade! Massa artesanal e ingredientes frescos.',
-    address: 'Rua das Flores, 123 - Centro'
+    address: 'Rua das Flores, 123 - Centro',
   },
   {
     id: '2',
@@ -106,7 +116,7 @@ export const businesses: Business[] = [
     isOpenNow: true,
     isVerified: true,
     description: 'Farmácia completa com plantão 24h. Tele-entrega rápida.',
-    address: 'Av. Principal, 500 - Centro'
+    address: 'Av. Principal, 500 - Centro',
   },
   {
     id: '3',
@@ -133,7 +143,7 @@ export const businesses: Business[] = [
     coverImages: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop'],
     isOpenNow: true,
     description: 'Comida caseira feita com amor. Buffet self-service e marmitex.',
-    address: 'Rua do Comércio, 89 - Centro'
+    address: 'Rua do Comércio, 89 - Centro',
   },
   {
     id: '5',
@@ -488,7 +498,7 @@ export const news: News[] = [
   },
   {
     id: '6',
-    title: 'Falta d\'água programada para quinta-feira',
+    title: "Falta d'água programada para quinta-feira",
     tag: 'Prefeitura',
     snippet: 'Manutenção preventiva afeta bairros Centro e Vila Nova.',
     date: '2024-01-13',
@@ -540,23 +550,14 @@ export const categories: Array<{ id: string; name: string; iconKey: CategoryIcon
   { id: 'agenda', name: 'Agenda', iconKey: 'events', color: 'category-events' },
   { id: 'falecimentos', name: 'Falecimentos', iconKey: 'obituary', color: 'category-obituary' },
   { id: 'noticias', name: 'Notícias', iconKey: 'news', color: 'category-news' },
+  { id: 'negocios', name: 'Negócios', iconKey: 'store', color: 'category-store' },
 ];
 
 // Filtros por categoria
 export const filtersByCategory: Record<string, string[]> = {
   'comer-agora': ['Delivery', 'Aberto agora', 'Aceita cartão'],
-  'servicos': ['Atende em domicílio', 'Orçamento sem compromisso', 'Atendimento 24h', 'Pet friendly'],
-  'classificados': ['Novo', 'Usado', 'Doação'],
-  'agenda': ['Entrada gratuita', 'Hoje', 'Fim de semana'],
-  'ofertas': ['Válido hoje', 'Delivery'],
+  servicos: ['Atende em domicílio', 'Orçamento sem compromisso', 'Atendimento 24h', 'Pet friendly'],
+  classificados: ['Novo', 'Usado', 'Doação'],
+  agenda: ['Entrada gratuita', 'Hoje', 'Fim de semana'],
+  ofertas: ['Válido hoje', 'Delivery'],
 };
-export type CategoryIconKey =
-  | 'food'
-  | 'classifieds'
-  | 'deals'
-  | 'services'
-  | 'events'
-  | 'obituary'
-  | 'news'
-  | 'store';
-];
