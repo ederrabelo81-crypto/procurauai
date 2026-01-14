@@ -550,3 +550,22 @@ export const filtersByCategory: Record<string, string[]> = {
   'agenda': ['Entrada gratuita', 'Hoje', 'Fim de semana'],
   'ofertas': ['Válido hoje', 'Delivery'],
 };
+export type CategoryIconKey =
+  | 'food'
+  | 'classifieds'
+  | 'deals'
+  | 'services'
+  | 'events'
+  | 'obituary'
+  | 'news'
+  | 'store';
+
+export const categories: Array<{ id: string; name: string; iconKey: CategoryIconKey; color: string }> = [
+  { id: 'comer-agora', name: 'Comer Agora', iconKey: 'food', color: 'category-food' },
+  { id: 'classificados', name: 'Classificados', iconKey: 'classifieds', color: 'category-classifieds' },
+  { id: 'ofertas', name: 'Ofertas', iconKey: 'deals', color: 'category-deals' },
+  { id: 'servicos', name: 'Serviços', iconKey: 'services', color: 'category-services' },
+  { id: 'agenda', name: 'Agenda', iconKey: 'events', color: 'category-events' },
+  { id: 'falecimentos', name: 'Falecimentos', iconKey: 'obituary', color: 'category-obituary' },
+  { id: 'noticias', name: 'Notícias', iconKey: 'news', color: 'category-news' },
+];
