@@ -9,6 +9,7 @@ import { EventCard } from '@/components/cards/EventCard';
 import { NewsCard } from '@/components/cards/NewsCard';
 import { ObituaryCard } from '@/components/cards/ObituaryCard';
 import { MonteIcon } from '@/components/icons/MonteIcons';
+import { categories } from '@/data/mockData';
 import { 
   categories, 
   businesses, 
