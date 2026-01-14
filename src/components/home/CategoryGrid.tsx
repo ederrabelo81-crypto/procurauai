@@ -1,3 +1,4 @@
+import { categories } from '@/data/mockData';
 export function CategoryGrid() {
   return (
     <div className="grid grid-cols-4 gap-2">
