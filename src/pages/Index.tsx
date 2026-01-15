@@ -46,7 +46,7 @@ export default function Index() {
             className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-primary/30 rounded-2xl text-primary font-semibold hover:bg-primary/5 transition-colors touch-target"
           >
             <Plus className="w-5 h-5" />
-            Publicar anúncio grátis
+            Anunciar Grátis
           </Link>
         </section>
       </main>
