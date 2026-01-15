@@ -86,7 +86,7 @@ export default function Search() {
           <div className="flex items-center gap-3 mb-3">
             <button 
               onClick={() => navigate(-1)}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors flex-shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -96,25 +96,26 @@ export default function Search() {
           <SearchBar 
             value={query}
             onChange={setQuery}
+            placeholder="O que você procura agora?"
             size="large"
           />
         </div>
         
-        {/* Filtros */}
-        <div className="px-4 pb-3">
-  <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-2">
-    {allFilters.map((filter) => (
-      <Chip
-        key={filter}
-        isActive={activeFilters.includes(filter)}
-        onClick={() => toggleFilter(filter)}
-        size="sm"
-      >
-        {filter}
-      </Chip>
-    ))}
-  </div>
-</div>
+        {/* Filtros - scroll horizontal sem quebra */}
+        <div className="px-4 pb-3 -mx-4">
+          <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide">
+            {allFilters.map((filter) => (
+              <Chip
+                key={filter}
+                isActive={activeFilters.includes(filter)}
+                onClick={() => toggleFilter(filter)}
+                size="sm"
+              >
+                {filter}
+              </Chip>
+            ))}
+          </div>
+        </div>
       </header>
 
       <main className="px-4 py-4">

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Camera, X, Check } from 'lucide-react';
-import { MonteIcon } from '@/components/icons/MonteIcons';
+import { ArrowLeft, ArrowRight, Camera, Check } from 'lucide-react';
+import { MonteIcon, type MonteIconName } from '@/components/icons/MonteIcons';
+import { cn } from '@/lib/utils';
 
 type PublishType = 'bazar' | 'evento' | 'oferta' | 'comercio';
 
@@ -19,11 +20,11 @@ interface FormData {
 
 const DRAFT_KEY = 'monte-de-tudo-draft';
 
-const publishTypes = [
-  { id: 'bazar' as PublishType, iconKey: 'classifieds', shortLabel: 'Bazar', label: 'Bazar / Classificado', description: 'Vender ou doar algo' },
-  { id: 'evento' as PublishType, iconKey: 'events', shortLabel: 'Evento', label: 'Evento', description: 'Divulgar um evento' },
-  { id: 'oferta' as PublishType, iconKey: 'deals', shortLabel: 'Oferta', label: 'Oferta', description: 'Promoção do seu negócio' },
-  { id: 'comercio' as PublishType, iconKey: 'store', shortLabel: 'Negócio', label: 'Comércio / Serviço', description: 'Cadastrar seu negócio' },
+const publishTypes: { id: PublishType; iconKey: MonteIconName; shortLabel: string; label: string; description: string }[] = [
+  { id: 'bazar', iconKey: 'classifieds', shortLabel: 'Bazar', label: 'Bazar / Classificado', description: 'Vender ou doar algo' },
+  { id: 'evento', iconKey: 'events', shortLabel: 'Evento', label: 'Evento', description: 'Divulgar um evento' },
+  { id: 'oferta', iconKey: 'deals', shortLabel: 'Oferta', label: 'Oferta', description: 'Promoção do seu negócio' },
+  { id: 'comercio', iconKey: 'store', shortLabel: 'Negócio', label: 'Comércio / Serviço', description: 'Cadastrar seu negócio' },
 ];
 
 const categories = {

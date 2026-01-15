@@ -11,7 +11,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ 
-  placeholder = "o que você procura?", 
+  placeholder = "O que você procura agora?", 
   value,
   onChange,
   onFocus,
@@ -19,14 +19,11 @@ export function SearchBar({
   size = 'default'
 }: SearchBarProps) {
   return (
-    <div className={cn(
-      "w-full bg-muted/60 border border-transparent rounded-2xl ...",
-      className
-    )}>
+    <div className={cn("relative w-full", className)}>
       <Search 
         className={cn(
-          "absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground",
-          size === 'large' ? "w-6 h-6" : "w-5 h-5"
+          "absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none",
+          size === 'large' ? "w-5 h-5" : "w-4 h-4"
         )} 
       />
       <input
@@ -36,8 +33,8 @@ export function SearchBar({
         onChange={(e) => onChange?.(e.target.value)}
         onFocus={onFocus}
         className={cn(
-          "w-full bg-card border border-border rounded-2xl pl-12 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all card-shadow",
-          size === 'large' ? "h-14 text-lg" : "h-12 text-base"
+          "w-full bg-card border border-border rounded-2xl pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm",
+          size === 'large' ? "h-14 text-base" : "h-12 text-sm"
         )}
       />
     </div>

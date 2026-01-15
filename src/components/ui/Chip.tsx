@@ -17,10 +17,10 @@ export function Chip({
   size = 'md',
   className 
 }: ChipProps) {
-  const baseStyles = "inline-flex items-center justify-center font-medium rounded-full transition-all touch-target whitespace-nowrap";
+  const baseStyles = "inline-flex items-center justify-center font-medium rounded-full transition-all whitespace-nowrap flex-shrink-0";
   
   const sizeStyles = {
-    sm: "px-3 py-1.5 text-xs min-h-[32px]",
+    sm: "px-3.5 py-1.5 text-xs min-h-[32px]",
     md: "px-4 py-2 text-sm min-h-[40px]"
   };
 
@@ -28,8 +28,8 @@ export function Chip({
     default: cn(
       "border",
       isActive 
-        ? "bg-primary text-primary-foreground border-primary" 
-        : "bg-card text-foreground border-border hover:border-primary/50"
+        ? "bg-primary text-primary-foreground border-primary shadow-sm" 
+        : "bg-card text-foreground border-border hover:border-primary/50 hover:bg-muted/50"
     ),
     outline: cn(
       "border-2",
@@ -46,6 +46,7 @@ export function Chip({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         baseStyles,

@@ -1,12 +1,13 @@
-import React from 'react';
 import type { CategoryIconKey } from '@/data/mockData';
 
+export type MonteIconName = CategoryIconKey;
+
 type Props = {
-  name: CategoryIconKey;
+  name: MonteIconName;
   className?: string;
 };
 
-// Ícones “exclusivos” do Monte de Tudo (simples, expressivos e consistentes)
+// Ícones "exclusivos" do Monte de Tudo (simples, expressivos e consistentes)
 // SVG inline pra não depender de libs externas.
 
 export function MonteIcon({ name, className }: Props) {
