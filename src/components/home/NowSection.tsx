@@ -14,7 +14,7 @@ export function NowSection() {
   const tabs = [
     { id: 'ofertas' as Tab, label: 'Ofertas do dia' },
     { id: 'eventos' as Tab, label: 'Próximos eventos' },
-    { id: 'abertos' as Tab, label: 'Abertos agora' },
+    { id: 'abertos' as Tab, label: 'Aberto agora' },
   ];
 
   const openBusinesses = businesses.filter(b => b.isOpenNow).slice(0, 3);
