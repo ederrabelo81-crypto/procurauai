@@ -68,16 +68,26 @@ export default function Category() {
 
   const renderContent = () => {
     switch (categoryId) {
-      case 'comer-agora':
-      case 'servicos':
-        const filteredBusinesses = getFilteredBusinesses();
-        return (
-          <div className="grid grid-cols-1 gap-4">
-            {filteredBusinesses.map(business => (
-              <BusinessCard key={business.id} business={business} />
-            ))}
-          </div>
-        );
+  case 'comer-agora':
+  case 'servicos':
+  case 'negocios':
+    const filteredBusinesses = getFilteredBusinesses();
+        if (filteredBusinesses.length === 0) {
+  return (
+    <div className="py-12 text-center">
+      <div className="text-4xl mb-2">🏪</div>
+      <p className="font-semibold">Ainda não temos negócios aqui.</p>
+      <p className="text-muted-foreground">Indique um lugar pra gente adicionar.</p>
+    </div>
+  );
+}
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        {filteredBusinesses.map(business => (
+          <BusinessCard key={business.id} business={business} />
+        ))}
+      </div>
+    );
 
       case 'classificados':
         const filteredListings = getFilteredListings();
