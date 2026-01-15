@@ -1,5 +1,4 @@
 import { categories } from '@/data/mockData';
-import { CategoryCard } from '@/components/cards/CategoryCard';
 import type React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
