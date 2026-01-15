@@ -296,7 +296,7 @@ export const businesses: Business[] = [
     isOpenNow: true,
     description: 'Troca de tela, bateria, conector e diagnóstico.',
   },
-  {
+    {
     id: 'n6',
     name: 'Contabilidade Minas Fácil',
     category: 'Contador(a)',
@@ -309,11 +309,10 @@ export const businesses: Business[] = [
     isOpenNow: true,
     description: 'MEI, imposto de renda e contabilidade empresarial.',
   },
-];
 
   // === SERVIÇOS ===
   {
-    id: '2',
+    id: 's7',
     name: 'Farmácia São Lucas',
     category: 'Farmácia',
     categorySlug: 'servicos',
@@ -328,7 +327,7 @@ export const businesses: Business[] = [
     address: 'Av. Principal, 500 - Centro',
   },
   {
-    id: '3',
+    id: 's8',
     name: 'João Eletricista',
     category: 'Eletricista',
     categorySlug: 'servicos',
