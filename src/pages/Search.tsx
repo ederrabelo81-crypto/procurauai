@@ -102,7 +102,7 @@ export default function Search() {
         
         {/* Filtros */}
         <div className="px-4 pb-3 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-2">
             {allFilters.slice(0, 6).map((filter) => (
               <Chip
                 key={filter}
