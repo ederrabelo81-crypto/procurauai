@@ -8,7 +8,7 @@ import { DealCard } from '@/components/cards/DealCard';
 import { EventCard } from '@/components/cards/EventCard';
 import { NewsCard } from '@/components/cards/NewsCard';
 import { ObituaryCard } from '@/components/cards/ObituaryCard';
-import { MonteIcon } from '@/components/icons/MonteIcons';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { 
   categories, 
   businesses, 
@@ -186,9 +186,7 @@ export default function Category() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <span className="text-primary">
-  <MonteIcon name={category.iconKey} className="h-7 w-7" />
-</span>
+              <CategoryIcon categoryId={category.iconKey} size="sm" />
               <h1 className="text-lg font-bold text-foreground">{category.name}</h1>
             </div>
           </div>

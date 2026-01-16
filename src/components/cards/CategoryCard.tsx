@@ -1,20 +1,20 @@
-import { categories } from '@/data/mockData';
 import type React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { MonteIcon } from '@/components/icons/MonteIcons';
-import type { CategoryIconKey } from '@/data/mockData';
+import { getCategoryIcon } from '@/assets/icons/categoryIcons';
 
 interface CategoryCardProps {
   id: string;
   name: string;
-  iconKey: CategoryIconKey;
+  iconKey: string;
   className?: string;
   size?: 'sm' | 'md';
   onClickOverride?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 export function CategoryCard({ id, name, iconKey, className, size = 'md', onClickOverride }: CategoryCardProps) {
+  const iconSrc = getCategoryIcon(iconKey) || getCategoryIcon(id);
+  
   return (
     <Link
       to={`/categoria/${id}`}
@@ -26,14 +26,31 @@ export function CategoryCard({ id, name, iconKey, className, size = 'md', onClic
         className
       )}
     >
-      <span className={cn("mb-2 flex items-center justify-center text-primary", size === 'md' ? "h-10 w-10" : "h-9 w-9")}>
-        <MonteIcon name={iconKey} className={cn(size === 'md' ? 'h-9 w-9' : 'h-8 w-8')} />
+      <span className={cn(
+        "mb-2 flex items-center justify-center",
+        size === 'md' ? "h-12 w-12" : "h-11 w-11"
+      )}>
+        {iconSrc ? (
+          <img 
+            src={iconSrc} 
+            alt={name}
+            loading="lazy"
+            className={cn(
+              "object-contain drop-shadow-md",
+              size === 'md' ? 'h-12 w-12' : 'h-11 w-11'
+            )}
+          />
+        ) : (
+          <span className="text-2xl">📦</span>
+        )}
       </span>
 
-      <span className={cn("font-semibold text-foreground text-center leading-tight", size === 'md' ? 'text-sm' : 'text-[12px]')}>
+      <span className={cn(
+        "font-semibold text-foreground text-center leading-tight",
+        size === 'md' ? 'text-sm' : 'text-[12px]'
+      )}>
         {name}
       </span>
     </Link>
   );
 }
-
