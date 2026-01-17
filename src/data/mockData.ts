@@ -528,7 +528,7 @@ export const businesses: Business[] = [
     id: "r029",
     name: "Cida Salgados",
     category: "Loja de Congelados",
-    categorySlug: "comer-agora", "negocios",
+    categorySlug: "negocios",
     tags: ["Boa reputação", "WhatsApp", "Entrega"],
     neighborhood: "Centro",
     hours: "Horário: 8AM-7PM",
