@@ -1289,7 +1289,7 @@ export const businesses: Business[] = [
     id: "d020",
     name: "Center Vet",
     category: "Pet Shop",
-    categorySlug: "servicos", "negocios",
+    categorySlug: "servicos",
     tags: ["Bem avaliado", "Muitas avaliações", "WhatsApp", "Site"],
     neighborhood: "Monte Santo de Minas",
     hours: "Horário: 8AM-5:30PM",
