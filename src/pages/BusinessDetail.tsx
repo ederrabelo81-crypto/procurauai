@@ -5,6 +5,7 @@ import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
 import { businesses } from '@/data/mockData';
 import { useFavorites } from '@/hooks/useFavorites';
 import { cn } from '@/lib/utils';
+import { MapsButton } from '@/components/ui/MapsButton';
 
 export default function BusinessDetail() {
   const { id } = useParams<{ id: string }>();
