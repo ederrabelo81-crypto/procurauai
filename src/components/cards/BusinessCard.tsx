@@ -1,4 +1,5 @@
 // BusinessCard.tsx
+import { MapsButton } from '@/components/ui/MapsButton';
 import { Link } from 'react-router-dom';
 import { MapPin, CheckCircle2 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -64,16 +65,13 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
         </div>
 
         {!isCompact && tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-0.5 bg-accent text-accent-foreground text-xs rounded-full"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+          <div className="flex gap-2">
+  <WhatsAppButton whatsapp={business.whatsapp} size="sm" />
+  <MapsButton
+    size="sm"
+    query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
+  />
+</div>
         )}
 
         <WhatsAppButton whatsapp={business.whatsapp} size="sm" className="w-full" />
