@@ -26,7 +26,8 @@ const FILTER_SYNONYMS: Record<string, string[]> = {
     'pix e cartao', 'pix e cartão', 'aceita pix'
   ],
   
-  'aberto agora': ['aberto agora', 'aberto', 'funcionando'],
+  'agora: ['aberto agora', 'aberto', 'funcionando'],
+'agora na cidade': ['aberto agora', 'aberto', 'funcionando'],
   
   'atende hoje': ['atende hoje', 'hoje', 'plantao', 'plantão'],
   
@@ -81,6 +82,13 @@ export function matchesFilter(itemTags: string[], filterName: string): boolean {
 /**
  * Verifica se um item corresponde a TODOS os filtros ativos (lógica AND)
  */
+function isOpenNowFilterLabel(normalizedFilter: string) {
+  return (
+    normalizedFilter === 'aberto agora' ||
+    normalizedFilter === 'agora' ||
+    normalizedFilter === 'agora na cidade'
+  );
+}
 export function matchesAllFilters(
   itemTags: string[], 
   activeFilters: string[],
@@ -90,7 +98,7 @@ export function matchesAllFilters(
     const normalizedFilter = normalizeText(filter);
     
     // Tratamento especial para "Aberto agora"
-    if (normalizedFilter === 'aberto agora' && options?.checkOpenNow) {
+    if (isOpenNowFilterLabel(normalizedFilter) && options?.checkOpenNow) {
       const openResult = isOpenNow(options.hours || '');
       // Se não conseguimos interpretar o horário, não filtramos para fora
       if (openResult === null) return true;
