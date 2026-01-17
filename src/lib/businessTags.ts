@@ -1,7 +1,7 @@
 import type { Business } from "@/data/mockData";
 
 export function getBusinessTags(b: Business): string[] {
-  const tags = new Set<string>(b.tags ?? []);
+  const tags = getBusinessTags(business);
 
   // Ajuste os nomes dos campos conforme seu mockData:
   if ((b as any).acceptsCard) tags.add("Aceita Cartão");
