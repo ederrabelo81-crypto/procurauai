@@ -3145,7 +3145,7 @@ export const categories: Array<{ id: string; name: string; iconKey: CategoryIcon
 // Filtros por categoria
 export const filtersByCategory: Record<string, string[]> = {
   'comer-agora': ['Entrega', 'Aberto agora', 'Aceita cartão'],
-  servicos: ['Atende em domicílio', 'Orçamento sem compromisso', 'Atendimento 24h', 'Pet friendly'],
+  servicos: ["WhatsApp", "Agendamento", "Site", "Bem avaliado"],
   classificados: ['Novo', 'Usado', 'Doação'],
   agenda: ['Entrada gratuita', 'Hoje', 'Fim de semana'],
   ofertas: ['Válido hoje', 'Entrega'],
