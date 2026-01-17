@@ -3,6 +3,18 @@
 /**
  * Normaliza texto: lowercase, remove acentos, trim, remove pontuação
  */
+export const normalizeTag = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove acentos
+    .trim()
+    .toLowerCase();
+
+export const hasTag = (itemTags: string[] | undefined, selectedTag: string) => {
+  const sel = normalizeTag(selectedTag);
+  return (itemTags ?? []).some(t => normalizeTag(t) === sel);
+};
+
 export function normalizeText(text: string): string {
   return text
     .toLowerCase()
