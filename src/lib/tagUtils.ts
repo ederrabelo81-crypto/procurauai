@@ -33,11 +33,11 @@ const FILTER_SYNONYMS: Record<string, string[]> = {
   
   'pet friendly': ['pet friendly', 'aceita pet', 'aceita animais', 'permite animais', 'permite pet'],
   
-  '24h': ['24h', '24 horas', '24 horas por dia', 'vinte quatro horas'],
+  '24h': ['24h', '24 horas', '24 horas por dia', 'vinte quatro horas', 'plantao', 'plantão'],
   
   'atendimento 24h': ['atendimento 24h', '24h', '24 horas', 'plantao 24h', 'plantão 24h'],
   
-  'atende em domicilio': ['atende em domicilio',  'atende em domicílio',  'atendimento residencial',  'atendimento em casa',  'visita tecnica',  'visita técnica',  'vai ate voce',  'vai até você'],],
+  'atende em domicilio': ['atende em domicilio',  'atende em domicílio',  'atendimento residencial',  'atendimento em casa',  'visita tecnica',  'visita técnica',  'vai ate voce',  'vai até você'],
   
   'orcamento sem compromisso': [  'orcamento sem compromisso',  'orçamento sem compromisso',  'orcamento',  'orçamento',  'sem compromisso',  'avaliacao gratuita',  'avaliação gratuita',  'consultoria gratuita],
                                 
