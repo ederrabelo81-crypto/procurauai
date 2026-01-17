@@ -39,7 +39,9 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
           />
 
           <div className="absolute top-2 left-2">
-            <StatusBadge isOpen={business.isOpenNow} />
+            <StatusBadge
+  status={open === true ? "open" : open === false ? "closed" : "unknown"}
+/>
           </div>
 
           {business.isVerified && (
