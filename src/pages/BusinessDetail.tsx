@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, Phone, Share2, CheckCircle2, Heart, Navigation } from 'lucide-react';
+import { ArrowLeft, MapPin, Clock, Phone, Share2, CheckCircle2, Heart } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { MapsButton } from '@/components/ui/MapsButton';
 import { businesses } from '@/data/mockData';
 import { useFavorites } from '@/hooks/useFavorites';
 import { cn } from '@/lib/utils';
-import { MapsButton } from '@/components/ui/MapsButton';
 import { isOpenNow } from '@/lib/tagUtils';
 
 export default function BusinessDetail() {
@@ -14,8 +14,6 @@ export default function BusinessDetail() {
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const business = businesses.find(b => b.id === id);
-  const open = isOpenNow(business.hours);
-
 
   if (!business) {
     return (
@@ -25,26 +23,24 @@ export default function BusinessDetail() {
     );
   }
 
+  const open = isOpenNow(business.hours);
+  const status = open === true ? 'open' : open === false ? 'closed' : 'unknown';
+
   const isLiked = isFavorite('business', business.id);
 
   const handleShare = async () => {
     const url = window.location.href;
     const text = `Veja ${business.name} no Monte de Tudo!`;
-    
+
     if (navigator.share) {
       try {
         await navigator.share({ title: business.name, text, url });
-      } catch (e) {
-        // User cancelled
+      } catch {
+        // usuário cancelou
       }
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, '_blank');
     }
-  };
-
-  const handleDirections = () => {
-    const query = encodeURIComponent(business.address || business.name);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   };
 
   const handleCall = () => {
@@ -57,32 +53,34 @@ export default function BusinessDetail() {
     <div className="min-h-screen bg-background pb-28">
       {/* Header com imagem */}
       <div className="relative h-56">
-        <img 
-          src={business.coverImages[0]} 
+        <img
+          src={business.coverImages[0]}
           alt={business.name}
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-        
+
         {/* Botões do header */}
         <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 safe-top">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex gap-2">
-            <button 
+            <button
               onClick={() => toggleFavorite('business', business.id)}
               className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
             >
-              <Heart className={cn(
-                "w-5 h-5",
-                isLiked ? "fill-destructive text-destructive" : "text-foreground"
-              )} />
+              <Heart
+                className={cn(
+                  'w-5 h-5',
+                  isLiked ? 'fill-destructive text-destructive' : 'text-foreground',
+                )}
+              />
             </button>
-            <button 
+            <button
               onClick={handleShare}
               className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
             >
@@ -99,22 +97,18 @@ export default function BusinessDetail() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-xl font-bold text-foreground">{business.name}</h1>
-                {business.isVerified && (
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                )}
+                {business.isVerified && <CheckCircle2 className="w-5 h-5 text-primary" />}
               </div>
               <p className="text-muted-foreground">{business.category}</p>
             </div>
-            <StatusBadge
-  status={open === true ? "open" : open === false ? "closed" : "unknown"}
-/>
+            <StatusBadge status={status} />
           </div>
 
           {/* Tags */}
-          {business.tags.length > 0 && (
+          {business.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 my-4">
-              {business.tags.map((tag) => (
-                <span 
+              {business.tags.map(tag => (
+                <span
                   key={tag}
                   className="px-3 py-1 bg-accent text-accent-foreground text-sm rounded-full"
                 >
@@ -154,23 +148,19 @@ export default function BusinessDetail() {
 
       {/* Barra de ações fixa */}
       <div className="fixed bottom-16 left-0 right-0 z-50 bg-card border-t border-border p-4 safe-bottom">
-        <<div className="flex gap-2">
-  <WhatsAppButton whatsapp={business.whatsapp} size="sm" />
-  <MapsButton
-    size="sm"
-    query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
-  />
-</div>
-          <button
-            onClick={handleDirections}
-            className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center hover:bg-muted/80 transition-colors"
-          >
-            <Navigation className="w-6 h-6 text-foreground" />
-          </button>
+        <div className="flex gap-2 items-center">
+          <WhatsAppButton whatsapp={business.whatsapp} size="md" className="flex-1" />
+          <MapsButton
+            size="md"
+            label="Mapa"
+            query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
+            className="shrink-0"
+          />
           {business.phone && (
             <button
               onClick={handleCall}
               className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center hover:bg-muted/80 transition-colors"
+              aria-label="Ligar"
             >
               <Phone className="w-6 h-6 text-foreground" />
             </button>
