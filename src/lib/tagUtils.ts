@@ -278,35 +278,6 @@ export function matchesListingFilter(listing: { type: 'venda' | 'doacao' }, acti
   
   return true;
 }
-const toMinutes = (h: number, m: number) => h * 60 + m;
-
-const parseTime = (s: string) => {
-  // aceita 7, 7:30, 7AM, 7:30PM, 19:30, etc. dependendo do mock
-  const t = s.trim().toUpperCase();
-
-  // 24h: 19:30
-  const m24 = t.match(/^(\d{1,2})(?::(\d{2}))?$/);
-  if (m24) return toMinutes(Number(m24[1]), Number(m24[2] ?? "0"));
-
-  // 12h: 7:30AM / 7PM
-  const m12 = t.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/);
-  if (!m12) return null;
-
-  let h = Number(m12[1]);
-  const min = Number(m12[2] ?? "0");
-  const ap = m12[3];
-
-  if (ap === "AM") {
-    if (h === 12) h = 0;
-  } else {
-    if (h !== 12) h += 12;
-  }
-  return toMinutes(h, min);
-};
-
-export const isOpenByHoursText = (hoursText?: string) => {
-  if (!hoursText) return null;
-
   // extrai o trecho depois de "Horário:"
   const raw = hoursText.replace(/hor[aá]rio:\s*/i, "").trim();
 
