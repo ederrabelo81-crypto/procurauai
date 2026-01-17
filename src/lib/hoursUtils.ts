@@ -35,8 +35,12 @@ function parseTimePart(partRaw: string): { h: number; m: number } | null {
   return { h: h24, m: mm };
 }
 
-export function formatHours(hoursRaw?: string): string {
-  if (!hoursRaw) return 'Horário: Consultar';
+export function formatHours(hoursString: string, isOpenNow?: boolean) {
+  if (isOpenNow) {
+    return `Aberto agora • ${hoursString}`;
+  }
+  return hoursString;
+}
 
   const raw = hoursRaw.trim();
   const n = normalizeText(raw);
