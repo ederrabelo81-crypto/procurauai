@@ -1,106 +1,83 @@
-import { useMemo } from "react";
-import { ListingCard } from "@/components/cards/ListingCard";
-import { DealCard } from "@/components/cards/DealCard";
-import { BusinessCard } from "@/components/cards/BusinessCard";
-import { EventCard } from "@/components/cards/EventCard";
-import { NewsCard } from "@/components/cards/NewsCard";
-import { Badge } from "@/components/ui/Badge";
+// src/components/home/TrendingSection.tsx
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { DealCard } from '@/components/cards/DealCard';
+import { ListingCard } from '@/components/cards/ListingCard';
+import { NewsCard } from '@/components/cards/NewsCard';
+import { deals, listings, news } from '@/data/mockData';
 
-// Se você já tem tipos melhores no seu projeto, pode trocar estes.
-type TrendingItemType = "listing" | "deal" | "business" | "event" | "news";
+type TrendingItem =
+  | { type: 'deal'; data: (typeof deals)[number] | undefined }
+  | { type: 'listing'; data: (typeof listings)[number][] }
+  | { type: 'news'; data: (typeof news)[number] | undefined };
 
-type TrendingItem = {
-  title?: string;
-  type: TrendingItemType;
-  data?: any[]; // cada tipo tem um shape diferente; deixo flexível aqui
-};
-
-interface TrendingSectionProps {
-  items: TrendingItem[];
+function Badge({ text }: { text: string }) {
+  return (
+    <span className="absolute top-2 left-2 z-10 rounded-full px-2 py-1 text-[11px] font-semibold bg-background/90 border border-border">
+      {text}
+    </span>
+  );
 }
 
-export function TrendingSection({ items }: TrendingSectionProps) {
-  // Normaliza e remove seções vazias ANTES de renderizar
-  const safeItems = useMemo(() => {
-    if (!Array.isArray(items)) return [];
-    return items
-      .map((it) => ({
-        ...it,
-        data: Array.isArray(it.data) ? it.data.filter(Boolean) : [],
-      }))
-      .filter((it) => it.data.length > 0);
-  }, [items]);
-
-  if (safeItems.length === 0) return null;
+export function TrendingSection() {
+  // Mix de conteúdo em alta (simples e estável)
+  const trendingItems: TrendingItem[] = [
+    { type: 'deal', data: deals[0] },
+    { type: 'listing', data: [listings[0], listings[1]].filter(Boolean) },
+    { type: 'news', data: news[0] },
+  ];
 
   return (
-    <section className="space-y-6">
-      {safeItems.map((item, idx) => {
-        const sectionTitle = item.title ?? "Em alta";
+    <section>
+      <SectionHeader title="Em alta" action={{ label: 'Ver tudo', to: '/buscar' }} />
 
-        return (
-          <div key={`${item.type}-${idx}`} className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold">{sectionTitle}</h2>
-            </div>
+      <div className="space-y-3">
+        {trendingItems.map((item, index) => {
+          if (item.type === 'deal') {
+            // Se não existir deal, não renderiza nada
+            if (!item.data) return null;
 
-            {item.type === "listing" && (
-              <div className="grid grid-cols-2 gap-3">
-                {item.data.map((l: any, i: number) => (
-                  <div key={l?.id ?? `listing-${i}`} className="relative">
-                    <Badge text="Classificado" />
-                    <ListingCard listing={l} />
-                  </div>
-                ))}
+            return (
+              <div key={`deal-${index}`} className="relative">
+                <Badge text="Oferta" />
+                <DealCard deal={item.data} variant="compact" />
               </div>
-            )}
+            );
+          }
 
-            {item.type === "deal" && (
-              <div className="space-y-3">
-                {item.data.map((d: any, i: number) => (
-                  <div key={d?.id ?? `deal-${i}`} className="relative">
-                    <Badge text="Oferta" />
-                    <DealCard deal={d} />
-                  </div>
-                ))}
-              </div>
-            )}
+          if (item.type === 'listing') {
+            // ✅ Corrigido: valida ANTES do map (nada de "if" dentro do JSX)
+            if (!item.data || item.data.length === 0) return null;
 
-            {item.type === "business" && (
-              <div className="grid grid-cols-1 gap-4">
-                {item.data.map((b: any, i: number) => (
-                  <div key={b?.id ?? `business-${i}`} className="relative">
-                    <Badge text="Negócio" />
-                    <BusinessCard business={b} />
-                  </div>
-                ))}
+            return (
+              <div key={`listing-${index}`} className="grid grid-cols-2 gap-3">
+                {item.data.map((l, i) => {
+                  if (!l) return null;
+                  return (
+                    <div key={l.id ?? `listing-${i}`} className="relative">
+                      <Badge text="Classificado" />
+                      <ListingCard listing={l} />
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            );
+          }
 
-            {item.type === "event" && (
-              <div className="space-y-3">
-                {item.data.map((e: any, i: number) => (
-                  <div key={e?.id ?? `event-${i}`} className="relative">
-                    <Badge text="Evento" />
-                    <EventCard event={e} />
-                  </div>
-                ))}
-              </div>
-            )}
+          if (item.type === 'news') {
+            // Se não existir notícia, não renderiza nada
+            if (!item.data) return null;
 
-            {item.type === "news" && (
-              <div className="space-y-3">
-                {item.data.map((n: any, i: number) => (
-                  <div key={n?.id ?? `news-${i}`} className="relative">
-                    <Badge text="Notícia" />
-                    <NewsCard news={n} />
-                  </div>
-                ))}
+            return (
+              <div key={`news-${index}`} className="relative">
+                <Badge text="Notícia" />
+                <NewsCard news={item.data} variant="compact" />
               </div>
-            )}
-          </div>
-        );
-      })}
+            );
+          }
+
+          return null;
+        })}
+      </div>
     </section>
   );
 }
