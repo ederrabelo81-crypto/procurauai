@@ -5,7 +5,7 @@ import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
 import type { Business } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { formatHours, parseAndFormatHours } from '@/lib/hoursUtils';
-
+import { getBusinessTags } from "@/lib/businessTags";
 interface BusinessCardProps {
   business: Business;
   variant?: 'default' | 'compact';
@@ -57,19 +57,15 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
           <span className="truncate">  {formatHours(parseAndFormatHours(business.hours), business.isOpenNow)}</span>
         </div>
 
-        {!isCompact && business.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {business.tags.slice(0, 3).map((tag) => (
-              <span 
-                key={tag}
-                className="px-2 py-0.5 bg-accent text-accent-foreground text-xs rounded-full"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
+        {!isCompact && tags.length > 0 && (
+  <div className="flex flex-wrap gap-1.5 mb-3">
+    {tags.slice(0, 3).map((tag) => (
+      <span key={tag} className="px-2 py-0.5 bg-accent text-accent-foreground text-xs rounded-full">
+        {tag}
+      </span>
+    ))}
+  </div>
+)}
         <WhatsAppButton 
           whatsapp={business.whatsapp} 
           size="sm"
