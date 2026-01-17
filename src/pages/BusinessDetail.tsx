@@ -149,13 +149,13 @@ export default function BusinessDetail() {
 
       {/* Barra de ações fixa */}
       <div className="fixed bottom-16 left-0 right-0 z-50 bg-card border-t border-border p-4 safe-bottom">
-        <div className="flex gap-3 max-w-lg mx-auto">
-          <WhatsAppButton 
-            whatsapp={business.whatsapp} 
-            message={`Olá! Vi ${business.name} no Monte de Tudo e gostaria de saber mais.`}
-            size="lg"
-            className="flex-1"
-          />
+        <<div className="flex gap-2">
+  <WhatsAppButton whatsapp={business.whatsapp} size="sm" />
+  <MapsButton
+    size="sm"
+    query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
+  />
+</div>
           <button
             onClick={handleDirections}
             className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center hover:bg-muted/80 transition-colors"
