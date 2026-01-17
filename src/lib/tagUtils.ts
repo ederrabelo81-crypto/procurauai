@@ -26,7 +26,7 @@ const FILTER_SYNONYMS: Record<string, string[]> = {
     'pix e cartao', 'pix e cartão', 'aceita pix'
   ],
   
-  'agora: ['aberto agora', 'aberto', 'funcionando'],
+  agora: ['aberto agora', 'aberto', 'funcionando'],
 'agora na cidade': ['aberto agora', 'aberto', 'funcionando'],
   
   'atende hoje': ['atende hoje', 'hoje', 'plantao', 'plantão'],
