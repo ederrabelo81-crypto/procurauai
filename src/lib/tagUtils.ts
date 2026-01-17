@@ -278,22 +278,3 @@ export function matchesListingFilter(listing: { type: 'venda' | 'doacao' }, acti
   
   return true;
 }
-  // extrai o trecho depois de "Horário:"
-  const raw = hoursText.replace(/hor[aá]rio:\s*/i, "").trim();
-
-  // formatos do seu mock: "7:30AM-5PM" e "7-11PM" e "9AM-9PM"
-  const parts = raw.split("-");
-  if (parts.length !== 2) return null;
-
-  const start = parseTime(parts[0]);
-  const end = parseTime(parts[1]);
-  if (start == null || end == null) return null;
-
-  const now = new Date();
-  // hora local do browser (que no seu caso é Brasil)
-  const cur = toMinutes(now.getHours(), now.getMinutes());
-
-  // atravessa meia-noite
-  if (end < start) return cur >= start || cur < end;
-  return cur >= start && cur < end;
-};
