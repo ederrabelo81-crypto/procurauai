@@ -1,15 +1,13 @@
-// BusinessCard.tsx
-import { MapsButton } from '@/components/ui/MapsButton';
 import { Link } from 'react-router-dom';
 import { MapPin, CheckCircle2 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { MapsButton } from '@/components/ui/MapsButton';
 import type { Business } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { formatHours, parseAndFormatHours } from '@/lib/hoursUtils';
 import { getBusinessTags } from '@/lib/businessTags';
 import { isOpenNow } from '@/lib/tagUtils';
-
 
 interface BusinessCardProps {
   business: Business;
@@ -26,7 +24,7 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
     <div
       className={cn(
         'bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all',
-        className
+        className,
       )}
     >
       <Link to={`/comercio/${business.id}`} className="block">
@@ -39,9 +37,7 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
           />
 
           <div className="absolute top-2 left-2">
-            <StatusBadge
-  status={open === true ? "open" : open === false ? "closed" : "unknown"}
-/>
+            <StatusBadge status={open === true ? 'open' : open === false ? 'closed' : 'unknown'} />
           </div>
 
           {business.isVerified && (
@@ -54,9 +50,7 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
 
       <div className="p-3">
         <Link to={`/comercio/${business.id}`}>
-          <h3 className="font-bold text-foreground text-base mb-0.5 line-clamp-1">
-            {business.name}
-          </h3>
+          <h3 className="font-bold text-foreground text-base mb-0.5 line-clamp-1">{business.name}</h3>
           <p className="text-sm text-muted-foreground mb-2">{business.category}</p>
         </Link>
 
@@ -64,22 +58,31 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
           <MapPin className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
           <span className="truncate">{business.neighborhood}</span>
           <span className="mx-2">•</span>
-          <span className="truncate">
-            {formatHours(parseAndFormatHours(business.hours), business.isOpenNow)}
-          </span>
+          <span className="truncate">{formatHours(parseAndFormatHours(business.hours), open === true)}</span>
         </div>
 
         {!isCompact && tags.length > 0 && (
-          <div className="flex gap-2">
-  <WhatsAppButton whatsapp={business.whatsapp} size="sm" />
-  <MapsButton
-    size="sm"
-    query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
-  />
-</div>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {tags.slice(0, 3).map(tag => (
+              <span
+                key={tag}
+                className="px-2 py-0.5 bg-accent text-accent-foreground text-[11px] rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
 
-        <WhatsAppButton whatsapp={business.whatsapp} size="sm" className="w-full" />
+        <div className={cn('flex gap-2', isCompact ? '' : '')}>
+          <WhatsAppButton whatsapp={business.whatsapp} size="sm" className={cn(isCompact ? 'flex-1' : 'flex-1')} />
+          <MapsButton
+            size="sm"
+            label="Mapa"
+            query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
+            className="shrink-0"
+          />
+        </div>
       </div>
     </div>
   );
