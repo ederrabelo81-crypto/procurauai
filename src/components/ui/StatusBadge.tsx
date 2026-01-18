@@ -23,7 +23,9 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, isOpen, className }: StatusBadgeProps) {
   const resolved: Status = status ?? (isOpen ? 'open' : 'closed');
 
-  const label = resolved === 'open' ? 'Aberto' : resolved === 'closed' ? 'Fechado' : 'Horário';
+  // Mantemos linguagem consistente no app todo.
+  // "Aberto agora" comunica melhor o estado em tempo real, alinhado ao filtro "Aberto agora".
+  const label = resolved === 'open' ? 'Aberto agora' : resolved === 'closed' ? 'Fechado' : 'Horário';
 
   return (
     <span
