@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
 import { SearchBar } from '@/components/ui/SearchBar';
@@ -50,6 +50,23 @@ export default function Search() {
 
   // Paginação local
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  const handleLoadMore = useCallback(() => {
+    // Hoje os dados são locais (mock) e carregam instantâneo.
+    // Mesmo assim, exibimos um micro feedback de carregamento (skeleton) para:
+    // 1) evitar "cliques fantasmas" e 2) ficar pronto quando virar API/BD.
+    setIsLoadingMore(true);
+    setCurrentPage((p) => p + 1);
+    window.setTimeout(() => setIsLoadingMore(false), 250);
+  }, []);
+
+  // Se mudar type/q/filters, reseta paginação e loading
+  useEffect(() => {
+    setCurrentPage(1);
+    setIsLoadingMore(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeType, query, filtersParam]);
 
   // Todos os filtros disponíveis
   const allFilters = useMemo(() => {
@@ -269,7 +286,12 @@ export default function Search() {
         <div className="px-4 pb-3 -mx-4">
           <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide">
             {activeFilters.length > 0 && (
-              <Chip onClick={clearFilters} size="sm" className="bg-destructive/10 text-destructive flex-shrink-0">
+              <Chip
+                onClick={clearFilters}
+                size="sm"
+                variant="outline"
+                className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/5 flex-shrink-0"
+              >
                 <X className="w-3 h-3 mr-1" />
                 Limpar
               </Chip>
@@ -308,7 +330,8 @@ export default function Search() {
             totalCount={singleTypeItems.length}
             pageSize={PAGE_SIZE}
             currentPage={currentPage}
-            onLoadMore={() => setCurrentPage((p) => p + 1)}
+            onLoadMore={handleLoadMore}
+            isLoading={isLoadingMore}
             onClearFilters={activeFilters.length > 0 ? clearFilters : undefined}
             keyExtractor={(item: any) => item.id}
             gridClassName={activeType === 'listing' ? 'grid grid-cols-2 sm:grid-cols-3 gap-3' : 'grid grid-cols-1 gap-3'}
