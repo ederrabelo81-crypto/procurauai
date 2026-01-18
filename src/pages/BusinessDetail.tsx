@@ -1,19 +1,21 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Clock, Phone, Share2, CheckCircle2, Heart } from 'lucide-react';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
-import { MapsButton } from '@/components/ui/MapsButton';
+import { User, Images, Phone as PhoneIcon, Info } from 'lucide-react';
+import { ListingHero } from '@/components/listing/ListingHero';
+import { ListingActionsBar } from '@/components/listing/ListingActionsBar';
+import { ListingTabs, TabItem } from '@/components/listing/ListingTabs';
+import { GallerySection } from '@/components/listing/GallerySection';
+import { ContactSection } from '@/components/listing/ContactSection';
+import { RelatedCarousel } from '@/components/listing/RelatedCarousel';
+import { Chip } from '@/components/ui/Chip';
 import { businesses } from '@/data/mockData';
 import { useFavorites } from '@/hooks/useFavorites';
-import { cn } from '@/lib/utils';
-import { isOpenNow } from '@/lib/tagUtils';
 
 export default function BusinessDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const business = businesses.find(b => b.id === id);
+  const business = businesses.find((b) => b.id === id);
 
   if (!business) {
     return (
@@ -23,10 +25,12 @@ export default function BusinessDetail() {
     );
   }
 
-  const open = isOpenNow(business.hours);
-  const status = open === true ? 'open' : open === false ? 'closed' : 'unknown';
-
   const isLiked = isFavorite('business', business.id);
+
+  // Extrai rating da descrição se existir (ex: "Nota 4.8 (108 avaliações)")
+  const ratingMatch = business.description?.match(/Nota (\d+\.?\d*) \((\d+)/);
+  const rating = ratingMatch ? parseFloat(ratingMatch[1]) : undefined;
+  const reviewCount = ratingMatch ? parseInt(ratingMatch[2]) : undefined;
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -43,130 +47,116 @@ export default function BusinessDetail() {
     }
   };
 
-  const handleCall = () => {
-    if (business.phone) {
-      window.open(`tel:${business.phone}`, '_self');
-    }
+  const handleTagClick = (tag: string) => {
+    navigate(`/buscar?filters=${encodeURIComponent(tag)}`);
   };
 
-  return (
-    <div className="min-h-screen bg-background pb-28">
-      {/* Header com imagem */}
-      <div className="relative h-56">
-        <img
-          src={business.coverImages[0]}
-          alt={business.name}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+  // Relacionados: mesma categoria
+  const relatedBusinesses = businesses
+    .filter((b) => b.id !== business.id && b.categorySlug === business.categorySlug)
+    .slice(0, 6)
+    .map((b) => ({
+      id: b.id,
+      type: 'business' as const,
+      title: b.name,
+      subtitle: b.neighborhood,
+      image: b.coverImages[0],
+    }));
 
-        {/* Botões do header */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 safe-top">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="flex gap-2">
-            <button
-              onClick={() => toggleFavorite('business', business.id)}
-              className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
-            >
-              <Heart
-                className={cn(
-                  'w-5 h-5',
-                  isLiked ? 'fill-destructive text-destructive' : 'text-foreground',
-                )}
-              />
-            </button>
-            <button
-              onClick={handleShare}
-              className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Conteúdo */}
-      <div className="px-4 -mt-6 relative z-10">
-        <div className="bg-card rounded-2xl p-4 card-shadow">
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h1 className="text-xl font-bold text-foreground">{business.name}</h1>
-                {business.isVerified && <CheckCircle2 className="w-5 h-5 text-primary" />}
-              </div>
-              <p className="text-muted-foreground">{business.category}</p>
-            </div>
-            <StatusBadge status={status} />
-          </div>
-
-          {/* Tags */}
-          {business.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-2 my-4">
-              {business.tags.map(tag => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 bg-accent text-accent-foreground text-sm rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Info */}
-          <div className="space-y-3 py-4 border-t border-border">
-            <div className="flex items-center text-foreground">
-              <MapPin className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-              <span>{business.address || business.neighborhood}</span>
-            </div>
-            <div className="flex items-center text-foreground">
-              <Clock className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-              <span>{business.hours}</span>
-            </div>
-            {business.phone && (
-              <div className="flex items-center text-foreground">
-                <Phone className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-                <span>{business.phone}</span>
-              </div>
-            )}
-          </div>
-
+  // Tabs do mini-site
+  const tabs: TabItem[] = [
+    {
+      id: 'perfil',
+      label: 'Perfil',
+      icon: <User className="w-4 h-4" />,
+      content: (
+        <div className="space-y-6 px-4">
           {/* Descrição */}
           {business.description && (
-            <div className="py-4 border-t border-border">
-              <h2 className="font-semibold text-foreground mb-2">Sobre</h2>
-              <p className="text-muted-foreground">{business.description}</p>
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Sobre</h3>
+              <p className="text-muted-foreground leading-relaxed">{business.description}</p>
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Barra de ações fixa */}
-      <div className="fixed bottom-16 left-0 right-0 z-50 bg-card border-t border-border p-4 safe-bottom">
-        <div className="flex gap-2 items-center">
-          <WhatsAppButton whatsapp={business.whatsapp} size="md" className="flex-1" />
-          <MapsButton
-            size="md"
-            label="Mapa"
-            query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
-            className="shrink-0"
-          />
-          {business.phone && (
-            <button
-              onClick={handleCall}
-              className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center hover:bg-muted/80 transition-colors"
-              aria-label="Ligar"
-            >
-              <Phone className="w-6 h-6 text-foreground" />
-            </button>
+          {/* Tags clicáveis */}
+          {business.tags && business.tags.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Diferenciais</h3>
+              <div className="flex flex-wrap gap-2">
+                {business.tags.map((tag) => (
+                  <Chip key={tag} onClick={() => handleTagClick(tag)} size="sm" className="cursor-pointer">
+                    {tag}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Relacionados */}
+          {relatedBusinesses.length > 0 && (
+            <RelatedCarousel title="Similares na região" items={relatedBusinesses} className="pt-4" />
           )}
         </div>
-      </div>
+      ),
+    },
+    {
+      id: 'galeria',
+      label: 'Galeria',
+      icon: <Images className="w-4 h-4" />,
+      hideIfEmpty: true,
+      content: business.coverImages.length > 1 ? (
+        <div className="px-4">
+          <GallerySection images={business.coverImages} title="Fotos" />
+        </div>
+      ) : null,
+    },
+    {
+      id: 'contato',
+      label: 'Contato',
+      icon: <PhoneIcon className="w-4 h-4" />,
+      content: (
+        <div className="px-4">
+          <ContactSection
+            address={business.address}
+            neighborhood={business.neighborhood}
+            hours={business.hours}
+            phone={business.phone}
+            businessName={business.name}
+          />
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background pb-32">
+      {/* Hero com chips */}
+      <ListingHero
+        coverImage={business.coverImages[0]}
+        title={business.name}
+        category={business.category}
+        neighborhood={business.neighborhood}
+        hours={business.hours}
+        rating={rating}
+        reviewCount={reviewCount}
+        isVerified={business.isVerified}
+        isFavorite={isLiked}
+        onFavoriteToggle={() => toggleFavorite('business', business.id)}
+        onShare={handleShare}
+      />
+
+      {/* Tabs */}
+      <ListingTabs tabs={tabs} defaultTab="perfil" className="mt-4" />
+
+      {/* Barra de ações sticky */}
+      <ListingActionsBar
+        whatsapp={business.whatsapp}
+        phone={business.phone}
+        address={business.address || business.neighborhood}
+        businessName={business.name}
+        onShare={handleShare}
+      />
     </div>
   );
 }
