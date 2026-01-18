@@ -1,5 +1,7 @@
 // Mock Data - Monte de Tudo (gerado a partir de Apify + Outscraper)
 
+export type BusinessPlan = 'free' | 'pro' | 'destaque';
+
 export interface Business {
   id: string;
   name: string;
@@ -15,6 +17,10 @@ export interface Business {
   isVerified?: boolean;
   description?: string;
   address?: string;
+  plan?: BusinessPlan;
+  website?: string;
+  instagram?: string;
+  logo?: string;
 }
 
 export interface Listing {

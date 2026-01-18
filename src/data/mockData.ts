@@ -26,6 +26,8 @@ export type CategoryIconKey =
   | 'news'
   | 'store';
 
+export type BusinessPlan = 'free' | 'pro' | 'destaque';
+
 export interface Business {
   id: string;
   name: string;
@@ -41,6 +43,10 @@ export interface Business {
   isVerified?: boolean;
   description?: string;
   address?: string;
+  plan?: BusinessPlan;
+  website?: string;
+  instagram?: string;
+  logo?: string;
 }
 
 export interface Listing {
@@ -113,11 +119,14 @@ export const businesses: Business[] = [
     neighborhood: "Centro",
     hours: "Horário: 9AM-6PM",
     whatsapp: "5535998983994",
+    phone: "+55 35 99898-3994",
     coverImages: ["https://lh3.googleusercontent.com/p/AF1QipNTHu7d32M33X0r6plztSSb9kHmymedB5TZt-I=w800-h500-k-no"],
     isOpenNow: true,
     isVerified: true,
     description: "Comida boa e atendimento local. • Nota 5.0 (21 avaliações)",
     address: "R. Antenor Carvalhaes, 663 - Centro, Monte Santo de Minas - MG, 37958-000",
+    plan: "destaque",
+    website: "https://emporiomineiro.com.br",
   },
   {
     id: "r002",

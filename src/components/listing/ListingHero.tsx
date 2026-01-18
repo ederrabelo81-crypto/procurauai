@@ -1,8 +1,10 @@
 import { ReactNode, useState } from 'react';
-import { Star, MapPin, Clock, CheckCircle2, Heart, Share2, ArrowLeft } from 'lucide-react';
+import { Star, MapPin, Clock, CheckCircle2, Heart, Share2, ArrowLeft, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { isOpenNow } from '@/lib/tagUtils';
+import type { BusinessPlan } from '@/data/mockData';
+import { PLAN_INFO } from '@/lib/planUtils';
 
 interface ListingHeroProps {
   coverImage: string;
@@ -16,6 +18,7 @@ interface ListingHeroProps {
   priceRange?: string; // $, $$, $$$
   isVerified?: boolean;
   isFavorite?: boolean;
+  plan?: BusinessPlan;
   onFavoriteToggle?: () => void;
   onShare?: () => void;
   onBack?: () => void;
@@ -34,6 +37,7 @@ export function ListingHero({
   priceRange,
   isVerified,
   isFavorite,
+  plan,
   onFavoriteToggle,
   onShare,
   onBack,
@@ -127,6 +131,13 @@ export function ListingHero({
             <span className="px-2.5 py-1 bg-primary/90 backdrop-blur-sm rounded-full text-xs font-medium text-primary-foreground shadow flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5" />
               Verificado
+            </span>
+          )}
+          {/* Badge de plano DESTAQUE */}
+          {plan === 'destaque' && (
+            <span className="px-2.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full text-xs font-bold text-white shadow flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5" />
+              {PLAN_INFO.destaque.label}
             </span>
           )}
           {badges}

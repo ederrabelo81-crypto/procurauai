@@ -1,20 +1,38 @@
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { BusinessPlan } from '@/data/mockData';
+import { hasFeature, PLAN_INFO } from '@/lib/planUtils';
 
 interface GallerySectionProps {
   images: string[];
   title?: string;
   className?: string;
+  /** Plano do negócio - se FREE, galeria fica com blur */
+  plan?: BusinessPlan;
+  /** Callback para abrir modal de upgrade */
+  onUpgrade?: () => void;
 }
 
-export function GallerySection({ images, title = 'Galeria', className }: GallerySectionProps) {
+export function GallerySection({
+  images,
+  title = 'Galeria',
+  className,
+  plan = 'pro',
+  onUpgrade,
+}: GallerySectionProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const hasAccess = hasFeature(plan, 'gallery');
 
   if (images.length === 0) return null;
 
   const openLightbox = (index: number) => {
+    if (!hasAccess) {
+      onUpgrade?.();
+      return;
+    }
     setCurrentIndex(index);
     setLightboxOpen(true);
   };
@@ -25,33 +43,61 @@ export function GallerySection({ images, title = 'Galeria', className }: Gallery
   const goPrev = () => setCurrentIndex((i) => (i - 1 + images.length) % images.length);
 
   return (
-    <section className={cn('', className)}>
+    <section className={cn('relative', className)}>
       <h3 className="text-lg font-bold text-foreground mb-3">{title}</h3>
 
       {/* Grid de miniaturas */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className={cn('grid grid-cols-3 gap-2', !hasAccess && 'relative')}>
         {images.slice(0, 6).map((img, idx) => (
           <button
             key={idx}
             onClick={() => openLightbox(idx)}
-            className="aspect-square rounded-lg overflow-hidden bg-muted relative group"
+            className={cn(
+              'aspect-square rounded-lg overflow-hidden bg-muted relative group',
+              !hasAccess && 'cursor-pointer'
+            )}
           >
             <img
               src={img}
               alt={`Foto ${idx + 1}`}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+              className={cn(
+                'w-full h-full object-cover transition-transform',
+                hasAccess && 'group-hover:scale-105',
+                !hasAccess && 'filter blur-sm'
+              )}
             />
-            {idx === 5 && images.length > 6 && (
+            {idx === 5 && images.length > 6 && hasAccess && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <span className="text-white font-bold text-lg">+{images.length - 6}</span>
               </div>
             )}
           </button>
         ))}
+
+        {/* Overlay de bloqueio para FREE */}
+        {!hasAccess && (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-[2px] rounded-lg cursor-pointer"
+            onClick={onUpgrade}
+          >
+            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Lock className="w-7 h-7 text-primary" />
+            </div>
+            <p className="text-sm font-semibold text-foreground mb-1">
+              Galeria bloqueada
+            </p>
+            <p className="text-xs text-muted-foreground mb-3 text-center px-4">
+              Veja todas as fotos do negócio
+            </p>
+            <span className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm">
+              Ativar {PLAN_INFO.pro.label}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Lightbox */}
-      {lightboxOpen && (
+      {/* Lightbox - só abre se tiver acesso */}
+      {lightboxOpen && hasAccess && (
         <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center">
           <button
             onClick={closeLightbox}
