@@ -84,6 +84,13 @@ export function PaginatedList<T>({
           </button>
         </div>
       )}
+
+      {/* Fim da lista */}
+      {!hasMore && !isLoading && totalCount > 0 && (
+        <div className="text-center pt-2">
+          <p className="text-sm text-muted-foreground">Você chegou ao fim dos resultados.</p>
+        </div>
+      )}
     </div>
   );
 }
