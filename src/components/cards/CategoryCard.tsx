@@ -15,9 +15,20 @@ interface CategoryCardProps {
 export function CategoryCard({ id, name, iconKey, className, size = 'md', onClickOverride }: CategoryCardProps) {
   const iconSrc = getCategoryIcon(iconKey) || getCategoryIcon(id);
   
+  // Rotas especiais para novos tipos
+  const getRoute = () => {
+    const specialRoutes: Record<string, string> = {
+      'lugares': '/lugares',
+      'carros': '/carros',
+      'empregos': '/empregos',
+      'imoveis': '/imoveis',
+    };
+    return specialRoutes[id] || `/categoria/${id}`;
+  };
+  
   return (
     <Link
-      to={`/categoria/${id}`}
+      to={getRoute()}
       onClick={onClickOverride}
       className={cn(
         "flex flex-col items-center justify-center bg-card rounded-2xl card-shadow hover:card-shadow-hover transition-all active:scale-95 touch-target",

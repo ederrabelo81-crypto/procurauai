@@ -7,6 +7,10 @@ import categoryDeals from '@/assets/icons/category-deals.png';
 import categoryEvents from '@/assets/icons/category-events.png';
 import categoryNews from '@/assets/icons/category-news.png';
 import categoryObituary from '@/assets/icons/category-obituary.png';
+import categoryPlaces from '@/assets/icons/category-places.png';
+import categoryCars from '@/assets/icons/category-cars.png';
+import categoryJobs from '@/assets/icons/category-jobs.png';
+import categoryRealEstate from '@/assets/icons/category-realestate.png';
 
 export const categoryIconMap: Record<string, string> = {
   food: categoryFood,
@@ -18,6 +22,10 @@ export const categoryIconMap: Record<string, string> = {
   events: categoryEvents,
   news: categoryNews,
   obituary: categoryObituary,
+  places: categoryPlaces,
+  cars: categoryCars,
+  jobs: categoryJobs,
+  realestate: categoryRealEstate,
 };
 
 export function getCategoryIcon(categoryId: string): string | undefined {

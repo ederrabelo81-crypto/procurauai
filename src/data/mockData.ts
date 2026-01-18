@@ -24,7 +24,11 @@ export type CategoryIconKey =
   | 'events'
   | 'obituary'
   | 'news'
-  | 'store';
+  | 'store'
+  | 'places'
+  | 'cars'
+  | 'jobs'
+  | 'realestate';
 
 export type BusinessPlan = 'free' | 'pro' | 'destaque';
 
@@ -3139,16 +3143,30 @@ export const obituaries: Obituary[] = [
   },
 ];
 
-// Categorias do app (ordem fixa: Comer Agora, Negócios, Serviços, Classificados, Ofertas, Agenda, Notícias, Falecimentos)
-export const categories: Array<{ id: string; name: string; iconKey: CategoryIconKey; color: string }> = [
+// Categorias principais (primeiras 6 na home)
+export const mainCategories: Array<{ id: string; name: string; iconKey: CategoryIconKey; color: string }> = [
   { id: 'comer-agora', name: 'Comer Agora', iconKey: 'food', color: 'category-food' },
   { id: 'negocios', name: 'Negócios', iconKey: 'store', color: 'category-store' },
   { id: 'servicos', name: 'Serviços', iconKey: 'services', color: 'category-services' },
   { id: 'classificados', name: 'Classificados', iconKey: 'classifieds', color: 'category-classifieds' },
   { id: 'ofertas', name: 'Ofertas', iconKey: 'deals', color: 'category-deals' },
   { id: 'agenda', name: 'Agenda', iconKey: 'events', color: 'category-events' },
+];
+
+// Categorias expandidas (aparecem no "Ver mais")
+export const extraCategories: Array<{ id: string; name: string; iconKey: CategoryIconKey; color: string }> = [
   { id: 'noticias', name: 'Notícias', iconKey: 'news', color: 'category-news' },
   { id: 'falecimentos', name: 'Falecimentos', iconKey: 'obituary', color: 'category-obituary' },
+  { id: 'lugares', name: 'Lugares', iconKey: 'places', color: 'category-places' },
+  { id: 'carros', name: 'Carros', iconKey: 'cars', color: 'category-cars' },
+  { id: 'empregos', name: 'Empregos', iconKey: 'jobs', color: 'category-jobs' },
+  { id: 'imoveis', name: 'Imóveis', iconKey: 'realestate', color: 'category-realestate' },
+];
+
+// Todas as categorias (para compatibilidade)
+export const categories: Array<{ id: string; name: string; iconKey: CategoryIconKey; color: string }> = [
+  ...mainCategories,
+  ...extraCategories,
 ];
 
 // Filtros por categoria
@@ -3159,4 +3177,8 @@ export const filtersByCategory: Record<string, string[]> = {
   agenda: ['Entrada gratuita', 'Hoje', 'Fim de semana'],
   ofertas: ['Válido hoje', 'Entrega'],
   negocios: ['Entrega', 'Aceita cartão', 'Estacionamento', 'Aberto agora'],
+  lugares: ['Grátis', 'Família', 'Romântico', 'Trilha', 'Cultura', 'Pet Friendly'],
+  carros: ['Concessionária', 'Particular', 'Financiamento', 'Troca', 'Único dono', 'Baixa km'],
+  empregos: ['CLT', 'PJ', 'Estágio', 'Freelancer', 'Home office', 'Sem experiência'],
+  imoveis: ['Alugar', 'Comprar', 'Apartamento', 'Casa', 'Mobiliado', 'Pet Friendly'],
 };

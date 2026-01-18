@@ -17,6 +17,10 @@ import ObituaryDetail from "./pages/ObituaryDetail";
 import Publish from "./pages/Publish";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import PlacesList from "./pages/PlacesList";
+import CarsList from "./pages/CarsList";
+import JobsList from "./pages/JobsList";
+import RealEstateList from "./pages/RealEstateList";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +44,11 @@ const App = () => (
               <Route path="/falecimento/:id" element={<ObituaryDetail />} />
               <Route path="/publicar" element={<Publish />} />
               <Route path="/perfil" element={<Profile />} />
+              {/* Novos tipos */}
+              <Route path="/lugares" element={<PlacesList />} />
+              <Route path="/carros" element={<CarsList />} />
+              <Route path="/empregos" element={<JobsList />} />
+              <Route path="/imoveis" element={<RealEstateList />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />
