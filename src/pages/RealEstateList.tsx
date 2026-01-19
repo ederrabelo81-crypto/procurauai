@@ -1,38 +1,64 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Bed, Bath, Car, Maximize } from 'lucide-react';
+import { ArrowLeft, MapPin, Bed, Bath, Car, Maximize, X, ChevronDown } from 'lucide-react';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Chip } from '@/components/ui/Chip';
 import { realEstate } from '@/data/newListingTypes';
 import { filtersByCategory } from '@/data/mockData';
+import { 
+  createFilterOptions, 
+  formatTag, 
+  matchesAnyFilter, 
+  sortItems,
+  SORT_OPTIONS 
+} from '@/lib/tags';
 
 export default function RealEstateList() {
   const [query, setQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const filters = filtersByCategory['imoveis'] || [];
+  const [sortKey, setSortKey] = useState('');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  
+  const filterOptions = useMemo(
+    () => createFilterOptions(filtersByCategory['imoveis'] || []),
+    []
+  );
+  const sortOptions = SORT_OPTIONS['imoveis'] || [];
 
   const filtered = useMemo(() => {
-    return realEstate.filter((item) => {
+    let result = realEstate.filter((item) => {
       const matchesQuery = !query || 
         item.title.toLowerCase().includes(query.toLowerCase()) ||
         item.neighborhood.toLowerCase().includes(query.toLowerCase());
       
-      const matchesFilters = activeFilters.length === 0 ||
-        activeFilters.some(f => item.tags.some(t => t.toLowerCase().includes(f.toLowerCase())));
+      const matchesFiltersResult = matchesAnyFilter(item, activeFilters, 'imoveis');
       
-      return matchesQuery && matchesFilters;
+      return matchesQuery && matchesFiltersResult;
     });
-  }, [query, activeFilters]);
+    
+    if (sortKey) {
+      result = sortItems(result, sortKey, 'imoveis');
+    }
+    
+    return result;
+  }, [query, activeFilters, sortKey]);
 
-  const toggleFilter = (filter: string) => {
+  const toggleFilter = (filterKey: string) => {
     setActiveFilters(prev => 
-      prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+      prev.includes(filterKey) ? prev.filter(f => f !== filterKey) : [...prev, filterKey]
     );
+  };
+
+  const clearFilters = () => {
+    setActiveFilters([]);
+    setSortKey('');
   };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
   };
+
+  const currentSort = sortOptions.find(s => s.key === sortKey);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -49,21 +75,64 @@ export default function RealEstateList() {
           </div>
           <SearchBar value={query} onChange={setQuery} placeholder="Buscar imóveis..." />
           <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
-            {filters.map((filter) => (  <Chip
-  key={filter}
-  active={activeFilters.includes(filter)}
-  onClick={() => toggleFilter(filter)}
->
-  {filter}
-</Chip>
-))}
+            {filterOptions.map((filter) => (
+              <Chip
+                key={filter.key}
+                isActive={activeFilters.includes(filter.key)}
+                onClick={() => toggleFilter(filter.key)}
+              >
+                {filter.label}
+              </Chip>
+            ))}
           </div>
         </div>
       </header>
 
       <main className="px-4 py-4">
+        {/* Active Filters & Sort */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {activeFilters.length > 0 && (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  {activeFilters.length} filtro{activeFilters.length > 1 ? 's' : ''} ativo{activeFilters.length > 1 ? 's' : ''}
+                </span>
+                <button
+                  onClick={clearFilters}
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <X className="w-3 h-3" /> Limpar
+                </button>
+              </>
+            )}
+          </div>
+          
+          <div className="relative">
+            <button
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              {currentSort?.label || 'Ordenar'} <ChevronDown className="w-4 h-4" />
+            </button>
+            {showSortMenu && (
+              <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg z-50 min-w-[150px]">
+                {sortOptions.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => { setSortKey(opt.key); setShowSortMenu(false); }}
+                    className={`block w-full text-left px-3 py-2 text-sm hover:bg-muted ${sortKey === opt.key ? 'text-primary' : ''}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Results Count */}
         <p className="text-sm text-muted-foreground mb-4">
-          {filtered.length} {filtered.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
+          Mostrando {filtered.length} de {realEstate.length} imóveis
         </p>
 
         <div className="space-y-4">
@@ -81,11 +150,11 @@ export default function RealEstateList() {
                   loading="lazy"
                 />
                 <div className="absolute top-2 left-2 flex gap-1">
-                  <span className="px-2 py-1 bg-primary text-primary-foreground rounded-full text-xs font-medium capitalize">
-                    {item.transactionType}
+                  <span className="px-2 py-1 bg-primary text-primary-foreground rounded-full text-xs font-medium">
+                    {formatTag(item.transactionType)}
                   </span>
-                  <span className="px-2 py-1 bg-background/90 rounded-full text-xs font-medium capitalize">
-                    {item.propertyType}
+                  <span className="px-2 py-1 bg-background/90 rounded-full text-xs font-medium">
+                    {formatTag(item.propertyType)}
                   </span>
                 </div>
               </div>
@@ -102,6 +171,18 @@ export default function RealEstateList() {
                     </span>
                   )}
                 </p>
+                
+                {/* Tags - formatted */}
+                {item.tags && item.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {item.tags.slice(0, 4).map((tag) => (
+                      <span key={tag} className="px-2 py-0.5 bg-muted rounded-full text-xs text-muted-foreground">
+                        {formatTag(tag)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   {item.bedrooms > 0 && (
                     <span className="flex items-center gap-1">
@@ -138,6 +219,11 @@ export default function RealEstateList() {
         {filtered.length === 0 && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">Nenhum imóvel encontrado</p>
+            {activeFilters.length > 0 && (
+              <button onClick={clearFilters} className="text-primary text-sm mt-2 hover:underline">
+                Limpar filtros
+              </button>
+            )}
           </div>
         )}
       </main>
