@@ -9,8 +9,8 @@ export function CategoryGrid() {
 
   return (
     <>
-      {/* Grid 3x2 principal */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* Grid 4x2 principal (8 categorias) */}
+      <div className="grid grid-cols-4 gap-2">
         {mainCategories.map((category) => (
           <CategoryCard
             key={category.id}

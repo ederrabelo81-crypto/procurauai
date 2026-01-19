@@ -1,8 +1,9 @@
 // Category.tsx
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Chip } from '@/components/ui/Chip';
+import { SearchBar } from '@/components/ui/SearchBar';
 import { BusinessCard } from '@/components/cards/BusinessCard';
 import { ListingCard } from '@/components/cards/ListingCard';
 import { DealCard } from '@/components/cards/DealCard';
@@ -23,22 +24,49 @@ import {
 import { matchesAllFilters, matchesListingFilter, normalizeText } from '@/lib/tagUtils';
 import { getBusinessTags } from '@/lib/businessTags';
 
+// Placeholder dinâmico por categoria
+const searchPlaceholders: Record<string, string> = {
+  'comer-agora': 'Buscar restaurantes...',
+  negocios: 'Buscar negócios...',
+  servicos: 'Buscar serviços...',
+  classificados: 'Buscar classificados...',
+  ofertas: 'Buscar ofertas...',
+  agenda: 'Buscar eventos...',
+  noticias: 'Buscar notícias...',
+  falecimentos: 'Buscar...',
+};
+
 export default function Category() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const navigate = useNavigate();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [query, setQuery] = useState('');
 
   const category = categories.find((c) => c.id === categoryId);
   const filters = filtersByCategory[categoryId || ''] || [];
+  const placeholder = searchPlaceholders[categoryId || ''] || 'Buscar...';
 
   const toggleFilter = (filter: string) => {
     setActiveFilters((prev) => (prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter]));
   };
 
-  const clearFilters = () => setActiveFilters([]);
+  const clearFilters = () => {
+    setActiveFilters([]);
+    setQuery('');
+  };
 
   const filteredBusinesses = useMemo(() => {
     let filtered = businesses.filter((b) => b.categorySlug === categoryId);
+
+    // Filtro por busca
+    if (query) {
+      const q = query.toLowerCase();
+      filtered = filtered.filter((b) => 
+        b.name.toLowerCase().includes(q) ||
+        b.category.toLowerCase().includes(q) ||
+        b.neighborhood.toLowerCase().includes(q)
+      );
+    }
 
     if (activeFilters.length > 0) {
       filtered = filtered.filter((business) =>
@@ -50,68 +78,131 @@ export default function Category() {
     }
 
     return filtered;
-  }, [categoryId, activeFilters]);
+  }, [categoryId, activeFilters, query]);
 
   const filteredListings = useMemo(() => {
-    if (activeFilters.length === 0) return listings;
-    return listings.filter((listing) => matchesListingFilter(listing, activeFilters));
-  }, [activeFilters]);
+    let filtered = listings;
+    
+    // Filtro por busca
+    if (query) {
+      const q = query.toLowerCase();
+      filtered = filtered.filter((l) => 
+        l.title.toLowerCase().includes(q) ||
+        l.neighborhood.toLowerCase().includes(q)
+      );
+    }
+    
+    if (activeFilters.length > 0) {
+      filtered = filtered.filter((listing) => matchesListingFilter(listing, activeFilters));
+    }
+    
+    return filtered;
+  }, [activeFilters, query]);
 
   const filteredDeals = useMemo(() => {
-    if (activeFilters.length === 0) return deals;
+    let filtered = deals;
+    
+    // Filtro por busca
+    if (query) {
+      const q = query.toLowerCase();
+      filtered = filtered.filter((d) => 
+        d.title.toLowerCase().includes(q) ||
+        (d.subtitle?.toLowerCase().includes(q)) ||
+        (d.businessName?.toLowerCase().includes(q))
+      );
+    }
 
-    const normalizedFilters = activeFilters.map((f) => normalizeText(f));
+    if (activeFilters.length > 0) {
+      const normalizedFilters = activeFilters.map((f) => normalizeText(f));
 
-    return deals.filter((deal) => {
-      if (normalizedFilters.includes('valido hoje')) {
-        const today = new Date().toISOString().split('T')[0];
-        if (deal.validUntil < today) return false;
-      }
+      filtered = filtered.filter((deal) => {
+        if (normalizedFilters.includes('valido hoje')) {
+          const today = new Date().toISOString().split('T')[0];
+          if (deal.validUntil < today) return false;
+        }
 
-      if (normalizedFilters.includes('entrega')) {
-        const text = `${deal.title} ${deal.subtitle || ''}`.toLowerCase();
-        if (!text.includes('entrega') && !text.includes('delivery')) return false;
-      }
+        if (normalizedFilters.includes('entrega')) {
+          const text = `${deal.title} ${deal.subtitle || ''}`.toLowerCase();
+          if (!text.includes('entrega') && !text.includes('delivery')) return false;
+        }
 
-      return true;
-    });
-  }, [activeFilters]);
+        return true;
+      });
+    }
+    
+    return filtered;
+  }, [activeFilters, query]);
 
   const filteredEvents = useMemo(() => {
-    if (activeFilters.length === 0) return events;
-
-    const normalizedFilters = activeFilters.map((f) => normalizeText(f));
-
-    return events.filter((event) => {
-      if (normalizedFilters.includes('entrada gratuita')) {
-        const price = event.priceText.toLowerCase();
-        const ok =
-          price.includes('grátis') ||
-          price.includes('gratuito') ||
-          price.includes('free') ||
-          price === 'entrada livre';
-        if (!ok) return false;
-      }
-
-      if (normalizedFilters.includes('hoje')) {
-        const today = new Date().toISOString().split('T')[0];
-        if (!event.dateTime.startsWith(today)) return false;
-      }
-
-      if (normalizedFilters.includes('fim de semana')) {
-        const eventDate = new Date(event.dateTime);
-        const day = eventDate.getDay();
-        if (day !== 0 && day !== 6) return false;
-      }
-
-      // Mantém só os filtros que não são "regras especiais"
-      const remainingFilters = activeFilters.filter((f) =>
-        !['entrada gratuita', 'hoje', 'fim de semana'].includes(normalizeText(f))
+    let filtered = events;
+    
+    // Filtro por busca
+    if (query) {
+      const q = query.toLowerCase();
+      filtered = filtered.filter((e) => 
+        e.title.toLowerCase().includes(q) ||
+        e.location.toLowerCase().includes(q)
       );
+    }
 
-      return matchesAllFilters(event.tags, remainingFilters, {});
-    });
-  }, [activeFilters]);
+    if (activeFilters.length > 0) {
+      const normalizedFilters = activeFilters.map((f) => normalizeText(f));
+
+      filtered = filtered.filter((event) => {
+        if (normalizedFilters.includes('entrada gratuita')) {
+          const price = event.priceText.toLowerCase();
+          const ok =
+            price.includes('grátis') ||
+            price.includes('gratuito') ||
+            price.includes('free') ||
+            price === 'entrada livre';
+          if (!ok) return false;
+        }
+
+        if (normalizedFilters.includes('hoje')) {
+          const today = new Date().toISOString().split('T')[0];
+          if (!event.dateTime.startsWith(today)) return false;
+        }
+
+        if (normalizedFilters.includes('fim de semana')) {
+          const eventDate = new Date(event.dateTime);
+          const day = eventDate.getDay();
+          if (day !== 0 && day !== 6) return false;
+        }
+
+        // Mantém só os filtros que não são "regras especiais"
+        const remainingFilters = activeFilters.filter((f) =>
+          !['entrada gratuita', 'hoje', 'fim de semana'].includes(normalizeText(f))
+        );
+
+        return matchesAllFilters(event.tags, remainingFilters, {});
+      });
+    }
+    
+    return filtered;
+  }, [activeFilters, query]);
+  
+  // Filtro de notícias por busca
+  const filteredNews = useMemo(() => {
+    if (!query) return news;
+    const q = query.toLowerCase();
+    return news.filter((n) => 
+      n.title.toLowerCase().includes(q) ||
+      n.snippet.toLowerCase().includes(q)
+    );
+  }, [query]);
+  
+  // Filtro de obituários por busca
+  const filteredObituaries = useMemo(() => {
+    const approved = obituaries.filter((o) => o.status === 'approved');
+    if (!query) return approved;
+    const q = query.toLowerCase();
+    return approved.filter((o) => 
+      o.name.toLowerCase().includes(q) ||
+      o.wakeLocation.toLowerCase().includes(q) ||
+      o.burialLocation.toLowerCase().includes(q)
+    );
+  }, [query]);
 
   if (!category) {
     return (
@@ -236,22 +327,27 @@ export default function Category() {
         );
 
       case 'noticias':
+        if (filteredNews.length === 0) {
+          return <EmptyState message="Nenhuma notícia encontrada" subMessage="Tente outra busca" />;
+        }
         return (
           <div className="space-y-3">
-            {news.map((n) => (
+            {filteredNews.map((n) => (
               <NewsCard key={n.id} news={n} />
             ))}
           </div>
         );
 
       case 'falecimentos': {
-        const approvedObituaries = obituaries.filter((o) => o.status === 'approved');
+        if (filteredObituaries.length === 0) {
+          return <EmptyState message="Nenhum resultado encontrado" subMessage="Tente outra busca" />;
+        }
         return (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground text-center mb-4">
               Nossos sentimentos às famílias enlutadas.
             </p>
-            {approvedObituaries.map((obituary) => (
+            {filteredObituaries.map((obituary) => (
               <ObituaryCard key={obituary.id} obituary={obituary} />
             ))}
           </div>
@@ -267,24 +363,29 @@ export default function Category() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
         <div className="px-4 py-3">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-3">
             <button
               onClick={() => navigate(-1)}
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
+              className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors touch-target"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-
             <div className="flex items-center gap-2">
               <CategoryIcon categoryId={category.iconKey} size="sm" />
               <h1 className="text-lg font-bold text-foreground">{category.name}</h1>
             </div>
           </div>
-        </div>
+          
+          {/* Barra de busca */}
+          <SearchBar 
+            value={query} 
+            onChange={setQuery} 
+            placeholder={placeholder} 
+          />
 
-        {filters.length > 0 && (
-          <div className="pb-3 -mx-4">
-            <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
+          {/* Chips de filtro */}
+          {filters.length > 0 && (
+            <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
               {filters.map((filter) => (
                 <Chip
                   key={filter}
@@ -295,9 +396,18 @@ export default function Category() {
                   {filter}
                 </Chip>
               ))}
+              {activeFilters.length > 0 && (
+                <Chip
+                  onClick={clearFilters}
+                  variant="outline"
+                  className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/5"
+                >
+                  <X className="w-3 h-3 mr-1" /> Limpar
+                </Chip>
+              )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </header>
 
       <main className="px-4 py-4">{renderContent()}</main>

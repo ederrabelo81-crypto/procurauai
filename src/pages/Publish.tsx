@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Camera, Check } from 'lucide-react';
-import { MonteIcon, type MonteIconName } from '@/components/icons/MonteIcons';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { cn } from '@/lib/utils';
+import type { CategoryIconKey } from '@/data/mockData';
 
 type PublishType = 'bazar' | 'evento' | 'oferta' | 'comercio' | 'carro' | 'emprego' | 'imovel';
 
@@ -20,7 +21,7 @@ interface FormData {
 
 const DRAFT_KEY = 'monte-de-tudo-draft';
 
-const publishTypes: { id: PublishType; iconKey: MonteIconName; shortLabel: string; label: string; description: string }[] = [
+const publishTypes: { id: PublishType; iconKey: CategoryIconKey; shortLabel: string; label: string; description: string }[] = [
   { id: 'bazar', iconKey: 'classifieds', shortLabel: 'Bazar', label: 'Bazar / Classificado', description: 'Vender ou doar algo' },
   { id: 'evento', iconKey: 'events', shortLabel: 'Evento', label: 'Evento', description: 'Divulgar um evento' },
   { id: 'oferta', iconKey: 'deals', shortLabel: 'Oferta', label: 'Oferta', description: 'Promoção do seu negócio' },
@@ -178,25 +179,36 @@ export default function Publish() {
       <main className="px-4 py-6">
         {/* Step 1: Tipo */}
         {step === 1 && (
-          <div className="space-y-4 animate-fade-in">
-            <h2 className="text-xl font-bold text-foreground">O que você quer publicar?</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+          <div className="space-y-6 animate-fade-in">
+            {/* Prompt vendedor */}
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
+              <h2 className="text-lg font-bold text-foreground mb-2">
+                Publique seu anúncio e comece a receber clientes agora
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Escolha a categoria certa, descreva seu negócio com clareza e apareça para pessoas que já estão procurando exatamente o que você oferece.
+              </p>
+              <p className="text-xs text-primary font-medium mt-3 flex items-center gap-1.5">
+                <span>💡</span>
+                Quanto mais completo o anúncio, maiores as chances de destaque e contato.
+              </p>
+            </div>
+
+            <h3 className="text-base font-semibold text-foreground">O que você quer publicar?</h3>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {publishTypes.map((type) => (
                 <button
                   key={type.id}
                   onClick={() => updateField('type', type.id)}
                   className={cn(
-  "flex flex-col items-center justify-center gap-2 p-3 bg-card rounded-2xl card-shadow text-center transition-all active:scale-98",
-  formData.type === type.id && "ring-2 ring-primary"
-)}
+                    "flex flex-col items-center justify-center gap-2 p-4 bg-card rounded-2xl card-shadow text-center transition-all active:scale-98",
+                    formData.type === type.id && "ring-2 ring-primary bg-primary/5"
+                  )}
                 >
-                  <span className="text-primary">
-  <MonteIcon name={type.iconKey} className="h-8 w-8" />
-</span>
-
-<p className="text-[12px] font-semibold text-foreground">
-  {type.shortLabel}
-</p>
+                  <CategoryIcon categoryId={type.iconKey} size="md" />
+                  <p className="text-[12px] font-semibold text-foreground leading-tight">
+                    {type.shortLabel}
+                  </p>
                 </button>
               ))}
             </div>
