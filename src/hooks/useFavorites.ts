@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-type FavoriteType = 'business' | 'listing';
+type FavoriteType = 'business' | 'listing' | 'place' | 'car' | 'job' | 'realestate';
 
 interface Favorite {
   type: FavoriteType;

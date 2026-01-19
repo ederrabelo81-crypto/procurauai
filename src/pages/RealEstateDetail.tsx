@@ -1,11 +1,18 @@
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, MapPin, Phone, MessageCircle, Bed, Bath, Car, Maximize } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { MapPin, Bed, Bath, Car, Maximize, Info, Images, Building, MessageCircle, Phone, Navigation, Heart, Share2 } from "lucide-react";
+import { ListingHero } from "@/components/listing/ListingHero";
+import { ListingTabs, TabItem } from "@/components/listing/ListingTabs";
+import { GallerySection } from "@/components/listing/GallerySection";
 import { Chip } from "@/components/ui/Chip";
 import { realEstate } from "@/data/newListingTypes";
 import { formatTag } from "@/lib/tags";
+import { useFavorites } from "@/hooks/useFavorites";
 
 export default function RealEstateDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { isFavorite, toggleFavorite } = useFavorites();
+
   const item = realEstate.find((r) => r.id === id);
 
   const formatPrice = (price: number) =>
@@ -13,151 +20,279 @@ export default function RealEstateDetail() {
 
   if (!item) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <Link to="/imoveis" className="text-primary underline">Voltar para Imóveis</Link>
-        <p className="mt-4 text-muted-foreground">Imóvel não encontrado.</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Imóvel não encontrado.</p>
+          <button 
+            onClick={() => navigate('/imoveis')} 
+            className="text-primary underline"
+          >
+            Voltar para Imóveis
+          </button>
+        </div>
       </div>
     );
   }
 
-  const whatsapp = item.whatsapp;
-  const phone = item.phone;
+  const isLiked = isFavorite('realestate', item.id);
 
-  const priceText =
-    item.transactionType === "alugar"
-      ? `${formatPrice(item.rentPrice || 0)}/mês`
-      : formatPrice(item.price || 0);
+  const priceText = item.transactionType === "alugar"
+    ? `${formatPrice(item.rentPrice || 0)}/mês`
+    : formatPrice(item.price || 0);
 
-  return (
-    <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <Link to="/imoveis" className="p-2 -ml-2 rounded-full hover:bg-muted touch-target">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div className="min-w-0">
-            <h1 className="text-lg font-bold truncate">{item.title}</h1>
-            <p className="text-xs text-muted-foreground truncate">
-              {formatTag(item.transactionType)} • {formatTag(item.propertyType)}
-            </p>
+  const mapsUrl = item.lat && item.lng 
+    ? `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.title + ' ' + item.neighborhood + ' ' + item.city)}`;
+
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = `Veja ${item.title} no Tudo de Monte!`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: item.title, text, url });
+      } catch {
+        // usuário cancelou
+      }
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, '_blank');
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (item.whatsapp) {
+      const msg = encodeURIComponent(`Olá! Vi o anúncio "${item.title}" no Tudo de Monte e gostaria de mais informações.`);
+      window.open(`https://wa.me/${item.whatsapp}?text=${msg}`, '_blank');
+    }
+  };
+
+  const handleCall = () => {
+    if (item.phone) {
+      window.open(`tel:${item.phone}`, '_self');
+    }
+  };
+
+  const handleTagClick = (tag: string) => {
+    navigate(`/buscar?filters=${encodeURIComponent(tag)}`);
+  };
+
+  // Tabs do mini-site
+  const tabs: TabItem[] = [
+    {
+      id: 'detalhes',
+      label: 'Detalhes',
+      icon: <Info className="w-4 h-4" />,
+      content: (
+        <div className="space-y-6 px-4">
+          {/* Preço destacado */}
+          <div className="bg-primary/5 rounded-2xl p-4 border border-primary/20">
+            <p className="text-2xl font-bold text-primary">{priceText}</p>
+            {item.condoFee && item.condoFee > 0 && (
+              <p className="text-sm text-muted-foreground mt-1">
+                + {formatPrice(item.condoFee)} de condomínio
+              </p>
+            )}
           </div>
-        </div>
-      </header>
 
-      <main className="px-4 py-4 space-y-4">
-        <div className="bg-card rounded-2xl overflow-hidden card-shadow">
-          <div className="relative aspect-video">
-            <img src={item.coverImage} alt={item.title} className="w-full h-full object-cover" />
-          </div>
-
-          <div className="p-4">
-            <p className="text-lg font-bold text-primary">
-              {priceText}
-              {item.condoFee ? (
-                <span className="text-xs font-normal text-muted-foreground ml-1">
-                  + {formatPrice(item.condoFee)} cond.
-                </span>
-              ) : null}
-            </p>
-
-            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-3">
-              {item.bedrooms ? (
-                <span className="flex items-center gap-1">
-                  <Bed className="w-3.5 h-3.5" /> {item.bedrooms} quarto{item.bedrooms > 1 ? 's' : ''}
-                </span>
-              ) : null}
-              {item.bathrooms ? (
-                <span className="flex items-center gap-1">
-                  <Bath className="w-3.5 h-3.5" /> {item.bathrooms} banheiro{item.bathrooms > 1 ? 's' : ''}
-                </span>
-              ) : null}
-              {item.parkingSpots ? (
-                <span className="flex items-center gap-1">
-                  <Car className="w-3.5 h-3.5" /> {item.parkingSpots} vaga{item.parkingSpots > 1 ? 's' : ''}
-                </span>
-              ) : null}
-              <span className="flex items-center gap-1">
-                <Maximize className="w-3.5 h-3.5" /> {item.areaM2}m²
-              </span>
+          {/* Características principais */}
+          <div className="grid grid-cols-4 gap-2">
+            {item.bedrooms > 0 && (
+              <div className="bg-muted/50 rounded-xl p-3 text-center">
+                <Bed className="w-5 h-5 mx-auto text-primary mb-1" />
+                <div className="text-sm font-medium">{item.bedrooms}</div>
+                <div className="text-xs text-muted-foreground">Quartos</div>
+              </div>
+            )}
+            {item.bathrooms > 0 && (
+              <div className="bg-muted/50 rounded-xl p-3 text-center">
+                <Bath className="w-5 h-5 mx-auto text-primary mb-1" />
+                <div className="text-sm font-medium">{item.bathrooms}</div>
+                <div className="text-xs text-muted-foreground">Banheiros</div>
+              </div>
+            )}
+            {item.parkingSpots > 0 && (
+              <div className="bg-muted/50 rounded-xl p-3 text-center">
+                <Car className="w-5 h-5 mx-auto text-primary mb-1" />
+                <div className="text-sm font-medium">{item.parkingSpots}</div>
+                <div className="text-xs text-muted-foreground">Vagas</div>
+              </div>
+            )}
+            <div className="bg-muted/50 rounded-xl p-3 text-center">
+              <Maximize className="w-5 h-5 mx-auto text-primary mb-1" />
+              <div className="text-sm font-medium">{item.areaM2}</div>
+              <div className="text-xs text-muted-foreground">m²</div>
             </div>
+          </div>
 
-            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-              <MapPin className="w-3.5 h-3.5" />
+          {/* Info adicional */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-muted/50 rounded-xl p-3">
+              <div className="text-muted-foreground text-xs mb-1">Mobília</div>
+              <div className="font-medium">{formatTag(item.furnished)}</div>
+            </div>
+            <div className="bg-muted/50 rounded-xl p-3">
+              <div className="text-muted-foreground text-xs mb-1">Disponibilidade</div>
+              <div className="font-medium">{item.availability === 'imediata' ? 'Imediata' : 'A negociar'}</div>
+            </div>
+            <div className="bg-muted/50 rounded-xl p-3 col-span-2">
+              <div className="text-muted-foreground text-xs mb-1">Pet Friendly</div>
+              <div className="font-medium">{item.petFriendly ? '✓ Aceita pets' : '✗ Não aceita pets'}</div>
+            </div>
+          </div>
+
+          {/* Descrição */}
+          {item.description && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Descrição</h3>
+              <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+            </div>
+          )}
+
+          {/* Localização */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-2">Localização</h3>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="w-4 h-4 text-primary" />
               {item.neighborhood}, {item.city}
             </div>
+          </div>
 
-            {/* Description */}
-            {item.description && (
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold mb-2">Descrição</h3>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-              </div>
-            )}
-
-            {/* Amenities */}
-            {item.amenities && item.amenities.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold mb-2">Comodidades</h3>
-                <div className="flex flex-wrap gap-2">
-                  {item.amenities.map((amenity) => (
-                    <span key={amenity} className="px-2 py-1 bg-muted rounded-full text-xs">
-                      {amenity}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Tags - formatted */}
-            {item.tags && item.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {item.tags.slice(0, 12).map((t) => (
-                  <Chip key={t}>{formatTag(t)}</Chip>
+          {/* Tags clicáveis */}
+          {item.tags && item.tags.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Características</h3>
+              <div className="flex flex-wrap gap-2">
+                {item.tags.map((tag) => (
+                  <Chip key={tag} onClick={() => handleTagClick(tag)} size="sm" className="cursor-pointer">
+                    {formatTag(tag)}
+                  </Chip>
                 ))}
               </div>
-            )}
-
-            {/* Extra info */}
-            <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-              <div className="bg-muted/50 rounded-lg p-2">
-                <span className="text-muted-foreground">Mobília:</span>{' '}
-                <span className="font-medium">{formatTag(item.furnished)}</span>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-2">
-                <span className="text-muted-foreground">Disponibilidade:</span>{' '}
-                <span className="font-medium">{item.availability === 'imediata' ? 'Imediata' : 'A negociar'}</span>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-2 col-span-2">
-                <span className="text-muted-foreground">Pet Friendly:</span>{' '}
-                <span className="font-medium">{item.petFriendly ? 'Sim' : 'Não'}</span>
-              </div>
             </div>
-
-            {(whatsapp || phone) && (
-              <div className="flex gap-2 mt-4">
-                {whatsapp && (
-                  <a
-                    href={`https://wa.me/${String(whatsapp).replace(/\D/g, "")}`}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-medium"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <MessageCircle className="w-4 h-4" /> WhatsApp
-                  </a>
-                )}
-                {phone && (
-                  <a
-                    href={`tel:${String(phone).replace(/\s/g, "")}`}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-muted font-medium"
-                  >
-                    <Phone className="w-4 h-4" /> Ligar
-                  </a>
-                )}
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'comodidades',
+      label: 'Comodidades',
+      icon: <Building className="w-4 h-4" />,
+      count: item.amenities?.length || 0,
+      hideIfEmpty: !item.amenities || item.amenities.length === 0,
+      content: (
+        <div className="px-4">
+          <div className="grid grid-cols-2 gap-2">
+            {item.amenities?.map((amenity) => (
+              <div key={amenity} className="bg-muted/50 rounded-xl p-3 text-sm flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary" />
+                {amenity}
               </div>
-            )}
+            ))}
           </div>
         </div>
-      </main>
+      ),
+    },
+    {
+      id: 'galeria',
+      label: 'Fotos',
+      icon: <Images className="w-4 h-4" />,
+      count: item.gallery?.length || 0,
+      hideIfEmpty: !item.gallery || item.gallery.length === 0,
+      content: (
+        <div className="px-4">
+          <GallerySection
+            images={item.gallery || []}
+            title="Fotos do imóvel"
+            plan="pro"
+          />
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background pb-32">
+      {/* Hero */}
+      <ListingHero
+        coverImage={item.coverImage}
+        title={item.title}
+        category={formatTag(item.propertyType)}
+        neighborhood={item.neighborhood}
+        priceRange={priceText}
+        isFavorite={isLiked}
+        onFavoriteToggle={() => toggleFavorite('realestate', item.id)}
+        onShare={handleShare}
+        badges={
+          <>
+            <span className="px-2.5 py-1 bg-primary/90 backdrop-blur-sm rounded-full text-xs font-bold text-primary-foreground shadow">
+              {formatTag(item.transactionType)}
+            </span>
+            <span className="px-2.5 py-1 bg-card/90 backdrop-blur-sm rounded-full text-xs font-medium text-foreground shadow flex items-center gap-1">
+              <Maximize className="w-3 h-3" />
+              {item.areaM2}m²
+            </span>
+          </>
+        }
+      />
+
+      {/* Tabs */}
+      <ListingTabs tabs={tabs} defaultTab="detalhes" className="mt-4" />
+
+      {/* Ações sticky */}
+      <div className="fixed bottom-16 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-t border-border p-3 safe-bottom">
+        <div className="flex items-center gap-2 max-w-lg mx-auto">
+          {/* WhatsApp - ação principal */}
+          {item.whatsapp && (
+            <button
+              onClick={handleWhatsApp}
+              className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span>WhatsApp</span>
+            </button>
+          )}
+
+          {/* Ligar */}
+          {item.phone && (
+            <button
+              onClick={handleCall}
+              className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+            >
+              <Phone className="w-5 h-5" />
+              <span className="hidden sm:inline text-sm font-medium">Ligar</span>
+            </button>
+          )}
+
+          {/* Mapa */}
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+          >
+            <Navigation className="w-5 h-5" />
+            <span className="hidden sm:inline text-sm font-medium">Mapa</span>
+          </a>
+
+          {/* Favoritar */}
+          <button
+            onClick={() => toggleFavorite('realestate', item.id)}
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          >
+            <Heart className={isLiked ? 'w-5 h-5 fill-destructive text-destructive' : 'w-5 h-5'} />
+          </button>
+
+          {/* Compartilhar */}
+          <button
+            onClick={handleShare}
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            aria-label="Compartilhar"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

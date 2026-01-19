@@ -1,136 +1,231 @@
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, MapPin, Star, Clock, Navigation } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { MapPin, Star, Clock, Info, Images, Navigation, Heart, Share2 } from "lucide-react";
+import { ListingHero } from "@/components/listing/ListingHero";
+import { ListingTabs, TabItem } from "@/components/listing/ListingTabs";
+import { ListingActionsBar } from "@/components/listing/ListingActionsBar";
+import { GallerySection } from "@/components/listing/GallerySection";
 import { Chip } from "@/components/ui/Chip";
 import { places } from "@/data/newListingTypes";
 import { formatTag } from "@/lib/tags";
+import { useFavorites } from "@/hooks/useFavorites";
 
 export default function PlaceDetail() {
   const { slug } = useParams();
+  const navigate = useNavigate();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const place = places.find((p) => p.slug === slug);
 
   if (!place) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <Link to="/lugares" className="text-primary underline">Voltar para Lugares</Link>
-        <p className="mt-4 text-muted-foreground">Lugar não encontrado.</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Lugar não encontrado.</p>
+          <button 
+            onClick={() => navigate('/lugares')} 
+            className="text-primary underline"
+          >
+            Voltar para Lugares
+          </button>
+        </div>
       </div>
     );
   }
+
+  const isLiked = isFavorite('place', place.id);
 
   const mapsUrl = place.lat && place.lng 
     ? `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ' ' + place.city)}`;
 
-  return (
-    <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <Link to="/lugares" className="p-2 -ml-2 rounded-full hover:bg-muted touch-target">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
-          <div className="min-w-0">
-            <h1 className="text-lg font-bold truncate">{place.name}</h1>
-            <p className="text-xs text-muted-foreground truncate">{place.typeTag} • {place.priceLevel}</p>
-          </div>
-        </div>
-      </header>
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = `Veja ${place.name} no Tudo de Monte!`;
 
-      <main className="px-4 py-4 space-y-4">
-        <div className="bg-card rounded-2xl overflow-hidden card-shadow">
-          <div className="relative aspect-video">
-            <img src={place.coverImage} alt={place.name} className="w-full h-full object-cover" />
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: place.name, text, url });
+      } catch {
+        // usuário cancelou
+      }
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, '_blank');
+    }
+  };
+
+  const handleTagClick = (tag: string) => {
+    navigate(`/buscar?filters=${encodeURIComponent(tag)}`);
+  };
+
+  // Tabs do mini-site
+  const tabs: TabItem[] = [
+    {
+      id: 'sobre',
+      label: 'Sobre',
+      icon: <Info className="w-4 h-4" />,
+      content: (
+        <div className="space-y-6 px-4">
+          {/* Descrição */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-2">Sobre o local</h3>
+            <p className="text-muted-foreground leading-relaxed">{place.shortDescription}</p>
           </div>
-          <div className="p-4">
-            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-              <span className="flex items-center gap-1">
-                <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                {place.rating} ({place.reviewsCount} avaliações)
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5" />
-                {place.neighborhood}
-              </span>
+
+          {/* Info Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {place.openingHours && (
+              <div className="bg-muted/50 rounded-xl p-3">
+                <div className="text-muted-foreground text-xs mb-1">Horário</div>
+                <div className="font-medium flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-primary" />
+                  {place.openingHours}
+                </div>
+              </div>
+            )}
+            {place.durationSuggestion && (
+              <div className="bg-muted/50 rounded-xl p-3">
+                <div className="text-muted-foreground text-xs mb-1">Duração sugerida</div>
+                <div className="font-medium">{place.durationSuggestion}</div>
+              </div>
+            )}
+            {place.bestTimeToGo && (
+              <div className="bg-muted/50 rounded-xl p-3">
+                <div className="text-muted-foreground text-xs mb-1">Melhor horário</div>
+                <div className="font-medium">{place.bestTimeToGo}</div>
+              </div>
+            )}
+            <div className="bg-muted/50 rounded-xl p-3">
+              <div className="text-muted-foreground text-xs mb-1">Preço</div>
+              <div className="font-medium">{place.priceLevel}</div>
             </div>
+          </div>
 
-            <p className="text-sm text-muted-foreground">{place.shortDescription}</p>
-
-            {/* Tags - formatted */}
-            {place.tags && place.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {place.tags.slice(0, 10).map((t) => (
-                  <Chip key={t}>{formatTag(t)}</Chip>
+          {/* Highlights */}
+          {place.highlights && place.highlights.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Destaques</h3>
+              <div className="flex flex-wrap gap-2">
+                {place.highlights.map((h) => (
+                  <span key={h} className="px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                    {h}
+                  </span>
                 ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Info Grid */}
-            <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
-              {place.openingHours && (
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="text-muted-foreground text-xs mb-1">Horário</div>
-                  <div className="font-medium flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5" />
-                    {place.openingHours}
-                  </div>
-                </div>
-              )}
-              {place.durationSuggestion && (
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="text-muted-foreground text-xs mb-1">Duração sugerida</div>
-                  <div className="font-medium">{place.durationSuggestion}</div>
-                </div>
-              )}
-              {place.bestTimeToGo && (
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <div className="text-muted-foreground text-xs mb-1">Melhor horário</div>
-                  <div className="font-medium">{place.bestTimeToGo}</div>
-                </div>
-              )}
-              <div className="bg-muted/50 rounded-lg p-3">
-                <div className="text-muted-foreground text-xs mb-1">Preço</div>
-                <div className="font-medium">{place.priceLevel}</div>
+          {/* Tags clicáveis */}
+          {place.tags && place.tags.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Características</h3>
+              <div className="flex flex-wrap gap-2">
+                {place.tags.map((tag) => (
+                  <Chip key={tag} onClick={() => handleTagClick(tag)} size="sm" className="cursor-pointer">
+                    {formatTag(tag)}
+                  </Chip>
+                ))}
               </div>
             </div>
-
-            {/* Highlights */}
-            {place.highlights && place.highlights.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold mb-2">Destaques</h3>
-                <div className="flex flex-wrap gap-2">
-                  {place.highlights.map((h) => (
-                    <span key={h} className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                      {h}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Action */}
-            <a
-              href={mapsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-medium"
-            >
-              <Navigation className="w-4 h-4" /> Como chegar
-            </a>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'galeria',
+      label: 'Fotos',
+      icon: <Images className="w-4 h-4" />,
+      count: place.gallery?.length || 0,
+      hideIfEmpty: !place.gallery || place.gallery.length === 0,
+      content: (
+        <div className="px-4">
+          <GallerySection
+            images={place.gallery || []}
+            title="Fotos do local"
+            plan="pro"
+          />
+        </div>
+      ),
+    },
+    {
+      id: 'avaliacoes',
+      label: 'Avaliações',
+      icon: <Star className="w-4 h-4" />,
+      count: place.reviewsCount,
+      content: (
+        <div className="px-4">
+          <div className="bg-card rounded-2xl p-6 text-center border border-border">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Star className="w-8 h-8 text-yellow-500 fill-yellow-500" />
+              <span className="text-3xl font-bold text-foreground">{place.rating}</span>
+            </div>
+            <p className="text-muted-foreground">{place.reviewsCount} avaliações</p>
+            <p className="text-sm text-muted-foreground mt-4">
+              As avaliações detalhadas estarão disponíveis em breve.
+            </p>
           </div>
         </div>
+      ),
+    },
+  ];
 
-        {/* Gallery */}
-        {place.gallery && place.gallery.length > 0 && (
-          <div className="bg-card rounded-2xl p-4 card-shadow">
-            <h2 className="font-semibold mb-3">Fotos</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {place.gallery.slice(0, 6).map((url, idx) => (
-                <img key={idx} src={url} alt="" className="rounded-xl object-cover aspect-square" />
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
+  return (
+    <div className="min-h-screen bg-background pb-32">
+      {/* Hero */}
+      <ListingHero
+        coverImage={place.coverImage}
+        title={place.name}
+        category={place.typeTag}
+        neighborhood={place.neighborhood}
+        rating={place.rating}
+        reviewCount={place.reviewsCount}
+        priceRange={place.priceLevel}
+        isFavorite={isLiked}
+        onFavoriteToggle={() => toggleFavorite('place', place.id)}
+        onShare={handleShare}
+        badges={
+          <span className="px-2.5 py-1 bg-card/90 backdrop-blur-sm rounded-full text-xs font-medium text-foreground shadow flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5" />
+            {place.city}
+          </span>
+        }
+      />
+
+      {/* Tabs */}
+      <ListingTabs tabs={tabs} defaultTab="sobre" className="mt-4" />
+
+      {/* Ações sticky */}
+      <div className="fixed bottom-16 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-t border-border p-3 safe-bottom">
+        <div className="flex items-center gap-2 max-w-lg mx-auto">
+          {/* Como chegar - ação principal */}
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
+          >
+            <Navigation className="w-5 h-5" />
+            <span>Como chegar</span>
+          </a>
+
+          {/* Favoritar */}
+          <button
+            onClick={() => toggleFavorite('place', place.id)}
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          >
+            <Heart className={isLiked ? 'w-5 h-5 fill-destructive text-destructive' : 'w-5 h-5'} />
+          </button>
+
+          {/* Compartilhar */}
+          <button
+            onClick={handleShare}
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            aria-label="Compartilhar"
+          >
+            <Share2 className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

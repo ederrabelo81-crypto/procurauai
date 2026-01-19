@@ -80,28 +80,25 @@ export default function PlacesList() {
                 {filter.label}
               </Chip>
             ))}
+            {activeFilters.length > 0 && (
+              <Chip
+                onClick={clearFilters}
+                variant="outline"
+                className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/5"
+              >
+                <X className="w-3 h-3 mr-1" /> Limpar
+              </Chip>
+            )}
           </div>
         </div>
       </header>
 
       <main className="px-4 py-4">
-        {/* Active Filters & Sort */}
+        {/* Sort & Results */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            {activeFilters.length > 0 && (
-              <>
-                <span className="text-sm text-muted-foreground">
-                  {activeFilters.length} filtro{activeFilters.length > 1 ? 's' : ''} ativo{activeFilters.length > 1 ? 's' : ''}
-                </span>
-                <button
-                  onClick={clearFilters}
-                  className="text-xs text-primary hover:underline flex items-center gap-1"
-                >
-                  <X className="w-3 h-3" /> Limpar
-                </button>
-              </>
-            )}
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Mostrando {filtered.length} de {places.length} lugares
+          </p>
           
           <div className="relative">
             <button
@@ -126,10 +123,6 @@ export default function PlacesList() {
           </div>
         </div>
 
-        {/* Results Count */}
-        <p className="text-sm text-muted-foreground mb-4">
-          Mostrando {filtered.length} de {places.length} lugares
-        </p>
 
         <div className="space-y-4">
           {filtered.map((place) => (

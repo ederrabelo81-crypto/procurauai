@@ -57,7 +57,7 @@ export function CategoryCard({ id, name, iconKey, className, size = 'md', onClic
       </span>
 
       <span className={cn(
-        "font-semibold text-foreground text-center leading-tight",
+        "font-semibold text-foreground text-center leading-tight line-clamp-2 break-words min-h-[2.5em]",
         size === 'md' ? 'text-sm' : 'text-[12px]'
       )}>
         {name}
