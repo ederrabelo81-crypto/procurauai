@@ -1,34 +1,60 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Briefcase, Clock, Building2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Briefcase, Clock, Building2, X, ChevronDown } from 'lucide-react';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Chip } from '@/components/ui/Chip';
 import { jobs } from '@/data/newListingTypes';
 import { filtersByCategory } from '@/data/mockData';
+import { 
+  createFilterOptions, 
+  formatTag, 
+  matchesAnyFilter, 
+  sortItems,
+  SORT_OPTIONS 
+} from '@/lib/tags';
 
 export default function JobsList() {
   const [query, setQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const filters = filtersByCategory['empregos'] || [];
+  const [sortKey, setSortKey] = useState('');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  
+  const filterOptions = useMemo(
+    () => createFilterOptions(filtersByCategory['empregos'] || []),
+    []
+  );
+  const sortOptions = SORT_OPTIONS['empregos'] || [];
 
   const filtered = useMemo(() => {
-    return jobs.filter((job) => {
+    let result = jobs.filter((job) => {
       const matchesQuery = !query || 
         job.jobTitle.toLowerCase().includes(query.toLowerCase()) ||
         job.companyName.toLowerCase().includes(query.toLowerCase());
       
-      const matchesFilters = activeFilters.length === 0 ||
-        activeFilters.some(f => job.tags.some(t => t.toLowerCase().includes(f.toLowerCase())));
+      const matchesFiltersResult = matchesAnyFilter(job, activeFilters, 'empregos');
       
-      return matchesQuery && matchesFilters;
+      return matchesQuery && matchesFiltersResult;
     });
-  }, [query, activeFilters]);
+    
+    if (sortKey) {
+      result = sortItems(result, sortKey, 'empregos');
+    }
+    
+    return result;
+  }, [query, activeFilters, sortKey]);
 
-  const toggleFilter = (filter: string) => {
+  const toggleFilter = (filterKey: string) => {
     setActiveFilters(prev => 
-      prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+      prev.includes(filterKey) ? prev.filter(f => f !== filterKey) : [...prev, filterKey]
     );
   };
+
+  const clearFilters = () => {
+    setActiveFilters([]);
+    setSortKey('');
+  };
+
+  const currentSort = sortOptions.find(s => s.key === sortKey);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -45,21 +71,64 @@ export default function JobsList() {
           </div>
           <SearchBar value={query} onChange={setQuery} placeholder="Buscar vagas..." />
           <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
-            {filters.map((filter) => (  <Chip
-  key={filter}
-  active={activeFilters.includes(filter)}
-  onClick={() => toggleFilter(filter)}
->
-  {filter}
-</Chip>
-))}
+            {filterOptions.map((filter) => (
+              <Chip
+                key={filter.key}
+                isActive={activeFilters.includes(filter.key)}
+                onClick={() => toggleFilter(filter.key)}
+              >
+                {filter.label}
+              </Chip>
+            ))}
           </div>
         </div>
       </header>
 
       <main className="px-4 py-4">
+        {/* Active Filters & Sort */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {activeFilters.length > 0 && (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  {activeFilters.length} filtro{activeFilters.length > 1 ? 's' : ''} ativo{activeFilters.length > 1 ? 's' : ''}
+                </span>
+                <button
+                  onClick={clearFilters}
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <X className="w-3 h-3" /> Limpar
+                </button>
+              </>
+            )}
+          </div>
+          
+          <div className="relative">
+            <button
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+            >
+              {currentSort?.label || 'Ordenar'} <ChevronDown className="w-4 h-4" />
+            </button>
+            {showSortMenu && (
+              <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg z-50 min-w-[150px]">
+                {sortOptions.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => { setSortKey(opt.key); setShowSortMenu(false); }}
+                    className={`block w-full text-left px-3 py-2 text-sm hover:bg-muted ${sortKey === opt.key ? 'text-primary' : ''}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Results Count */}
         <p className="text-sm text-muted-foreground mb-4">
-          {filtered.length} {filtered.length === 1 ? 'vaga encontrada' : 'vagas encontradas'}
+          Mostrando {filtered.length} de {jobs.length} vagas
         </p>
 
         <div className="space-y-4">
@@ -87,8 +156,8 @@ export default function JobsList() {
                 <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
                   {job.employmentType}
                 </span>
-                <span className="px-2 py-1 bg-muted rounded-full text-xs font-medium capitalize">
-                  {job.workModel}
+                <span className="px-2 py-1 bg-muted rounded-full text-xs font-medium">
+                  {formatTag(job.workModel)}
                 </span>
                 {job.salaryRange && (
                   <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
@@ -96,6 +165,17 @@ export default function JobsList() {
                   </span>
                 )}
               </div>
+              
+              {/* Tags - formatted */}
+              {job.tags && job.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {job.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="px-2 py-0.5 bg-muted/50 rounded-full text-xs text-muted-foreground">
+                      {formatTag(tag)}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <div className="flex items-center gap-4 text-xs text-muted-foreground mt-3">
                 <span className="flex items-center gap-1">
@@ -114,6 +194,11 @@ export default function JobsList() {
         {filtered.length === 0 && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">Nenhuma vaga encontrada</p>
+            {activeFilters.length > 0 && (
+              <button onClick={clearFilters} className="text-primary text-sm mt-2 hover:underline">
+                Limpar filtros
+              </button>
+            )}
           </div>
         )}
       </main>

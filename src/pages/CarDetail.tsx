@@ -2,11 +2,12 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, MapPin, Fuel, Gauge, Phone, MessageCircle } from "lucide-react";
 import { Chip } from "@/components/ui/Chip";
 import { cars } from "@/data/newListingTypes";
+import { formatTag } from "@/lib/tags";
 
 export default function CarDetail() {
   const { id } = useParams();
 
-  const car = cars.find((c: any) => c.id === id);
+  const car = cars.find((c) => c.id === id);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price);
@@ -20,8 +21,8 @@ export default function CarDetail() {
     );
   }
 
-  const whatsapp = car.contact?.whatsapp || car.whatsapp;
-  const phone = car.contact?.phone || car.phone;
+  const whatsapp = car.whatsapp;
+  const phone = car.phone;
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -32,7 +33,9 @@ export default function CarDetail() {
           </Link>
           <div className="min-w-0">
             <h1 className="text-lg font-bold truncate">{car.title}</h1>
-            <p className="text-xs text-muted-foreground truncate">{car.year} • {car.condition} • {car.sellerType}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {car.year} • {formatTag(car.condition)} • {formatTag(car.sellerType)}
+            </p>
           </div>
         </div>
       </header>
@@ -60,11 +63,33 @@ export default function CarDetail() {
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-2 mt-4">
-              {(car.tags || []).slice(0, 12).map((t: string) => (
-                <Chip key={t}>{t}</Chip>
-              ))}
-            </div>
+            {/* Description */}
+            {car.description && (
+              <p className="text-sm text-muted-foreground mt-4">{car.description}</p>
+            )}
+
+            {/* Features */}
+            {car.features && car.features.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-semibold mb-2">Opcionais</h3>
+                <div className="flex flex-wrap gap-2">
+                  {car.features.map((feature) => (
+                    <span key={feature} className="px-2 py-1 bg-muted rounded-full text-xs">
+                      {feature}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tags - formatted */}
+            {car.tags && car.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {car.tags.slice(0, 12).map((t) => (
+                  <Chip key={t}>{formatTag(t)}</Chip>
+                ))}
+              </div>
+            )}
 
             {(whatsapp || phone) && (
               <div className="flex gap-2 mt-4">
