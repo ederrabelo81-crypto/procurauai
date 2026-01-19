@@ -5,7 +5,7 @@ import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { cn } from '@/lib/utils';
 import type { CategoryIconKey } from '@/data/mockData';
 
-type PublishType = 'bazar' | 'evento' | 'oferta' | 'comercio' | 'carro' | 'emprego' | 'imovel';
+type PublishType = 'classificados' | 'evento' | 'oferta' | 'comercio' | 'carros' | 'emprego' | 'imovel' | 'servicos';
 
 interface FormData {
   type: PublishType | null;
@@ -22,23 +22,25 @@ interface FormData {
 const DRAFT_KEY = 'monte-de-tudo-draft';
 
 const publishTypes: { id: PublishType; iconKey: CategoryIconKey; shortLabel: string; label: string; description: string }[] = [
-  { id: 'bazar', iconKey: 'classifieds', shortLabel: 'Bazar', label: 'Bazar / Classificado', description: 'Vender ou doar algo' },
+  { id: 'classificados', iconKey: 'classifieds', shortLabel: 'Classificados', label: 'Classificados', description: 'Vender ou doar algo' },
   { id: 'evento', iconKey: 'events', shortLabel: 'Evento', label: 'Evento', description: 'Divulgar um evento' },
   { id: 'oferta', iconKey: 'deals', shortLabel: 'Oferta', label: 'Oferta', description: 'Promoção do seu negócio' },
   { id: 'comercio', iconKey: 'store', shortLabel: 'Negócio', label: 'Comércio / Serviço', description: 'Cadastrar seu negócio' },
-  { id: 'carro', iconKey: 'cars', shortLabel: 'Carro', label: 'Carro', description: 'Anunciar veículo' },
+  { id: 'carros', iconKey: 'cars', shortLabel: 'Carros', label: 'Carros', description: 'Anunciar veículo' },
   { id: 'emprego', iconKey: 'jobs', shortLabel: 'Emprego', label: 'Vaga de Emprego', description: 'Publicar vaga' },
   { id: 'imovel', iconKey: 'realestate', shortLabel: 'Imóvel', label: 'Imóvel', description: 'Alugar ou vender imóvel' },
+  { id: 'servicos', iconKey: 'services', shortLabel: 'Serviços', label: 'Serviços', description: 'Oferecer um serviço' },
 ];
 
 const categories: Record<PublishType, string[]> = {
-  bazar: ['Eletrônicos', 'Móveis', 'Roupas', 'Veículos', 'Pets', 'Outros'],
+  classificados: ['Eletrônicos', 'Móveis', 'Roupas', 'Veículos', 'Pets', 'Outros'],
   evento: ['Festa', 'Show', 'Esportes', 'Religioso', 'Cultural', 'Outros'],
   oferta: ['Alimentação', 'Beleza', 'Serviços', 'Varejo', 'Outros'],
   comercio: ['Alimentação', 'Beleza', 'Saúde', 'Serviços', 'Varejo', 'Pets', 'Outros'],
-  carro: ['Sedan', 'SUV', 'Hatch', 'Pickup', 'Moto', 'Outros'],
+  carros: ['Sedan', 'SUV', 'Hatch', 'Pickup', 'Moto', 'Outros'],
   emprego: ['CLT', 'PJ', 'Estágio', 'Freelancer', 'Temporário', 'Outros'],
   imovel: ['Apartamento', 'Casa', 'Kitnet', 'Terreno', 'Comercial', 'Outros'],
+  servicos: ['Beleza', 'Saúde', 'Tecnologia', 'Construção', 'Educação', 'Outros'],
 };
 
 const neighborhoods = ['Centro', 'Vila Nova', 'Jardim América', 'Industrial', 'Outro'];
@@ -282,17 +284,17 @@ export default function Publish() {
               </div>
             </div>
 
-            {(formData.type === 'bazar' || formData.type === 'carro' || formData.type === 'imovel') && (
+            {(formData.type === 'classificados' || formData.type === 'carros' || formData.type === 'imovel') && (
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">
-                  Preço {formData.type === 'bazar' && '(opcional)'}
+                  Preço {formData.type === 'classificados' && '(opcional)'}
                 </label>
                 <input
                   type="text"
                   value={formData.price}
                   onChange={(e) => updateField('price', e.target.value)}
                   placeholder={
-                    formData.type === 'bazar' 
+                    formData.type === 'classificados' 
                       ? "R$ 0,00 (deixe vazio se for doação)" 
                       : formData.type === 'imovel'
                         ? "R$ 0,00 (ou valor do aluguel)"
