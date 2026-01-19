@@ -45,14 +45,15 @@ export default function PlacesList() {
           </div>
           <SearchBar value={query} onChange={setQuery} placeholder="Buscar lugares..." />
           <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
-            {filters.map((filter) => (
-              <Chip
-                key={filter}
-                label={filter}
-                active={activeFilters.includes(filter)}
-                onClick={() => toggleFilter(filter)}
-              />
-            ))}
+           {filters.map((filter) => (
+  <Chip
+    key={filter}
+    active={activeFilters.includes(filter)}
+    onClick={() => toggleFilter(filter)}
+  >
+    {filter}
+  </Chip>
+))}
           </div>
         </div>
       </header>
