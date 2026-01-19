@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Camera, Check } from 'lucide-react';
 import { MonteIcon, type MonteIconName } from '@/components/icons/MonteIcons';
 import { cn } from '@/lib/utils';
 
-type PublishType = 'bazar' | 'evento' | 'oferta' | 'comercio';
+type PublishType = 'bazar' | 'evento' | 'oferta' | 'comercio' | 'carro' | 'emprego' | 'imovel';
 
 interface FormData {
   type: PublishType | null;
@@ -25,13 +25,19 @@ const publishTypes: { id: PublishType; iconKey: MonteIconName; shortLabel: strin
   { id: 'evento', iconKey: 'events', shortLabel: 'Evento', label: 'Evento', description: 'Divulgar um evento' },
   { id: 'oferta', iconKey: 'deals', shortLabel: 'Oferta', label: 'Oferta', description: 'Promoção do seu negócio' },
   { id: 'comercio', iconKey: 'store', shortLabel: 'Negócio', label: 'Comércio / Serviço', description: 'Cadastrar seu negócio' },
+  { id: 'carro', iconKey: 'cars', shortLabel: 'Carro', label: 'Carro', description: 'Anunciar veículo' },
+  { id: 'emprego', iconKey: 'jobs', shortLabel: 'Emprego', label: 'Vaga de Emprego', description: 'Publicar vaga' },
+  { id: 'imovel', iconKey: 'realestate', shortLabel: 'Imóvel', label: 'Imóvel', description: 'Alugar ou vender imóvel' },
 ];
 
-const categories = {
+const categories: Record<PublishType, string[]> = {
   bazar: ['Eletrônicos', 'Móveis', 'Roupas', 'Veículos', 'Pets', 'Outros'],
   evento: ['Festa', 'Show', 'Esportes', 'Religioso', 'Cultural', 'Outros'],
   oferta: ['Alimentação', 'Beleza', 'Serviços', 'Varejo', 'Outros'],
   comercio: ['Alimentação', 'Beleza', 'Saúde', 'Serviços', 'Varejo', 'Pets', 'Outros'],
+  carro: ['Sedan', 'SUV', 'Hatch', 'Pickup', 'Moto', 'Outros'],
+  emprego: ['CLT', 'PJ', 'Estágio', 'Freelancer', 'Temporário', 'Outros'],
+  imovel: ['Apartamento', 'Casa', 'Kitnet', 'Terreno', 'Comercial', 'Outros'],
 };
 
 const neighborhoods = ['Centro', 'Vila Nova', 'Jardim América', 'Industrial', 'Outro'];
@@ -174,7 +180,7 @@ export default function Publish() {
         {step === 1 && (
           <div className="space-y-4 animate-fade-in">
             <h2 className="text-xl font-bold text-foreground">O que você quer publicar?</h2>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {publishTypes.map((type) => (
                 <button
                   key={type.id}
@@ -264,14 +270,22 @@ export default function Publish() {
               </div>
             </div>
 
-            {formData.type === 'bazar' && (
+            {(formData.type === 'bazar' || formData.type === 'carro' || formData.type === 'imovel') && (
               <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Preço (opcional)</label>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">
+                  Preço {formData.type === 'bazar' && '(opcional)'}
+                </label>
                 <input
                   type="text"
                   value={formData.price}
                   onChange={(e) => updateField('price', e.target.value)}
-                  placeholder="R$ 0,00 (deixe vazio se for doação)"
+                  placeholder={
+                    formData.type === 'bazar' 
+                      ? "R$ 0,00 (deixe vazio se for doação)" 
+                      : formData.type === 'imovel'
+                        ? "R$ 0,00 (ou valor do aluguel)"
+                        : "R$ 0,00"
+                  }
                   className="w-full h-12 px-4 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>

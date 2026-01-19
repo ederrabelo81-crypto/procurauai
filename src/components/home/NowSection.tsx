@@ -21,10 +21,10 @@ export function NowSection() {
   // Mostra apenas os que estão realmente abertos agora pelo texto de hours
   const openBusinesses = businesses
     .filter((b) => isOpenNow(b.hours) === true)
-    .slice(0, 3);
+    .slice(0, 4);
 
-  const todayDeals = deals.slice(0, 3);
-  const upcomingEvents = events.slice(0, 3);
+  const todayDeals = deals.slice(0, 4);
+  const upcomingEvents = events.slice(0, 4);
 
   return (
     <section>

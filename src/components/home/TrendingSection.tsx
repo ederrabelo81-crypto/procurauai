@@ -19,11 +19,12 @@ function Badge({ text }: { text: string }) {
 }
 
 export function TrendingSection() {
-  // Mix de conteúdo em alta (simples e estável)
+  // Mix de conteúdo em alta (simples e estável) - 4 itens para melhor densidade
   const trendingItems: TrendingItem[] = [
     { type: 'deal', data: deals[0] },
     { type: 'listing', data: [listings[0], listings[1]].filter(Boolean) },
     { type: 'news', data: news[0] },
+    { type: 'deal', data: deals[1] },
   ];
 
   return (

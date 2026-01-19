@@ -33,8 +33,8 @@ export function CategoryGrid() {
 
       {/* Modal Ver Mais */}
       {showAllModal && (
-        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm animate-fade-in">
-          <div className="safe-top px-4 py-4">
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm animate-fade-in overflow-y-auto">
+          <div className="safe-top px-4 py-4 pb-24">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold">Todas as Categorias</h2>
               <button
