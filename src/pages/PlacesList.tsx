@@ -48,12 +48,11 @@ export default function PlacesList() {
            {filters.map((filter) => (
   <Chip
   key={filter}
-  label={filter}
   active={activeFilters.includes(filter)}
   onClick={() => toggleFilter(filter)}
-/>
-    {filter}
-  </Chip>
+>
+  {filter}
+</Chip>
 ))}
           </div>
         </div>
