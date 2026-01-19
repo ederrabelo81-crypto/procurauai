@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import Category from "./pages/Category";
@@ -17,10 +18,18 @@ import ObituaryDetail from "./pages/ObituaryDetail";
 import Publish from "./pages/Publish";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+
+// List pages (novos tipos)
 import PlacesList from "./pages/PlacesList";
 import CarsList from "./pages/CarsList";
 import JobsList from "./pages/JobsList";
 import RealEstateList from "./pages/RealEstateList";
+
+// Detail pages (CRIAR AGORA)
+import PlaceDetail from "./pages/PlaceDetail";
+import CarDetail from "./pages/CarDetail";
+import JobDetail from "./pages/JobDetail";
+import RealEstateDetail from "./pages/RealEstateDetail";
 
 const queryClient = new QueryClient();
 
@@ -44,11 +53,19 @@ const App = () => (
               <Route path="/falecimento/:id" element={<ObituaryDetail />} />
               <Route path="/publicar" element={<Publish />} />
               <Route path="/perfil" element={<Profile />} />
-              {/* Novos tipos */}
+
+              {/* Novos tipos - LISTA */}
               <Route path="/lugares" element={<PlacesList />} />
               <Route path="/carros" element={<CarsList />} />
               <Route path="/empregos" element={<JobsList />} />
               <Route path="/imoveis" element={<RealEstateList />} />
+
+              {/* Novos tipos - DETALHE (isso resolve o 404) */}
+              <Route path="/lugares/:slug" element={<PlaceDetail />} />
+              <Route path="/carros/:id" element={<CarDetail />} />
+              <Route path="/empregos/:id" element={<JobDetail />} />
+              <Route path="/imoveis/:id" element={<RealEstateDetail />} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BottomNav />
