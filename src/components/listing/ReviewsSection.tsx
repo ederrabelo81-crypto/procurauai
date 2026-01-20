@@ -1,7 +1,7 @@
-import { Star, MessageCircle, Lock } from 'lucide-react';
+import { Star, MessageCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BusinessPlan } from '@/data/mockData';
-import { hasFeature, PLAN_INFO } from '@/lib/planUtils';
+import { hasFeature } from '@/lib/planUtils';
 
 interface Review {
   id: string;
@@ -16,7 +16,6 @@ interface ReviewsSectionProps {
   averageRating?: number;
   reviewCount?: number;
   plan?: BusinessPlan;
-  onUpgrade?: () => void;
   className?: string;
 }
 
@@ -25,7 +24,6 @@ export function ReviewsSection({
   averageRating,
   reviewCount,
   plan = 'free',
-  onUpgrade,
   className,
 }: ReviewsSectionProps) {
   const hasAccess = hasFeature(plan, 'reviews');
@@ -45,60 +43,37 @@ export function ReviewsSection({
     );
   }
 
+  // Plano básico: mostrar apenas resumo geral
   if (!hasAccess) {
     return (
-      <div className={cn('relative', className)}>
-        {/* Preview com blur */}
-        <div className="filter blur-sm pointer-events-none space-y-4">
-          {/* Rating geral */}
+      <div className={cn('space-y-4', className)}>
+        {/* Rating geral sempre visível */}
+        {averageRating && (
           <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
             <div className="text-center">
-              <div className="text-3xl font-bold text-foreground">{averageRating?.toFixed(1) || '4.5'}</div>
+              <div className="text-3xl font-bold text-foreground">{averageRating.toFixed(1)}</div>
               <div className="flex gap-0.5 mt-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
                     className={cn(
                       'w-4 h-4',
-                      star <= (averageRating || 4.5) ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+                      star <= averageRating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
                     )}
                   />
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{reviewCount || 12} avaliações</p>
+              <p className="text-xs text-muted-foreground mt-1">{reviewCount} avaliações</p>
             </div>
           </div>
+        )}
 
-          {/* Reviews fake */}
-          {[1, 2].map((i) => (
-            <div key={i} className="p-4 border border-border rounded-xl">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-full bg-muted" />
-                <div className="h-4 w-24 bg-muted rounded" />
-              </div>
-              <div className="h-3 w-full bg-muted rounded mb-1" />
-              <div className="h-3 w-3/4 bg-muted rounded" />
-            </div>
-          ))}
-        </div>
-
-        {/* Overlay de bloqueio */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center bg-background/70 backdrop-blur-[2px] rounded-xl cursor-pointer"
-          onClick={onUpgrade}
-        >
-          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-            <Lock className="w-7 h-7 text-primary" />
-          </div>
-          <p className="text-sm font-semibold text-foreground mb-1">
-            Avaliações bloqueadas
+        {/* Mensagem informativa - sem CTA */}
+        <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl">
+          <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-muted-foreground">
+            As avaliações detalhadas não estão disponíveis para este anúncio.
           </p>
-          <p className="text-xs text-muted-foreground mb-3 text-center px-4">
-            Exiba avaliações e aumente sua credibilidade
-          </p>
-          <span className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm">
-            Ativar {PLAN_INFO.pro.label}
-          </span>
         </div>
       </div>
     );

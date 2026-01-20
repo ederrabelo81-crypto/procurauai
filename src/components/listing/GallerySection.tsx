@@ -1,17 +1,15 @@
 import { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BusinessPlan } from '@/data/mockData';
-import { hasFeature, PLAN_INFO } from '@/lib/planUtils';
+import { hasFeature } from '@/lib/planUtils';
 
 interface GallerySectionProps {
   images: string[];
   title?: string;
   className?: string;
-  /** Plano do negócio - se FREE, galeria fica com blur */
+  /** Plano do negócio */
   plan?: BusinessPlan;
-  /** Callback para abrir modal de upgrade */
-  onUpgrade?: () => void;
 }
 
 export function GallerySection({
@@ -19,7 +17,6 @@ export function GallerySection({
   title = 'Galeria',
   className,
   plan = 'pro',
-  onUpgrade,
 }: GallerySectionProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,76 +25,58 @@ export function GallerySection({
 
   if (images.length === 0) return null;
 
+  // Plano básico: mostrar apenas primeira foto
+  const visibleImages = hasAccess ? images : images.slice(0, 1);
+  const hiddenCount = images.length - visibleImages.length;
+
   const openLightbox = (index: number) => {
-    if (!hasAccess) {
-      onUpgrade?.();
-      return;
-    }
     setCurrentIndex(index);
     setLightboxOpen(true);
   };
 
   const closeLightbox = () => setLightboxOpen(false);
 
-  const goNext = () => setCurrentIndex((i) => (i + 1) % images.length);
-  const goPrev = () => setCurrentIndex((i) => (i - 1 + images.length) % images.length);
+  const goNext = () => setCurrentIndex((i) => (i + 1) % visibleImages.length);
+  const goPrev = () => setCurrentIndex((i) => (i - 1 + visibleImages.length) % visibleImages.length);
 
   return (
     <section className={cn('relative', className)}>
       <h3 className="text-lg font-bold text-foreground mb-3">{title}</h3>
 
       {/* Grid de miniaturas */}
-      <div className={cn('grid grid-cols-3 gap-2', !hasAccess && 'relative')}>
-        {images.slice(0, 6).map((img, idx) => (
+      <div className="grid grid-cols-3 gap-2">
+        {visibleImages.slice(0, 6).map((img, idx) => (
           <button
             key={idx}
             onClick={() => openLightbox(idx)}
-            className={cn(
-              'aspect-square rounded-lg overflow-hidden bg-muted relative group',
-              !hasAccess && 'cursor-pointer'
-            )}
+            className="aspect-square rounded-lg overflow-hidden bg-muted relative group"
           >
             <img
               src={img}
               alt={`Foto ${idx + 1}`}
-              className={cn(
-                'w-full h-full object-cover transition-transform',
-                hasAccess && 'group-hover:scale-105',
-                !hasAccess && 'filter blur-sm'
-              )}
+              className="w-full h-full object-cover transition-transform group-hover:scale-105"
             />
-            {idx === 5 && images.length > 6 && hasAccess && (
+            {idx === 5 && visibleImages.length > 6 && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">+{images.length - 6}</span>
+                <span className="text-white font-bold text-lg">+{visibleImages.length - 6}</span>
               </div>
             )}
           </button>
         ))}
 
-        {/* Overlay de bloqueio para FREE */}
-        {!hasAccess && (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-[2px] rounded-lg cursor-pointer"
-            onClick={onUpgrade}
-          >
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-              <Lock className="w-7 h-7 text-primary" />
-            </div>
-            <p className="text-sm font-semibold text-foreground mb-1">
-              Galeria bloqueada
+        {/* Placeholder informativo para plano básico */}
+        {!hasAccess && hiddenCount > 0 && (
+          <div className="aspect-square rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center p-2 col-span-2">
+            <Info className="w-5 h-5 text-muted-foreground mb-1" />
+            <p className="text-xs text-muted-foreground">
+              +{hiddenCount} {hiddenCount === 1 ? 'foto não disponível' : 'fotos não disponíveis'} neste anúncio
             </p>
-            <p className="text-xs text-muted-foreground mb-3 text-center px-4">
-              Veja todas as fotos do negócio
-            </p>
-            <span className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold text-sm">
-              Ativar {PLAN_INFO.pro.label}
-            </span>
           </div>
         )}
       </div>
 
-      {/* Lightbox - só abre se tiver acesso */}
-      {lightboxOpen && hasAccess && (
+      {/* Lightbox */}
+      {lightboxOpen && (
         <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center">
           <button
             onClick={closeLightbox}
@@ -107,7 +86,7 @@ export function GallerySection({
             <X className="w-6 h-6" />
           </button>
 
-          {images.length > 1 && (
+          {visibleImages.length > 1 && (
             <>
               <button
                 onClick={goPrev}
@@ -127,14 +106,14 @@ export function GallerySection({
           )}
 
           <img
-            src={images[currentIndex]}
+            src={visibleImages[currentIndex]}
             alt={`Foto ${currentIndex + 1}`}
             className="max-w-full max-h-[85vh] object-contain"
           />
 
           {/* Indicador */}
           <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-1.5">
-            {images.map((_, idx) => (
+            {visibleImages.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}

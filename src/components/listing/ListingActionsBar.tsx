@@ -1,7 +1,7 @@
-import { Phone, MessageCircle, Navigation, Globe, Share2, Calendar, Lock } from 'lucide-react';
+import { Phone, MessageCircle, Navigation, Globe, Share2, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BusinessPlan } from '@/data/mockData';
-import { hasFeature, PLAN_INFO } from '@/lib/planUtils';
+import { hasFeature } from '@/lib/planUtils';
 
 interface ListingActionsBarProps {
   whatsapp?: string;
@@ -12,10 +12,8 @@ interface ListingActionsBarProps {
   onShare?: () => void;
   onSchedule?: () => void;
   className?: string;
-  /** Plano do negócio para controlar ações bloqueadas */
+  /** Plano do negócio para controlar ações disponíveis */
   plan?: BusinessPlan;
-  /** Callback para abrir modal de upgrade */
-  onUpgrade?: () => void;
 }
 
 export function ListingActionsBar({
@@ -28,7 +26,6 @@ export function ListingActionsBar({
   onSchedule,
   className,
   plan = 'pro',
-  onUpgrade,
 }: ListingActionsBarProps) {
   const handleWhatsApp = () => {
     if (whatsapp) {
@@ -38,10 +35,6 @@ export function ListingActionsBar({
   };
 
   const handleCall = () => {
-    if (!hasFeature(plan, 'call')) {
-      onUpgrade?.();
-      return;
-    }
     if (phone) {
       window.open(`tel:${phone}`, '_self');
     }
@@ -53,31 +46,20 @@ export function ListingActionsBar({
   };
 
   const handleWebsite = () => {
-    if (!hasFeature(plan, 'website')) {
-      onUpgrade?.();
-      return;
-    }
     if (website) {
       const url = website.startsWith('http') ? website : `https://${website}`;
       window.open(url, '_blank');
     }
   };
 
-  const handleSchedule = () => {
-    if (!hasFeature(plan, 'schedule')) {
-      onUpgrade?.();
-      return;
-    }
-    onSchedule?.();
-  };
-
-  const hasActions = whatsapp || phone || address || website || onShare;
-
-  if (!hasActions) return null;
-
+  // Verifica features disponíveis pelo plano
   const canCall = hasFeature(plan, 'call');
   const canWebsite = hasFeature(plan, 'website');
   const canSchedule = hasFeature(plan, 'schedule');
+
+  // Se não tem ações disponíveis, não renderiza
+  const hasVisibleActions = whatsapp || (phone && canCall) || address || (website && canWebsite) || (onSchedule && canSchedule) || onShare;
+  if (!hasVisibleActions) return null;
 
   return (
     <div
@@ -111,66 +93,37 @@ export function ListingActionsBar({
           </button>
         )}
 
-        {/* Ligar - bloqueado para FREE */}
-        {phone && (
+        {/* Ligar - apenas se plano permite */}
+        {phone && canCall && (
           <button
             onClick={handleCall}
-            className={cn(
-              'h-12 w-12 sm:w-auto sm:px-4 rounded-xl flex items-center justify-center gap-2 transition-colors relative',
-              canCall
-                ? 'bg-muted hover:bg-muted/80 text-foreground'
-                : 'bg-muted/50 text-muted-foreground border border-dashed border-muted-foreground/30'
-            )}
-            aria-label={canCall ? 'Ligar' : `Disponível no plano ${PLAN_INFO.pro.label}`}
+            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+            aria-label="Ligar"
           >
-            {canCall ? (
-              <Phone className="w-5 h-5" />
-            ) : (
-              <Lock className="w-4 h-4" />
-            )}
-            <span className="hidden sm:inline text-sm font-medium">
-              {canCall ? 'Ligar' : 'Pro'}
-            </span>
+            <Phone className="w-5 h-5" />
+            <span className="hidden sm:inline text-sm font-medium">Ligar</span>
           </button>
         )}
 
-        {/* Website - bloqueado para FREE */}
-        {website && (
+        {/* Website - apenas se plano permite */}
+        {website && canWebsite && (
           <button
             onClick={handleWebsite}
-            className={cn(
-              'h-12 w-12 rounded-xl flex items-center justify-center transition-colors',
-              canWebsite
-                ? 'bg-muted hover:bg-muted/80 text-foreground'
-                : 'bg-muted/50 text-muted-foreground border border-dashed border-muted-foreground/30'
-            )}
-            aria-label={canWebsite ? 'Abrir site' : `Disponível no plano ${PLAN_INFO.pro.label}`}
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            aria-label="Abrir site"
           >
-            {canWebsite ? (
-              <Globe className="w-5 h-5" />
-            ) : (
-              <Lock className="w-4 h-4" />
-            )}
+            <Globe className="w-5 h-5" />
           </button>
         )}
 
         {/* Agendar - apenas DESTAQUE */}
-        {onSchedule && (
+        {onSchedule && canSchedule && (
           <button
-            onClick={handleSchedule}
-            className={cn(
-              'h-12 w-12 rounded-xl flex items-center justify-center transition-colors',
-              canSchedule
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600'
-                : 'bg-muted/50 text-muted-foreground border border-dashed border-muted-foreground/30'
-            )}
-            aria-label={canSchedule ? 'Agendar' : `Disponível no plano ${PLAN_INFO.destaque.label}`}
+            onClick={onSchedule}
+            className="h-12 w-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 rounded-xl flex items-center justify-center transition-colors"
+            aria-label="Agendar"
           >
-            {canSchedule ? (
-              <Calendar className="w-5 h-5" />
-            ) : (
-              <Lock className="w-4 h-4" />
-            )}
+            <Calendar className="w-5 h-5" />
           </button>
         )}
 
