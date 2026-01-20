@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { User, Images, Phone as PhoneIcon, Info, CalendarDays, Star } from 'lucide-react';
+import { User, Images, Phone as PhoneIcon, Info, CalendarDays, Star, BadgeCheck } from 'lucide-react';
 import { ListingHero } from '@/components/listing/ListingHero';
 import { ListingActionsBar } from '@/components/listing/ListingActionsBar';
 import { ListingTabs, TabItem } from '@/components/listing/ListingTabs';
@@ -10,20 +9,15 @@ import { RelatedCarousel } from '@/components/listing/RelatedCarousel';
 import { EventsSection } from '@/components/listing/EventsSection';
 import { ReviewsSection } from '@/components/listing/ReviewsSection';
 import { Chip } from '@/components/ui/Chip';
-import { UpgradeModal } from '@/components/ui/UpgradeModal';
 import { businesses, deals, events } from '@/data/mockData';
 import { useFavorites } from '@/hooks/useFavorites';
-import { hasFeature, type PlanFeature } from '@/lib/planUtils';
+import { hasFeature } from '@/lib/planUtils';
 import type { BusinessPlan } from '@/data/mockData';
 
 export default function BusinessDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
-
-  // Estado do modal de upgrade
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
-  const [lockedFeature, setLockedFeature] = useState<PlanFeature | undefined>();
 
   const business = businesses.find((b) => b.id === id);
 
@@ -35,8 +29,7 @@ export default function BusinessDetail() {
     );
   }
 
-  // Simular plano - em produção viria do backend
-  // Alternar para testar: 'free' | 'pro' | 'destaque'
+  // Plano do anunciante - em produção viria do backend
   const plan: BusinessPlan = business.plan || 'free';
 
   const isLiked = isFavorite('business', business.id);
@@ -67,11 +60,6 @@ export default function BusinessDetail() {
 
   const handleTagClick = (tag: string) => {
     navigate(`/buscar?filters=${encodeURIComponent(tag)}`);
-  };
-
-  const handleUpgrade = (feature?: PlanFeature) => {
-    setLockedFeature(feature);
-    setUpgradeModalOpen(true);
   };
 
   // Buscar eventos/deals relacionados ao negócio
@@ -105,6 +93,16 @@ export default function BusinessDetail() {
       icon: <User className="w-4 h-4" />,
       content: (
         <div className="space-y-6 px-4">
+          {/* Badge PRO para anunciantes pagos */}
+          {plan !== 'free' && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-lg w-fit">
+              <BadgeCheck className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">
+                {plan === 'destaque' ? 'Anunciante Destaque' : 'Anunciante PRO'}
+              </span>
+            </div>
+          )}
+
           {/* Descrição */}
           {business.description && (
             <div>
@@ -127,6 +125,16 @@ export default function BusinessDetail() {
             </div>
           )}
 
+          {/* Mensagem informativa para plano básico */}
+          {plan === 'free' && (
+            <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl">
+              <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground">
+                Este anúncio está no plano básico. Algumas informações podem não estar disponíveis.
+              </p>
+            </div>
+          )}
+
           {/* Relacionados */}
           {relatedBusinesses.length > 0 && (
             <RelatedCarousel title="Similares na região" items={relatedBusinesses} className="pt-4" />
@@ -145,7 +153,6 @@ export default function BusinessDetail() {
             images={business.coverImages}
             title="Fotos"
             plan={plan}
-            onUpgrade={() => handleUpgrade('gallery')}
           />
         </div>
       ),
@@ -162,7 +169,6 @@ export default function BusinessDetail() {
             averageRating={rating}
             reviewCount={reviewCount}
             plan={plan}
-            onUpgrade={() => handleUpgrade('reviews')}
           />
         </div>
       ),
@@ -172,14 +178,13 @@ export default function BusinessDetail() {
       label: 'Eventos',
       icon: <CalendarDays className="w-4 h-4" />,
       count: businessDeals.length + businessEvents.length,
-      hideIfEmpty: businessDeals.length === 0 && businessEvents.length === 0 && plan === 'free',
+      hideIfEmpty: businessDeals.length === 0 && businessEvents.length === 0,
       content: (
         <div className="px-4">
           <EventsSection
             events={businessEvents}
             deals={businessDeals}
             plan={plan}
-            onUpgrade={() => handleUpgrade('events')}
           />
         </div>
       ),
@@ -224,7 +229,7 @@ export default function BusinessDetail() {
       {/* Tabs */}
       <ListingTabs tabs={tabs} defaultTab="perfil" className="mt-4" />
 
-      {/* Barra de ações sticky com restrições por plano */}
+      {/* Barra de ações sticky - mostra apenas ações disponíveis no plano */}
       <ListingActionsBar
         whatsapp={business.whatsapp}
         phone={business.phone}
@@ -232,18 +237,8 @@ export default function BusinessDetail() {
         businessName={business.name}
         website={website}
         plan={plan}
-        onUpgrade={() => handleUpgrade()}
         onShare={handleShare}
         onSchedule={hasFeature(plan, 'schedule') ? () => alert('Agendamento em breve!') : undefined}
-      />
-
-      {/* Modal de upgrade */}
-      <UpgradeModal
-        isOpen={upgradeModalOpen}
-        onClose={() => setUpgradeModalOpen(false)}
-        currentPlan={plan}
-        lockedFeature={lockedFeature}
-        businessName={business.name}
       />
     </div>
   );
