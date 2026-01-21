@@ -1,11 +1,22 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Share2, Store } from 'lucide-react';
-import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
-import { deals } from '@/data/mockData';
+import { Clock, Store, Info, Tag } from 'lucide-react';
+import { deals, businesses } from '@/data/mockData';
+import { useFavorites } from '@/hooks/useFavorites';
+import { 
+  ListingHero, 
+  ListingTabs, 
+  ListingActionsBar,
+  DetailDescription,
+  DetailEssentials,
+  DetailCTA,
+  RelatedCarousel
+} from '@/components/listing';
+import type { TabItem } from '@/components/listing';
 
 export default function DealDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const deal = deals.find(d => d.id === id);
 
@@ -16,6 +27,8 @@ export default function DealDetail() {
       </div>
     );
   }
+
+  const isLiked = isFavorite('deal', deal.id);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -29,7 +42,7 @@ export default function DealDetail() {
     if (navigator.share) {
       try {
         await navigator.share({ title: deal.title, text, url });
-      } catch (e) {
+      } catch {
         // User cancelled
       }
     } else {
@@ -37,80 +50,125 @@ export default function DealDetail() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background pb-28">
-      {/* Header com imagem */}
-      <div className="relative h-56">
-        <img 
-          src={deal.image} 
-          alt={deal.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-        
-        {/* Badge patrocinado */}
-        {deal.isSponsored && (
-          <div className="absolute top-4 left-4 bg-foreground/70 text-background px-3 py-1 rounded text-xs font-medium safe-top">
-            Patrocinado
-          </div>
-        )}
-        
-        {/* Botões do header */}
-        <div className="absolute top-4 right-4 flex gap-2 safe-top">
-          <button 
-            onClick={handleShare}
-            className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
-        </div>
+  // Encontrar negócio relacionado
+  const relatedBusiness = deal.businessId 
+    ? businesses.find(b => b.id === deal.businessId)
+    : businesses.find(b => b.name === deal.businessName);
 
-        <button 
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center safe-top"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-      </div>
+  // Outras ofertas
+  const relatedDeals = deals
+    .filter((d) => d.id !== deal.id)
+    .slice(0, 6)
+    .map((d) => ({
+      id: d.id,
+      type: 'deal' as const,
+      title: d.title,
+      subtitle: d.priceText,
+      image: d.image,
+    }));
 
-      {/* Conteúdo */}
-      <div className="px-4 -mt-6 relative z-10">
-        <div className="bg-card rounded-2xl p-4 card-shadow">
-          <h1 className="text-xl font-bold text-foreground mb-1">{deal.title}</h1>
+  // Essentials
+  const essentialItems = [
+    {
+      icon: <Tag className="w-5 h-5 text-primary" />,
+      label: 'Preço',
+      value: deal.priceText,
+      highlight: true,
+    },
+    {
+      icon: <Clock className="w-5 h-5 text-muted-foreground" />,
+      label: 'Validade',
+      value: `Até ${formatDate(deal.validUntil)}`,
+    },
+    ...(deal.businessName ? [{
+      icon: <Store className="w-5 h-5 text-muted-foreground" />,
+      label: 'Estabelecimento',
+      value: deal.businessName,
+      action: relatedBusiness ? () => navigate(`/comercio/${relatedBusiness.id}`) : undefined,
+    }] : []),
+  ];
+
+  // Tabs do mini-site
+  const tabs: TabItem[] = [
+    {
+      id: 'oferta',
+      label: 'Oferta',
+      icon: <Tag className="w-4 h-4" />,
+      content: (
+        <div className="space-y-6 px-4">
+          {/* Descrição */}
           {deal.subtitle && (
-            <p className="text-muted-foreground mb-3">{deal.subtitle}</p>
+            <DetailDescription 
+              description={deal.subtitle} 
+              title="Detalhes da oferta" 
+            />
           )}
-          
-          <p className="text-3xl font-bold text-primary mb-4">{deal.priceText}</p>
 
-          {/* Info */}
-          <div className="space-y-3 py-4 border-t border-border">
-            <div className="flex items-center text-foreground">
-              <Clock className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-              <span>Válido até {formatDate(deal.validUntil)}</span>
-            </div>
-            {deal.businessName && (
-              <div className="flex items-center text-foreground">
-                <Store className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-                <span>{deal.businessName}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+          {/* Essentials */}
+          <DetailEssentials items={essentialItems} />
 
-      {/* Barra de ações fixa */}
-      <div className="fixed bottom-16 left-0 right-0 z-50 bg-card border-t border-border p-4 safe-bottom">
-        <div className="max-w-lg mx-auto">
-          <WhatsAppButton 
-            whatsapp={deal.whatsapp} 
-            message={`Olá! Vi a oferta "${deal.title}" no Monte de Tudo e quero aproveitar!`}
-            label="Quero essa oferta!"
-            size="lg"
-            className="w-full"
-          />
+          {/* Outras ofertas */}
+          {relatedDeals.length > 0 && (
+            <RelatedCarousel title="Outras ofertas" items={relatedDeals} className="pt-4" />
+          )}
+
+          {/* CTA */}
+          <DetailCTA listingTypeName="oferta ou promoção" />
         </div>
-      </div>
+      ),
+    },
+  ];
+
+  // Badges para o Hero
+  const heroBadges = (
+    <>
+      {deal.isSponsored && (
+        <span className="px-2.5 py-1 bg-foreground/70 text-background rounded-full text-xs font-medium shadow">
+          Patrocinado
+        </span>
+      )}
+      <span className="px-2.5 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold shadow">
+        OFERTA
+      </span>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-background pb-32">
+      {/* Hero */}
+      <ListingHero
+        coverImage={deal.image}
+        title={deal.title}
+        category={deal.businessName || 'Oferta'}
+        neighborhood={`Válido até ${formatDate(deal.validUntil)}`}
+        priceRange={deal.priceText}
+        isFavorite={isLiked}
+        onFavoriteToggle={() => toggleFavorite('deal', deal.id)}
+        onShare={handleShare}
+        badges={heroBadges}
+      />
+
+      {/* Tabs */}
+      <ListingTabs tabs={tabs} defaultTab="oferta" className="mt-4" />
+
+      {/* Barra de ações sticky */}
+      <ListingActionsBar
+        whatsapp={deal.whatsapp}
+        onShare={handleShare}
+        onFavorite={() => toggleFavorite('deal', deal.id)}
+        isFavorite={isLiked}
+        primaryAction={{
+          label: 'Quero essa oferta!',
+          icon: <Tag className="w-5 h-5" />,
+          onClick: () => {
+            if (deal.whatsapp) {
+              const msg = encodeURIComponent(`Olá! Vi a oferta "${deal.title}" no Monte de Tudo e quero aproveitar!`);
+              window.open(`https://wa.me/${deal.whatsapp}?text=${msg}`, '_blank');
+            }
+          },
+          color: 'whatsapp',
+        }}
+      />
     </div>
   );
 }

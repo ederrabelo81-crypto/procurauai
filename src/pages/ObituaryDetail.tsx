@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Calendar, MapPin, Clock } from 'lucide-react';
+import { ArrowLeft, Share2, Calendar, MapPin, Clock, Heart } from 'lucide-react';
 import { obituaries } from '@/data/mockData';
+import { HomeFooter } from '@/components/home/HomeFooter';
 
 export default function ObituaryDetail() {
   const { id } = useParams<{ id: string }>();
@@ -45,12 +46,17 @@ export default function ObituaryDetail() {
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Nota de Falecimento', text, url });
-      } catch (e) {
+      } catch {
         // User cancelled
       }
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank');
     }
+  };
+
+  const handleDirections = (location: string) => {
+    const query = encodeURIComponent(location);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   };
 
   return (
@@ -79,6 +85,9 @@ export default function ObituaryDetail() {
         <div className="bg-card rounded-2xl p-6 card-shadow border-l-4 border-muted-foreground/30">
           {/* Nome e idade */}
           <div className="text-center mb-6 pb-6 border-b border-border">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+              <Heart className="w-8 h-8 text-muted-foreground/50" />
+            </div>
             <h1 className="text-2xl font-bold text-foreground mb-1">{obituary.name}</h1>
             {obituary.age && (
               <p className="text-muted-foreground">{obituary.age} anos</p>
@@ -87,30 +96,38 @@ export default function ObituaryDetail() {
 
           {/* Informações */}
           <div className="space-y-4">
-            <div className="flex items-start">
-              <Calendar className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/30">
+              <Calendar className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-muted-foreground">Falecimento</p>
+                <p className="text-xs text-muted-foreground">Falecimento</p>
                 <p className="text-foreground font-medium">{formatDate(obituary.date)}</p>
               </div>
             </div>
             
-            <div className="flex items-start">
-              <MapPin className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <button
+              onClick={() => handleDirections(obituary.wakeLocation)}
+              className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors w-full text-left"
+            >
+              <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-muted-foreground">Velório</p>
+                <p className="text-xs text-muted-foreground">Velório</p>
                 <p className="text-foreground font-medium">{obituary.wakeLocation}</p>
+                <p className="text-xs text-primary mt-1">Ver no mapa →</p>
               </div>
-            </div>
+            </button>
             
-            <div className="flex items-start">
-              <Clock className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <button
+              onClick={() => handleDirections(obituary.burialLocation)}
+              className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors w-full text-left"
+            >
+              <Clock className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-muted-foreground">Sepultamento</p>
+                <p className="text-xs text-muted-foreground">Sepultamento</p>
                 <p className="text-foreground font-medium">{day} às {time}</p>
-                <p className="text-muted-foreground">{obituary.burialLocation}</p>
+                <p className="text-muted-foreground text-sm">{obituary.burialLocation}</p>
+                <p className="text-xs text-primary mt-1">Ver no mapa →</p>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Mensagem */}
@@ -135,10 +152,10 @@ export default function ObituaryDetail() {
         {/* Botão compartilhar */}
         <button
           onClick={handleShare}
-          className="w-full mt-4 py-4 bg-muted text-muted-foreground font-medium rounded-xl hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-4 py-4 bg-muted text-foreground font-medium rounded-xl hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
         >
           <Share2 className="w-5 h-5" />
-          Compartilhar no WhatsApp
+          Compartilhar nota
         </button>
 
         {/* Mensagem de condolências */}
@@ -146,6 +163,9 @@ export default function ObituaryDetail() {
           Nossos sentimentos à família e amigos.
         </p>
       </div>
+
+      {/* Footer */}
+      <HomeFooter />
     </div>
   );
 }

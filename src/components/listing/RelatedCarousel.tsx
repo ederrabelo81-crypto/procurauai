@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
+type ListingType = 'business' | 'listing' | 'deal' | 'event' | 'news' | 'obituary' | 'place' | 'car' | 'job' | 'realestate';
+
 interface RelatedItem {
   id: string;
-  type: 'business' | 'listing' | 'deal' | 'event';
+  type: ListingType;
   title: string;
   subtitle?: string;
   image: string;
+  slug?: string; // Para places que usam slug
 }
 
 interface RelatedCarouselProps {
@@ -15,6 +18,10 @@ interface RelatedCarouselProps {
   className?: string;
 }
 
+/**
+ * Carrossel horizontal de itens relacionados
+ * Padrão MyListing: mesmo Listing Type e Categoria
+ */
 export function RelatedCarousel({ title = 'Relacionados', items, className }: RelatedCarouselProps) {
   const navigate = useNavigate();
 
@@ -30,6 +37,18 @@ export function RelatedCarousel({ title = 'Relacionados', items, className }: Re
         return `/oferta/${item.id}`;
       case 'event':
         return `/evento/${item.id}`;
+      case 'news':
+        return `/noticia/${item.id}`;
+      case 'obituary':
+        return `/falecimento/${item.id}`;
+      case 'place':
+        return `/lugares/${item.slug || item.id}`;
+      case 'car':
+        return `/carros/${item.id}`;
+      case 'job':
+        return `/empregos/${item.id}`;
+      case 'realestate':
+        return `/imoveis/${item.id}`;
       default:
         return '#';
     }

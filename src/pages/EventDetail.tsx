@@ -1,11 +1,24 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, MapPin, Share2, Clock, Ticket } from 'lucide-react';
-import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { Calendar, MapPin, Clock, Ticket, Info, Navigation } from 'lucide-react';
 import { events } from '@/data/mockData';
+import { useFavorites } from '@/hooks/useFavorites';
+import { 
+  ListingHero, 
+  ListingTabs, 
+  ListingActionsBar,
+  DetailDescription,
+  DetailTags,
+  DetailEssentials,
+  DetailMap,
+  DetailCTA,
+  RelatedCarousel
+} from '@/components/listing';
+import type { TabItem } from '@/components/listing';
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const event = events.find(e => e.id === id);
 
@@ -16,6 +29,8 @@ export default function EventDetail() {
       </div>
     );
   }
+
+  const isLiked = isFavorite('event', event.id);
 
   const formatDateTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -37,7 +52,7 @@ export default function EventDetail() {
     if (navigator.share) {
       try {
         await navigator.share({ title: event.title, text, url });
-      } catch (e) {
+      } catch {
         // User cancelled
       }
     } else {
@@ -45,117 +60,139 @@ export default function EventDetail() {
     }
   };
 
-  const handleDirections = () => {
-    const query = encodeURIComponent(event.location);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
-  };
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`;
 
-  return (
-    <div className="min-h-screen bg-background pb-28">
-      {/* Header com imagem */}
-      <div className="relative h-56">
-        <img 
-          src={event.image} 
-          alt={event.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
-        
-        {/* Badge grátis */}
-        {event.priceText === 'Entrada gratuita' && (
-          <div className="absolute top-4 left-4 bg-status-open text-white px-3 py-1.5 rounded-lg text-sm font-bold safe-top">
-            GRÁTIS
-          </div>
-        )}
-        
-        {/* Botões do header */}
-        <div className="absolute top-4 right-4 flex gap-2 safe-top">
-          <button 
-            onClick={handleShare}
-            className="w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
-        </div>
+  // Outros eventos
+  const relatedEvents = events
+    .filter((e) => e.id !== event.id)
+    .slice(0, 6)
+    .map((e) => ({
+      id: e.id,
+      type: 'event' as const,
+      title: e.title,
+      subtitle: new Date(e.dateTime).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+      image: e.image,
+    }));
 
-        <button 
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 w-10 h-10 bg-card/90 backdrop-blur-sm rounded-full flex items-center justify-center safe-top"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-      </div>
+  // Essentials
+  const essentialItems = [
+    {
+      icon: <Calendar className="w-5 h-5 text-primary" />,
+      label: 'Data',
+      value: day,
+      highlight: true,
+    },
+    {
+      icon: <Clock className="w-5 h-5 text-muted-foreground" />,
+      label: 'Horário',
+      value: time,
+    },
+    {
+      icon: <MapPin className="w-5 h-5 text-primary" />,
+      label: 'Local',
+      value: event.location,
+      action: () => window.open(mapsUrl, '_blank'),
+    },
+    {
+      icon: <Ticket className="w-5 h-5 text-muted-foreground" />,
+      label: 'Entrada',
+      value: event.priceText,
+    },
+  ];
 
-      {/* Conteúdo */}
-      <div className="px-4 -mt-6 relative z-10">
-        <div className="bg-card rounded-2xl p-4 card-shadow">
-          <h1 className="text-xl font-bold text-foreground mb-3">{event.title}</h1>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {event.tags.map((tag) => (
-              <span 
-                key={tag}
-                className="px-3 py-1 bg-accent text-accent-foreground text-sm rounded-full"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          {/* Info */}
-          <div className="space-y-3 py-4 border-t border-border">
-            <div className="flex items-center text-foreground">
-              <Calendar className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-              <span>{day}</span>
-            </div>
-            <div className="flex items-center text-foreground">
-              <Clock className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-              <span>{time}</span>
-            </div>
-            <button 
-              onClick={handleDirections}
-              className="flex items-center text-primary hover:underline"
-            >
-              <MapPin className="w-5 h-5 mr-3 flex-shrink-0" />
-              <span>{event.location}</span>
-            </button>
-            <div className="flex items-center text-foreground">
-              <Ticket className="w-5 h-5 mr-3 text-muted-foreground flex-shrink-0" />
-              <span className="font-semibold">{event.priceText}</span>
-            </div>
-          </div>
-
+  // Tabs do mini-site
+  const tabs: TabItem[] = [
+    {
+      id: 'evento',
+      label: 'Evento',
+      icon: <Calendar className="w-4 h-4" />,
+      content: (
+        <div className="space-y-6 px-4">
           {/* Descrição */}
           {event.description && (
-            <div className="py-4 border-t border-border">
-              <h2 className="font-semibold text-foreground mb-2">Sobre o evento</h2>
-              <p className="text-muted-foreground">{event.description}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Barra de ações fixa */}
-      {event.whatsapp && (
-        <div className="fixed bottom-16 left-0 right-0 z-50 bg-card border-t border-border p-4 safe-bottom">
-          <div className="flex gap-3 max-w-lg mx-auto">
-            <WhatsAppButton 
-              whatsapp={event.whatsapp} 
-              message={`Olá! Vi o evento "${event.title}" no Monte de Tudo e quero saber mais!`}
-              label="Mais informações"
-              size="lg"
-              className="flex-1"
+            <DetailDescription 
+              description={event.description} 
+              title="Sobre o evento" 
             />
-            <button
-              onClick={handleShare}
-              className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center hover:bg-muted/80 transition-colors"
-            >
-              <Share2 className="w-6 h-6 text-foreground" />
-            </button>
-          </div>
+          )}
+
+          {/* Essentials */}
+          <DetailEssentials items={essentialItems} />
+
+          {/* Tags */}
+          {event.tags && event.tags.length > 0 && (
+            <DetailTags tags={event.tags} title="Características" />
+          )}
+
+          {/* Mapa */}
+          <DetailMap 
+            address={event.location}
+            businessName={event.title}
+          />
+
+          {/* Outros eventos */}
+          {relatedEvents.length > 0 && (
+            <RelatedCarousel title="Outros eventos" items={relatedEvents} className="pt-4" />
+          )}
+
+          {/* CTA */}
+          <DetailCTA listingTypeName="evento" />
         </div>
+      ),
+    },
+  ];
+
+  // Badges para o Hero
+  const heroBadges = (
+    <>
+      {event.priceText === 'Entrada gratuita' && (
+        <span className="px-2.5 py-1 bg-status-open text-white rounded-full text-xs font-bold shadow">
+          GRÁTIS
+        </span>
       )}
+    </>
+  );
+
+  return (
+    <div className="min-h-screen bg-background pb-32">
+      {/* Hero */}
+      <ListingHero
+        coverImage={event.image}
+        title={event.title}
+        category={day}
+        neighborhood={event.location}
+        priceRange={event.priceText}
+        isFavorite={isLiked}
+        onFavoriteToggle={() => toggleFavorite('event', event.id)}
+        onShare={handleShare}
+        badges={heroBadges}
+      />
+
+      {/* Tabs */}
+      <ListingTabs tabs={tabs} defaultTab="evento" className="mt-4" />
+
+      {/* Barra de ações sticky */}
+      <ListingActionsBar
+        whatsapp={event.whatsapp}
+        mapsUrl={mapsUrl}
+        onShare={handleShare}
+        onFavorite={() => toggleFavorite('event', event.id)}
+        isFavorite={isLiked}
+        primaryAction={event.whatsapp ? {
+          label: 'Mais informações',
+          icon: <Calendar className="w-5 h-5" />,
+          onClick: () => {
+            const msg = encodeURIComponent(`Olá! Vi o evento "${event.title}" no Monte de Tudo e quero saber mais!`);
+            window.open(`https://wa.me/${event.whatsapp}?text=${msg}`, '_blank');
+          },
+          color: 'whatsapp',
+        } : {
+          label: 'Como chegar',
+          icon: <Navigation className="w-5 h-5" />,
+          onClick: () => window.open(mapsUrl, '_blank'),
+          color: 'primary',
+        }}
+      />
     </div>
   );
 }

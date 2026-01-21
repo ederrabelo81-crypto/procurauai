@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Calendar } from 'lucide-react';
+import { ArrowLeft, Share2, Calendar, ExternalLink } from 'lucide-react';
 import { news } from '@/data/mockData';
+import { HomeFooter } from '@/components/home/HomeFooter';
 
 const tagColors: Record<string, string> = {
   'Prefeitura': 'bg-primary/10 text-primary',
@@ -40,7 +41,7 @@ export default function NewsDetail() {
     if (navigator.share) {
       try {
         await navigator.share({ title: article.title, text, url });
-      } catch (e) {
+      } catch {
         // User cancelled
       }
     } else {
@@ -48,11 +49,16 @@ export default function NewsDetail() {
     }
   };
 
+  // Notícias relacionadas
+  const relatedNews = news
+    .filter((n) => n.id !== article.id && n.tag === article.tag)
+    .slice(0, 4);
+
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
+      {/* Header com imagem (se houver) */}
       {article.image && (
-        <div className="relative h-48">
+        <div className="relative h-48 sm:h-64">
           <img 
             src={article.image} 
             alt={article.title}
@@ -76,6 +82,7 @@ export default function NewsDetail() {
         </div>
       )}
 
+      {/* Header simples sem imagem */}
       {!article.image && (
         <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
           <div className="px-4 py-3 flex items-center justify-between">
@@ -97,9 +104,10 @@ export default function NewsDetail() {
 
       {/* Conteúdo */}
       <div className={`px-4 ${article.image ? '-mt-6 relative z-10' : 'pt-4'}`}>
-        <div className="bg-card rounded-2xl p-4 card-shadow">
+        <article className="bg-card rounded-2xl p-5 card-shadow">
+          {/* Meta info */}
           <div className="flex items-center gap-2 mb-3">
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${tagColors[article.tag] || 'bg-muted text-muted-foreground'}`}>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${tagColors[article.tag] || 'bg-muted text-muted-foreground'}`}>
               {article.tag}
             </span>
             <span className="flex items-center text-xs text-muted-foreground">
@@ -108,20 +116,61 @@ export default function NewsDetail() {
             </span>
           </div>
           
-          <h1 className="text-xl font-bold text-foreground mb-4">{article.title}</h1>
+          {/* Título */}
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-4 leading-tight">
+            {article.title}
+          </h1>
           
-          <p className="text-muted-foreground leading-relaxed">{article.snippet}</p>
+          {/* Resumo */}
+          <p className="text-muted-foreground leading-relaxed text-base">
+            {article.snippet}
+          </p>
           
           {/* Conteúdo expandido (mock) */}
-          <div className="mt-4 pt-4 border-t border-border">
+          <div className="mt-6 pt-6 border-t border-border space-y-4">
             <p className="text-muted-foreground leading-relaxed">
               Esta é uma notícia de demonstração do aplicativo Monte de Tudo. 
               Em uma versão completa, aqui apareceria o conteúdo completo da notícia, 
               com mais parágrafos, imagens e informações relevantes para a comunidade.
             </p>
+            <p className="text-muted-foreground leading-relaxed">
+              O Monte de Tudo é uma plataforma local que conecta moradores, comerciantes 
+              e prestadores de serviço em uma única comunidade digital.
+            </p>
           </div>
-        </div>
+        </article>
+
+        {/* Notícias relacionadas */}
+        {relatedNews.length > 0 && (
+          <section className="mt-6">
+            <h2 className="font-semibold text-foreground mb-3">Mais sobre {article.tag}</h2>
+            <div className="space-y-3">
+              {relatedNews.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => navigate(`/noticia/${n.id}`)}
+                  className="w-full text-left p-3 bg-card rounded-xl border border-border hover:bg-muted/50 transition-colors"
+                >
+                  <p className="font-medium text-foreground line-clamp-2">{n.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{formatDate(n.date)}</p>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Botão compartilhar */}
+        <button
+          onClick={handleShare}
+          className="w-full mt-6 py-3 bg-muted text-foreground font-medium rounded-xl hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+        >
+          <Share2 className="w-5 h-5" />
+          Compartilhar notícia
+        </button>
       </div>
+
+      {/* Footer */}
+      <HomeFooter />
     </div>
   );
 }

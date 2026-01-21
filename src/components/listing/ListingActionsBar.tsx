@@ -1,4 +1,4 @@
-import { Phone, MessageCircle, Navigation, Globe, Share2, Calendar } from 'lucide-react';
+import { Phone, MessageCircle, Navigation, Globe, Share2, Calendar, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BusinessPlan } from '@/data/mockData';
 import { hasFeature } from '@/lib/planUtils';
@@ -9,11 +9,21 @@ interface ListingActionsBarProps {
   address?: string;
   businessName?: string;
   website?: string;
+  mapsUrl?: string;
   onShare?: () => void;
   onSchedule?: () => void;
+  onFavorite?: () => void;
+  isFavorite?: boolean;
   className?: string;
   /** Plano do negócio para controlar ações disponíveis */
   plan?: BusinessPlan;
+  /** Ação primária customizada */
+  primaryAction?: {
+    label: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    color?: 'primary' | 'whatsapp' | 'default';
+  };
 }
 
 export function ListingActionsBar({
@@ -22,10 +32,14 @@ export function ListingActionsBar({
   address,
   businessName,
   website,
+  mapsUrl,
   onShare,
   onSchedule,
+  onFavorite,
+  isFavorite,
   className,
   plan = 'pro',
+  primaryAction,
 }: ListingActionsBarProps) {
   const handleWhatsApp = () => {
     if (whatsapp) {
@@ -41,8 +55,12 @@ export function ListingActionsBar({
   };
 
   const handleMaps = () => {
-    const query = encodeURIComponent(`${businessName || ''} ${address || ''}`);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    if (mapsUrl) {
+      window.open(mapsUrl, '_blank');
+    } else if (address || businessName) {
+      const query = encodeURIComponent(`${businessName || ''} ${address || ''}`);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    }
   };
 
   const handleWebsite = () => {
@@ -58,8 +76,26 @@ export function ListingActionsBar({
   const canSchedule = hasFeature(plan, 'schedule');
 
   // Se não tem ações disponíveis, não renderiza
-  const hasVisibleActions = whatsapp || (phone && canCall) || address || (website && canWebsite) || (onSchedule && canSchedule) || onShare;
+  const hasWhatsApp = whatsapp;
+  const hasAddress = address || mapsUrl;
+  const hasPhone = phone && canCall;
+  const hasWebsiteAction = website && canWebsite;
+  const hasSchedule = onSchedule && canSchedule;
+  const hasPrimary = primaryAction;
+
+  const hasVisibleActions = hasPrimary || hasWhatsApp || hasPhone || hasAddress || hasWebsiteAction || hasSchedule || onShare || onFavorite;
   if (!hasVisibleActions) return null;
+
+  const getPrimaryColor = (color?: 'primary' | 'whatsapp' | 'default') => {
+    switch (color) {
+      case 'whatsapp':
+        return 'bg-[#25D366] hover:bg-[#22c55e] text-white';
+      case 'primary':
+        return 'bg-primary hover:bg-primary/90 text-primary-foreground';
+      default:
+        return 'bg-muted hover:bg-muted/80 text-foreground';
+    }
+  };
 
   return (
     <div
@@ -69,8 +105,19 @@ export function ListingActionsBar({
       )}
     >
       <div className="flex items-center gap-2 max-w-lg mx-auto">
-        {/* WhatsApp - botão principal (sempre disponível) */}
-        {whatsapp && (
+        {/* Ação primária customizada ou WhatsApp padrão */}
+        {primaryAction ? (
+          <button
+            onClick={primaryAction.onClick}
+            className={cn(
+              'flex-1 h-12 rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg',
+              getPrimaryColor(primaryAction.color)
+            )}
+          >
+            {primaryAction.icon}
+            <span>{primaryAction.label}</span>
+          </button>
+        ) : whatsapp ? (
           <button
             onClick={handleWhatsApp}
             className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
@@ -79,10 +126,10 @@ export function ListingActionsBar({
             <MessageCircle className="w-5 h-5" />
             <span className="hidden sm:inline">WhatsApp</span>
           </button>
-        )}
+        ) : null}
 
         {/* Mapa - sempre disponível */}
-        {address && (
+        {hasAddress && (
           <button
             onClick={handleMaps}
             className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
@@ -94,7 +141,7 @@ export function ListingActionsBar({
         )}
 
         {/* Ligar - apenas se plano permite */}
-        {phone && canCall && (
+        {hasPhone && (
           <button
             onClick={handleCall}
             className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
@@ -106,7 +153,7 @@ export function ListingActionsBar({
         )}
 
         {/* Website - apenas se plano permite */}
-        {website && canWebsite && (
+        {hasWebsiteAction && (
           <button
             onClick={handleWebsite}
             className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
@@ -117,13 +164,24 @@ export function ListingActionsBar({
         )}
 
         {/* Agendar - apenas DESTAQUE */}
-        {onSchedule && canSchedule && (
+        {hasSchedule && (
           <button
             onClick={onSchedule}
             className="h-12 w-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 rounded-xl flex items-center justify-center transition-colors"
             aria-label="Agendar"
           >
             <Calendar className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Favoritar */}
+        {onFavorite && (
+          <button
+            onClick={onFavorite}
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          >
+            <Heart className={cn('w-5 h-5', isFavorite && 'fill-destructive text-destructive')} />
           </button>
         )}
 
