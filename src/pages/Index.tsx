@@ -1,16 +1,26 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { CategoryGrid } from '@/components/home/CategoryGrid';
-import { NowSection } from '@/components/home/NowSection';
-import { TrendingSection } from '@/components/home/TrendingSection';
+import { HomeFooter } from '@/components/home/HomeFooter';
+
+// Blocos da Home - cada um renderiza condicionalmente se tiver dados
+import {
+  ComerAgoraBlock,
+  OfertasBlock,
+  NegociosServicosBlock,
+  AgendaBlock,
+  LugaresBlock,
+  ImoveisBlock,
+  EmpregosBlock,
+  ClassificadosBlock,
+  NoticiasBlock,
+} from '@/components/home/blocks';
 
 export default function Index() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header fixo com busca */}
+    <div className="min-h-screen bg-background">
+      {/* Header fixo com busca global */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
         <div className="px-4 py-3">
           <div className="flex items-center gap-3 mb-3">
@@ -19,6 +29,7 @@ export default function Index() {
               <p className="text-xs text-muted-foreground">Sua cidade na palma da mão</p>
             </div>
           </div>
+          {/* Busca global - sempre visível */}
           <SearchBar 
             size="large"
             onFocus={() => navigate('/buscar')}
@@ -26,30 +37,38 @@ export default function Index() {
         </div>
       </header>
 
-      {/* Conteúdo principal */}
+      {/* Conteúdo principal - 9 blocos de descoberta */}
       <main className="px-4 py-4 space-y-6">
-        {/* Grid de categorias */}
-        <section>
-          <CategoryGrid />
-        </section>
+        {/* Bloco 1 - Comer Agora (apenas abertos) */}
+        <ComerAgoraBlock />
 
-        {/* Seção "Agora na Cidade" */}
-        <NowSection />
+        {/* Bloco 2 - Ofertas Ativas (com validade) */}
+        <OfertasBlock />
 
-        {/* Seção "Em alta" */}
-        <TrendingSection />
+        {/* Bloco 3 - Negócios & Serviços (grid de acesso rápido) */}
+        <NegociosServicosBlock />
 
-        {/* CTA Publicar */}
-        <section className="py-4">
-          <Link
-            to="/publicar"
-            className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-primary/30 rounded-2xl text-primary font-semibold hover:bg-primary/5 transition-colors touch-target"
-          >
-            <Plus className="w-5 h-5" />
-            Anunciar grátis
-          </Link>
-        </section>
+        {/* Bloco 4 - Agenda da Cidade (eventos futuros) */}
+        <AgendaBlock />
+
+        {/* Bloco 5 - Lugares para Conhecer (inspiracional) */}
+        <LugaresBlock />
+
+        {/* Bloco 6 - Imóveis em Destaque */}
+        <ImoveisBlock />
+
+        {/* Bloco 7 - Empregos Recentes */}
+        <EmpregosBlock />
+
+        {/* Bloco 8 - Classificados & Doações */}
+        <ClassificadosBlock />
+
+        {/* Bloco 9 - Notícias & Falecimentos */}
+        <NoticiasBlock />
       </main>
+
+      {/* Rodapé Mobile */}
+      <HomeFooter />
     </div>
   );
 }
