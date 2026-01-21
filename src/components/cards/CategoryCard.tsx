@@ -12,8 +12,16 @@ interface CategoryCardProps {
   onClickOverride?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
+/**
+ * Card de categoria com ícone glassmorphic.
+ * 
+ * GARANTIAS:
+ * - Sempre renderiza ícone (fallback para Grid via GlassCategoryIcon)
+ * - Rotas especiais para verticais (carros, empregos, etc)
+ * - Consistência visual entre Home e Buscar
+ */
 export function CategoryCard({ id, name, iconKey, className, size = 'md', onClickOverride }: CategoryCardProps) {
-  // Rotas especiais para novos tipos
+  // Rotas especiais para verticais
   const getRoute = () => {
     const specialRoutes: Record<string, string> = {
       'lugares': '/lugares',
@@ -35,6 +43,7 @@ export function CategoryCard({ id, name, iconKey, className, size = 'md', onClic
         className
       )}
     >
+      {/* Ícone glassmorphic - SEMPRE renderiza (fallback seguro) */}
       <GlassCategoryIcon 
         categoryId={iconKey || id} 
         size={size === 'md' ? 'md' : 'sm'}

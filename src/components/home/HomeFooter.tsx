@@ -1,15 +1,28 @@
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 
+/**
+ * Links para TODOS os Listing Types do sistema.
+ * Garante que nenhum tipo fique inacessível.
+ * 
+ * IMPORTANTE: Ao adicionar novo Listing Type, incluir aqui também.
+ */
 const listingTypeLinks = [
+  // Principais (mais acessados)
   { to: '/categoria/comer-agora', label: 'Comer Agora' },
-  { to: '/categoria/ofertas', label: 'Ofertas' },
   { to: '/categoria/negocios', label: 'Negócios' },
   { to: '/categoria/servicos', label: 'Serviços' },
-  { to: '/empregos', label: 'Empregos' },
-  { to: '/imoveis', label: 'Imóveis' },
-  { to: '/categoria/classificados', label: 'Classificados' },
+  { to: '/categoria/ofertas', label: 'Ofertas' },
   { to: '/categoria/agenda', label: 'Agenda' },
+  // Verticais especializadas
+  { to: '/imoveis', label: 'Imóveis' },
+  { to: '/empregos', label: 'Empregos' },
+  { to: '/carros', label: 'Carros' },
+  // Classificados e conteúdo
+  { to: '/categoria/classificados', label: 'Classificados' },
+  { to: '/lugares', label: 'Lugares' },
+  { to: '/categoria/noticias', label: 'Notícias' },
+  { to: '/categoria/falecimentos', label: 'Falecimentos' },
 ];
 
 const institutionalLinks = [
@@ -31,7 +44,7 @@ export function HomeFooter() {
           Anunciar na Cidade
         </Link>
 
-        {/* Links por Listing Type */}
+        {/* Links por Listing Type - TODOS os 12 tipos */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-foreground mb-3">Explorar</h3>
           <div className="flex flex-wrap gap-2">
