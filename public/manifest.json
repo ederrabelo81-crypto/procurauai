@@ -1,7 +1,7 @@
 {
-  "name": "Monte de Tudo",
-  "short_name": "Monte de Tudo",
-  "description": "Sua cidade na palma da mão. Comércios, classificados, ofertas, eventos e notícias locais.",
+  "name": "Procura UAI",
+  "short_name": "Procura UAI",
+  "description": "Sua cidade na palma da mão. Comércios, classificados, ofertas, eventos e notícias locais em Monte Santo de Minas e região.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F5F6FA",

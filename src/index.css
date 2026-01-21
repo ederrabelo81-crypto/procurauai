@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Monte de Tudo - Design System */
+    /* Procura UAI - Design System Premium */
     --background: 228 33% 97%; /* #F5F6FA */
     --foreground: 220 17% 17%; /* #1F2937 */
 
@@ -43,10 +43,10 @@
 
     --radius: 1rem;
 
-    /* Custom tokens */
-    --shadow-card: 0 2px 8px -2px rgba(30, 94, 255, 0.08), 0 4px 16px -4px rgba(0, 0, 0, 0.06);
-    --shadow-card-hover: 0 4px 12px -2px rgba(30, 94, 255, 0.12), 0 8px 24px -4px rgba(0, 0, 0, 0.08);
-    --shadow-button: 0 2px 8px -2px rgba(30, 94, 255, 0.3);
+    /* Custom tokens - Premium shadows */
+    --shadow-card: 0 2px 8px -2px rgba(30, 94, 255, 0.06), 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+    --shadow-card-hover: 0 8px 24px -4px rgba(30, 94, 255, 0.12), 0 12px 32px -8px rgba(0, 0, 0, 0.08);
+    --shadow-button: 0 4px 12px -2px rgba(30, 94, 255, 0.35);
 
     /* Status colors */
     --open: 142 69% 49%;
@@ -64,25 +64,32 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 222 47% 8%;
     --foreground: 210 40% 98%;
-    --card: 222 47% 13%;
+    --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 13%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 222 100% 60%;
+    --primary: 222 100% 65%;
     --primary-foreground: 0 0% 100%;
     --secondary: 42 100% 55%;
     --secondary-foreground: 220 17% 17%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
+    --whatsapp: 142 69% 52%;
+    --whatsapp-foreground: 0 0% 100%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 60%;
+    --accent: 217 33% 15%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
+    --destructive: 0 70% 45%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 212 27% 84%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 222 100% 65%;
+
+    /* Dark mode shadows */
+    --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.3), 0 4px 20px -4px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover: 0 8px 24px -4px rgba(30, 94, 255, 0.2), 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+    --shadow-button: 0 4px 12px -2px rgba(30, 94, 255, 0.4);
   }
 }
 

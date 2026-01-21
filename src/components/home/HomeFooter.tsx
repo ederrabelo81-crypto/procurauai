@@ -61,7 +61,7 @@ export function HomeFooter() {
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-4">
-            © {new Date().getFullYear()} Monte de Tudo. Todos os direitos reservados.
+            © {new Date().getFullYear()} Procura UAI. Todos os direitos reservados.
           </p>
         </div>
       </div>

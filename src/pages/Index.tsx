@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { HomeFooter } from '@/components/home/HomeFooter';
+import { LocationSelector } from '@/components/ui/LocationSelector';
 
 // Blocos da Home - cada um renderiza condicionalmente se tiver dados
 import {
@@ -25,8 +26,10 @@ export default function Index() {
         <div className="px-4 py-3">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-primary">Monte de Tudo</h1>
-              <p className="text-xs text-muted-foreground">Sua cidade na palma da mão</p>
+              <h1 className="text-xl font-extrabold text-primary tracking-tight">
+                Procura UAI
+              </h1>
+              <LocationSelector />
             </div>
           </div>
           {/* Busca global - sempre visível */}

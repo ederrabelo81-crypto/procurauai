@@ -45,7 +45,7 @@ export default function BusinessDetail() {
 
   const handleShare = async () => {
     const url = window.location.href;
-    const text = `Veja ${business.name} no Monte de Tudo!`;
+    const text = `Veja ${business.name} no Procura UAI!`;
 
     if (navigator.share) {
       try {

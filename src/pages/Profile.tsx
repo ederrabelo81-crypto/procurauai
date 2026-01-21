@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Settings, Bell, HelpCircle, Share2, ChevronRight, Download } from 'lucide-react';
+import { ArrowLeft, Heart, Settings, Bell, HelpCircle, Share2, ChevronRight, Download, Smartphone } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
+import { usePwaInstall } from '@/hooks/usePwaInstall';
 import { businesses, listings } from '@/data/mockData';
 import { BusinessCard } from '@/components/cards/BusinessCard';
 import { ListingCard } from '@/components/cards/ListingCard';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useState } from 'react';
 import { Chip } from '@/components/ui/Chip';
 
@@ -12,6 +14,7 @@ type Tab = 'favoritos' | 'config';
 export default function Profile() {
   const navigate = useNavigate();
   const { favorites } = useFavorites();
+  const { isInstallable, isInstalled, promptInstall } = usePwaInstall();
   const [activeTab, setActiveTab] = useState<Tab>('favoritos');
 
   const favoriteBusinesses = businesses.filter(b => 
@@ -27,8 +30,8 @@ export default function Profile() {
     { icon: Share2, label: 'Compartilhar app', action: () => {
       if (navigator.share) {
         navigator.share({
-          title: 'Monte de Tudo',
-          text: 'Conheça o Monte de Tudo - sua cidade na palma da mão!',
+          title: 'Procura UAI',
+          text: 'Conheça o Procura UAI - sua cidade na palma da mão!',
           url: window.location.origin,
         });
       }
@@ -112,17 +115,45 @@ export default function Profile() {
 
         {activeTab === 'config' && (
           <div className="space-y-4 animate-fade-in">
+            {/* Dark Mode Toggle */}
+            <ThemeToggle variant="full" />
+
             {/* Instalar app */}
-            <button className="w-full flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-2xl text-left">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                <Download className="w-6 h-6 text-primary" />
+            {!isInstalled && (
+              <button 
+                onClick={promptInstall}
+                className="w-full flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-2xl text-left hover:bg-primary/10 transition-colors"
+              >
+                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                  {isInstallable ? (
+                    <Download className="w-6 h-6 text-primary" />
+                  ) : (
+                    <Smartphone className="w-6 h-6 text-primary" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground">Instalar app</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isInstallable 
+                      ? 'Clique para instalar na tela inicial' 
+                      : 'Adicione à tela inicial pelo menu do navegador'}
+                  </p>
+                </div>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
+
+            {isInstalled && (
+              <div className="flex items-center gap-4 p-4 bg-status-open/5 border border-status-open/20 rounded-2xl">
+                <div className="w-12 h-12 bg-status-open/10 rounded-xl flex items-center justify-center">
+                  <Smartphone className="w-6 h-6 text-status-open" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground">App instalado! ✓</p>
+                  <p className="text-sm text-muted-foreground">Você está usando o app instalado</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="font-semibold text-foreground">Instalar app</p>
-                <p className="text-sm text-muted-foreground">Adicione à tela inicial</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </button>
+            )}
 
             {/* Menu items */}
             <div className="bg-card rounded-2xl card-shadow overflow-hidden">
@@ -143,7 +174,7 @@ export default function Profile() {
 
             {/* Versão */}
             <p className="text-center text-sm text-muted-foreground pt-4">
-              Monte de Tudo v1.0.0
+              Procura UAI v2.0.0
             </p>
           </div>
         )}

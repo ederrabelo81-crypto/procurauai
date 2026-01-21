@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Camera, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Camera, Check, AlertCircle } from 'lucide-react';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { cn } from '@/lib/utils';
 import type { CategoryIconKey } from '@/data/mockData';
@@ -20,7 +20,16 @@ interface FormData {
   phone: string;
 }
 
-const DRAFT_KEY = 'monte-de-tudo-draft';
+interface ValidationErrors {
+  title?: string;
+  description?: string;
+  category?: string;
+  neighborhood?: string;
+  price?: string;
+  whatsapp?: string;
+}
+
+const DRAFT_KEY = 'procura-uai-draft';
 
 // Mapeamento de PublishType para ID da taxonomia e iconKey
 const publishTypes: { id: PublishType; taxonomyId: string; iconKey: CategoryIconKey; shortLabel: string; label: string; description: string }[] = [
@@ -40,12 +49,45 @@ const getCategoriesForPublishType = (type: PublishType): string[] => {
   if (!publishType) return ['Outros'];
   
   const categories = getCategoriesForType(publishType.taxonomyId);
-  // Adiciona "Outros" se não existir
   if (categories.length === 0) return ['Outros'];
   return [...categories, 'Outros'];
 };
 
 const neighborhoods = ['Centro', 'Vila Nova', 'Jardim América', 'Industrial', 'Outro'];
+
+// Validação em tempo real
+function validateField(field: keyof FormData, value: string, formData: FormData): string | undefined {
+  switch (field) {
+    case 'title':
+      if (!value.trim()) return 'O título é obrigatório';
+      if (value.length < 5) return 'O título deve ter pelo menos 5 caracteres';
+      if (value.length > 100) return 'O título deve ter no máximo 100 caracteres';
+      return undefined;
+    
+    case 'description':
+      if (value.length > 500) return 'A descrição deve ter no máximo 500 caracteres';
+      return undefined;
+    
+    case 'price':
+      if (value && !/^[\d.,\s]+$/.test(value.replace('R$', '').trim())) {
+        return 'Digite apenas números';
+      }
+      return undefined;
+    
+    case 'whatsapp':
+      if (!value.trim()) return 'WhatsApp é obrigatório';
+      if (value.length < 10) return 'Digite um número válido com DDD';
+      if (value.length > 11) return 'Número muito longo';
+      return undefined;
+    
+    case 'phone':
+      if (value && value.length < 10) return 'Digite um número válido';
+      return undefined;
+    
+    default:
+      return undefined;
+  }
+}
 
 export default function Publish() {
   const navigate = useNavigate();
@@ -78,6 +120,8 @@ export default function Publish() {
       };
     }
   });
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
@@ -86,12 +130,37 @@ export default function Publish() {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
   }, [formData]);
 
+  // Validação em tempo real
+  const validateForm = (data: FormData): ValidationErrors => {
+    const newErrors: ValidationErrors = {};
+    
+    if (step === 2) {
+      const titleError = validateField('title', data.title, data);
+      if (titleError) newErrors.title = titleError;
+      
+      if (!data.category) newErrors.category = 'Selecione uma categoria';
+      if (!data.neighborhood) newErrors.neighborhood = 'Selecione um bairro';
+      
+      const priceError = validateField('price', data.price, data);
+      if (priceError) newErrors.price = priceError;
+    }
+    
+    if (step === 4) {
+      const whatsappError = validateField('whatsapp', data.whatsapp, data);
+      if (whatsappError) newErrors.whatsapp = whatsappError;
+    }
+    
+    return newErrors;
+  };
+
   const canProceed = () => {
+    const currentErrors = validateForm(formData);
+    
     switch (step) {
       case 1: return formData.type !== null;
-      case 2: return formData.title.trim() && formData.category && formData.neighborhood;
-      case 3: return true; // Fotos são opcionais
-      case 4: return formData.whatsapp.trim().length >= 10;
+      case 2: return formData.title.trim() && formData.category && formData.neighborhood && !currentErrors.title && !currentErrors.price;
+      case 3: return true;
+      case 4: return formData.whatsapp.trim().length >= 10 && !currentErrors.whatsapp;
       default: return false;
     }
   };
@@ -99,6 +168,7 @@ export default function Publish() {
   const handleNext = () => {
     if (step < 4 && canProceed()) {
       setStep(step + 1);
+      setTouched({});
     } else if (step === 4 && canProceed()) {
       handleSubmit();
     }
@@ -114,7 +184,6 @@ export default function Publish() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Simula envio
     await new Promise(resolve => setTimeout(resolve, 1500));
     localStorage.removeItem(DRAFT_KEY);
     setIsSubmitting(false);
@@ -123,6 +192,18 @@ export default function Publish() {
 
   const updateField = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Validação em tempo real
+    if (touched[field]) {
+      const error = validateField(field, value, { ...formData, [field]: value });
+      setErrors(prev => ({ ...prev, [field]: error }));
+    }
+  };
+
+  const handleBlur = (field: keyof FormData) => {
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const error = validateField(field, formData[field] as string, formData);
+    setErrors(prev => ({ ...prev, [field]: error }));
   };
 
   if (isComplete) {
@@ -138,7 +219,7 @@ export default function Publish() {
           </p>
           <button
             onClick={() => navigate('/')}
-            className="px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-xl"
+            className="px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-2xl button-shadow active:scale-95 transition-transform"
           >
             Voltar ao início
           </button>
@@ -171,7 +252,7 @@ export default function Publish() {
               <div 
                 key={s}
                 className={cn(
-                  "h-1 flex-1 rounded-full transition-colors",
+                  "h-1.5 flex-1 rounded-full transition-colors",
                   s <= step ? "bg-primary" : "bg-border"
                 )}
               />
@@ -205,7 +286,7 @@ export default function Publish() {
                   key={type.id}
                   onClick={() => updateField('type', type.id)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 p-3 bg-card rounded-2xl card-shadow text-center transition-all active:scale-98",
+                    "flex flex-col items-center justify-center gap-2 p-3 bg-card rounded-2xl card-shadow text-center transition-all active:scale-95",
                     formData.type === type.id && "ring-2 ring-primary bg-primary/5"
                   )}
                 >
@@ -224,37 +305,74 @@ export default function Publish() {
           <div className="space-y-4 animate-fade-in">
             <h2 className="text-xl font-bold text-foreground">Informações básicas</h2>
             
+            {/* Título */}
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Título</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
+                Título <span className="text-destructive">*</span>
+              </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => updateField('title', e.target.value)}
+                onBlur={() => handleBlur('title')}
                 placeholder="Ex: iPhone 12 seminovo"
-                className="w-full h-12 px-4 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className={cn(
+                  "w-full h-12 px-4 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                  errors.title && touched.title 
+                    ? "border-destructive focus:border-destructive" 
+                    : "border-border focus:border-primary"
+                )}
               />
+              {errors.title && touched.title && (
+                <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.title}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1 text-right">
+                {formData.title.length}/100
+              </p>
             </div>
 
+            {/* Descrição */}
             <div>
               <label className="text-sm font-medium text-foreground mb-1.5 block">Descrição curta</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => updateField('description', e.target.value)}
+                onBlur={() => handleBlur('description')}
                 placeholder="Descreva em poucas palavras..."
                 rows={3}
-                className="w-full px-4 py-3 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                className={cn(
+                  "w-full px-4 py-3 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none transition-all",
+                  errors.description && touched.description 
+                    ? "border-destructive" 
+                    : "border-border focus:border-primary"
+                )}
               />
+              {errors.description && touched.description && (
+                <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.description}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1 text-right">
+                {formData.description.length}/500
+              </p>
             </div>
 
+            {/* Categoria */}
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Categoria</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
+                Categoria <span className="text-destructive">*</span>
+              </label>
               <div className="flex flex-wrap gap-2">
                 {getCategoriesForPublishType(formData.type).map((cat) => (
                   <button
                     key={cat}
                     onClick={() => updateField('category', cat)}
                     className={cn(
-                      "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95",
                       formData.category === cat
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -264,17 +382,26 @@ export default function Publish() {
                   </button>
                 ))}
               </div>
+              {errors.category && touched.category && (
+                <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.category}
+                </p>
+              )}
             </div>
 
+            {/* Bairro */}
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Bairro</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">
+                Bairro <span className="text-destructive">*</span>
+              </label>
               <div className="flex flex-wrap gap-2">
                 {neighborhoods.map((n) => (
                   <button
                     key={n}
                     onClick={() => updateField('neighborhood', n)}
                     className={cn(
-                      "px-4 py-2 rounded-full text-sm font-medium transition-all",
+                      "px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95",
                       formData.neighborhood === n
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -286,6 +413,7 @@ export default function Publish() {
               </div>
             </div>
 
+            {/* Preço condicional */}
             {(formData.type === 'classificados' || formData.type === 'carros' || formData.type === 'imoveis') && (
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">
@@ -295,6 +423,7 @@ export default function Publish() {
                   type="text"
                   value={formData.price}
                   onChange={(e) => updateField('price', e.target.value)}
+                  onBlur={() => handleBlur('price')}
                   placeholder={
                     formData.type === 'classificados' 
                       ? "R$ 0,00 (deixe vazio se for doação)" 
@@ -302,8 +431,19 @@ export default function Publish() {
                         ? "R$ 0,00 (ou valor do aluguel)"
                         : "R$ 0,00"
                   }
-                  className="w-full h-12 px-4 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className={cn(
+                    "w-full h-12 px-4 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                    errors.price && touched.price 
+                      ? "border-destructive" 
+                      : "border-border focus:border-primary"
+                  )}
                 />
+                {errors.price && touched.price && (
+                  <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.price}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -319,7 +459,7 @@ export default function Publish() {
               {[...Array(6)].map((_, i) => (
                 <button
                   key={i}
-                  className="aspect-square bg-card border-2 border-dashed border-border rounded-xl flex items-center justify-center hover:bg-muted/50 transition-colors"
+                  className="aspect-square bg-card border-2 border-dashed border-border rounded-2xl flex items-center justify-center hover:bg-muted/50 hover:border-primary/50 transition-all active:scale-95"
                 >
                   <Camera className="w-8 h-8 text-muted-foreground" />
                 </button>
@@ -345,10 +485,23 @@ export default function Publish() {
                 type="tel"
                 value={formData.whatsapp}
                 onChange={(e) => updateField('whatsapp', e.target.value.replace(/\D/g, ''))}
+                onBlur={() => handleBlur('whatsapp')}
                 placeholder="31999999999"
-                className="w-full h-12 px-4 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className={cn(
+                  "w-full h-12 px-4 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                  errors.whatsapp && touched.whatsapp 
+                    ? "border-destructive" 
+                    : "border-border focus:border-primary"
+                )}
               />
-              <p className="text-xs text-muted-foreground mt-1">Apenas números, com DDD</p>
+              {errors.whatsapp && touched.whatsapp ? (
+                <p className="text-xs text-destructive mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  {errors.whatsapp}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">Apenas números, com DDD</p>
+              )}
             </div>
 
             <div>
@@ -357,8 +510,9 @@ export default function Publish() {
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateField('phone', e.target.value.replace(/\D/g, ''))}
+                onBlur={() => handleBlur('phone')}
                 placeholder="3199999999"
-                className="w-full h-12 px-4 bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full h-12 px-4 bg-card border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
           </div>
@@ -371,9 +525,9 @@ export default function Publish() {
           onClick={handleNext}
           disabled={!canProceed() || isSubmitting}
           className={cn(
-            "w-full h-14 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 transition-all",
+            "w-full h-14 rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 transition-all",
             canProceed() && !isSubmitting
-              ? "bg-primary text-primary-foreground active:scale-98"
+              ? "bg-primary text-primary-foreground button-shadow active:scale-98"
               : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
