@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin } from 'lucide-react';
+import { BadgePill } from '@/components/ui/BadgePill';
+import { TagChip } from '@/components/ui/TagChip';
 import type { Event } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +22,9 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
   };
 
   const { day, time } = formatDateTime(event.dateTime);
+  const isFree = event.priceText === 'Entrada gratuita' || 
+                 event.priceText.toLowerCase().includes('grátis') ||
+                 event.priceText.toLowerCase().includes('gratuito');
 
   return (
     <Link 
@@ -40,9 +45,10 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
           className="w-full h-full object-cover"
           loading="lazy"
         />
-        {!isCompact && event.priceText === 'Entrada gratuita' && (
-          <div className="absolute top-2 left-2 bg-status-open text-white px-2 py-1 rounded-lg text-xs font-bold">
-            GRÁTIS
+        {/* Badge: top-left */}
+        {!isCompact && isFree && (
+          <div className="absolute top-2 left-2">
+            <BadgePill variant="open">GRÁTIS</BadgePill>
           </div>
         )}
       </div>
@@ -55,15 +61,13 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
           {event.title}
         </h3>
         
-        {!isCompact && (
+        {/* Tags using unified TagChip */}
+        {!isCompact && event.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
             {event.tags.slice(0, 2).map((tag) => (
-              <span 
-                key={tag}
-                className="px-2 py-0.5 bg-accent text-accent-foreground text-xs rounded-full"
-              >
+              <TagChip key={tag} size="sm" variant="tag">
                 {tag}
-              </span>
+              </TagChip>
             ))}
           </div>
         )}

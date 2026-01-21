@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, Clock, Tag, MapPin, Zap, Star, Briefcase, Home } from 'lucide-react';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { Chip } from '@/components/ui/Chip';
+import { TagChip } from '@/components/ui/TagChip';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { PaginatedList } from '@/components/ui/PaginatedList';
 import { CategoryCard } from '@/components/cards/CategoryCard';
@@ -14,6 +14,29 @@ import { NewsCard } from '@/components/cards/NewsCard';
 import { categories, businesses, listings, deals, events, news, filtersByCategory } from '@/data/mockData';
 import { matchesAllFilters, normalizeText, matchesListingFilter } from '@/lib/tagUtils';
 import { getBusinessTags } from '@/lib/businessTags';
+import type { LucideIcon } from 'lucide-react';
+
+// Icon mapping for filter chips
+const FILTER_ICONS: Record<string, LucideIcon> = {
+  'aberto agora': Clock,
+  'delivery': Tag,
+  'oferta': Tag,
+  'ofertas': Tag,
+  'perto de mim': MapPin,
+  'urgente': Zap,
+  'destaque': Star,
+  'vaga': Briefcase,
+  'aluguel': Home,
+  'venda': Home,
+};
+
+function getFilterIcon(filter: string): LucideIcon | undefined {
+  const normalized = filter.toLowerCase().trim();
+  for (const [key, icon] of Object.entries(FILTER_ICONS)) {
+    if (normalized.includes(key)) return icon;
+  }
+  return undefined;
+}
 
 // Tipos de conteúdo suportados
 type ContentType = 'business' | 'listing' | 'deal' | 'event' | 'news';
@@ -278,29 +301,31 @@ export default function Search() {
           <SearchBar value={query} onChange={setQuery} placeholder="O que você procura agora?" size="large" />
         </div>
 
-        {/* Filtros */}
+        {/* Filtros - unified TagChip with icons */}
         <div className="px-4 pb-3 -mx-4">
           <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide">
             {activeFilters.length > 0 && (
-              <Chip
+              <TagChip
                 onClick={clearFilters}
+                icon={X}
                 size="sm"
-                variant="outline"
-                className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/5 flex-shrink-0"
+                variant="filter"
+                className="border-destructive/40 text-destructive flex-shrink-0"
               >
-                <X className="w-3 h-3 mr-1" />
                 Limpar
-              </Chip>
+              </TagChip>
             )}
             {allFilters.map((filter) => (
-              <Chip
+              <TagChip
                 key={filter}
+                icon={getFilterIcon(filter)}
                 isActive={activeFilters.includes(filter)}
                 onClick={() => toggleFilter(filter)}
                 size="sm"
+                variant="filter"
               >
                 {filter}
-              </Chip>
+              </TagChip>
             ))}
           </div>
         </div>

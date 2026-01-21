@@ -1,8 +1,8 @@
 // Category.tsx
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, Clock, Tag, MapPin, Zap, Star } from 'lucide-react';
 import { useState, useMemo } from 'react';
-import { Chip } from '@/components/ui/Chip';
+import { TagChip } from '@/components/ui/TagChip';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { BusinessCard } from '@/components/cards/BusinessCard';
 import { ListingCard } from '@/components/cards/ListingCard';
@@ -10,7 +10,7 @@ import { DealCard } from '@/components/cards/DealCard';
 import { EventCard } from '@/components/cards/EventCard';
 import { NewsCard } from '@/components/cards/NewsCard';
 import { ObituaryCard } from '@/components/cards/ObituaryCard';
-import { CategoryIcon } from '@/components/ui/CategoryIcon';
+import { GlassCategoryIcon } from '@/components/ui/GlassCategoryIcon';
 import {
   categories,
   businesses,
@@ -23,6 +23,26 @@ import {
 } from '@/data/mockData';
 import { matchesAllFilters, matchesListingFilter, normalizeText } from '@/lib/tagUtils';
 import { getBusinessTags } from '@/lib/businessTags';
+import type { LucideIcon } from 'lucide-react';
+
+// Icon mapping for filter chips
+const FILTER_ICONS: Record<string, LucideIcon> = {
+  'aberto agora': Clock,
+  'delivery': Tag,
+  'oferta': Tag,
+  'ofertas': Tag,
+  'perto de mim': MapPin,
+  'urgente': Zap,
+  'destaque': Star,
+};
+
+function getFilterIcon(filter: string): LucideIcon | undefined {
+  const normalized = filter.toLowerCase().trim();
+  for (const [key, icon] of Object.entries(FILTER_ICONS)) {
+    if (normalized.includes(key)) return icon;
+  }
+  return undefined;
+}
 
 // Placeholder dinâmico por categoria
 const searchPlaceholders: Record<string, string> = {
@@ -371,7 +391,7 @@ export default function Category() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <CategoryIcon categoryId={category.iconKey} size="sm" />
+              <GlassCategoryIcon categoryId={category.iconKey} size="xs" />
               <h1 className="text-lg font-bold text-foreground">{category.name}</h1>
             </div>
           </div>
@@ -383,28 +403,32 @@ export default function Category() {
             placeholder={placeholder} 
           />
 
-          {/* Chips de filtro */}
+          {/* Chips de filtro - unified TagChip with icons */}
           {filters.length > 0 && (
             <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+              {activeFilters.length > 0 && (
+                <TagChip
+                  onClick={clearFilters}
+                  icon={X}
+                  size="sm"
+                  variant="filter"
+                  className="border-destructive/40 text-destructive"
+                >
+                  Limpar
+                </TagChip>
+              )}
               {filters.map((filter) => (
-                <Chip
+                <TagChip
                   key={filter}
+                  icon={getFilterIcon(filter)}
                   isActive={activeFilters.includes(filter)}
                   onClick={() => toggleFilter(filter)}
                   size="sm"
+                  variant="filter"
                 >
                   {filter}
-                </Chip>
+                </TagChip>
               ))}
-              {activeFilters.length > 0 && (
-                <Chip
-                  onClick={clearFilters}
-                  variant="outline"
-                  className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/5"
-                >
-                  <X className="w-3 h-3 mr-1" /> Limpar
-                </Chip>
-              )}
             </div>
           )}
         </div>

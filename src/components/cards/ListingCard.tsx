@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Heart } from 'lucide-react';
+import { BadgePill } from '@/components/ui/BadgePill';
 import type { Listing } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -36,18 +37,17 @@ export function ListingCard({ listing, className }: ListingCardProps) {
             loading="lazy"
           />
           
-          {listing.type === 'doacao' && (
-            <div className="absolute top-2 left-2 bg-status-open text-white px-2 py-1 rounded-lg text-xs font-bold">
-              DOAÇÃO
-            </div>
-          )}
+          {/* Badges: top-left */}
+          <div className="absolute top-2 left-2 flex gap-1.5">
+            {listing.type === 'doacao' && (
+              <BadgePill variant="open">DOAÇÃO</BadgePill>
+            )}
+            {listing.isHighlighted && (
+              <BadgePill variant="highlight">DESTAQUE</BadgePill>
+            )}
+          </div>
           
-          {listing.isHighlighted && (
-            <div className="absolute top-2 left-2 bg-secondary text-secondary-foreground px-2 py-1 rounded-lg text-xs font-bold">
-              DESTAQUE
-            </div>
-          )}
-          
+          {/* Favorite button: top-right */}
           <button
             onClick={(e) => {
               e.preventDefault();

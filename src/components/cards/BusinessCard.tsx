@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom';
-import { MapPin, CheckCircle2, Star } from 'lucide-react';
-import { StatusBadge } from '@/components/ui/StatusBadge';
-import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
-import { MapsButton } from '@/components/ui/MapsButton';
-import { CallButton } from '@/components/ui/CallButton';
-import { MetaChip } from '@/components/ui/MetaChip';
+import { MapPin } from 'lucide-react';
+import { BadgePill, VerifiedBadge, OpenBadge, ClosedBadge, RatingBadge } from '@/components/ui/BadgePill';
+import { TagChip } from '@/components/ui/TagChip';
+import { CTAGrid } from '@/components/ui/ActionButtons';
 import type { Business } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { formatHours, parseAndFormatHours } from '@/lib/hoursUtils';
@@ -22,7 +20,7 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
   const tags = getBusinessTags(business);
   const open = isOpenNow(business.hours);
 
-  // Extrai rating da descrição se existir (ex: "Nota 5.0 (21 avaliações)")
+  // Extract rating from description if exists (ex: "Nota 5.0 (21 avaliações)")
   const ratingMatch = business.description?.match(/Nota\s+(\d+(?:\.\d+)?)\s*\((\d+)/i);
   const rating = ratingMatch ? parseFloat(ratingMatch[1]) : undefined;
   const reviewCount = ratingMatch ? parseInt(ratingMatch[2]) : undefined;
@@ -43,26 +41,21 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
             loading="lazy"
           />
 
-          {/* Meta chips (estilo MyListing) */}
-          <div className="absolute top-2 left-2 flex gap-2 items-center">
-            <StatusBadge status={open === true ? 'open' : open === false ? 'closed' : 'unknown'} />
+          {/* Badges: Status (top-left), Rating (top-left after status), Verified (top-right) */}
+          <div className="absolute top-2 left-2 flex gap-1.5 items-center">
+            {open === true && <OpenBadge />}
+            {open === false && <ClosedBadge />}
+            {open === null && (
+              <BadgePill variant="default">Horário</BadgePill>
+            )}
             {typeof rating === 'number' && !Number.isNaN(rating) && (
-              <MetaChip>
-                <Star className="w-3.5 h-3.5" />
-                <span>{rating.toFixed(1)}</span>
-                {typeof reviewCount === 'number' && reviewCount > 0 && (
-                  <span className="opacity-90">({reviewCount})</span>
-                )}
-              </MetaChip>
+              <RatingBadge rating={rating} count={reviewCount} />
             )}
           </div>
 
           {business.isVerified && (
             <div className="absolute top-2 right-2">
-              <MetaChip className="bg-primary/85">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Verificado</span>
-              </MetaChip>
+              <VerifiedBadge />
             </div>
           )}
         </div>
@@ -81,29 +74,24 @@ export function BusinessCard({ business, variant = 'default', className }: Busin
           <span className="truncate">{formatHours(parseAndFormatHours(business.hours), open === true)}</span>
         </div>
 
+        {/* Tags using unified TagChip */}
         {!isCompact && tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {tags.slice(0, 3).map(tag => (
-              <span
-                key={tag}
-                className="px-2 py-0.5 bg-accent text-accent-foreground text-[11px] rounded-full"
-              >
+              <TagChip key={tag} size="sm" variant="tag">
                 {tag}
-              </span>
+              </TagChip>
             ))}
           </div>
         )}
 
-        <div className={cn('flex gap-2', isCompact ? '' : '')}>
-          <WhatsAppButton whatsapp={business.whatsapp} size="sm" className={cn(isCompact ? 'flex-1' : 'flex-1')} />
-          <MapsButton
-            size="sm"
-            label="Mapa"
-            query={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
-            className="shrink-0"
-          />
-          {business.phone && <CallButton phone={business.phone} size="sm" className="shrink-0" />}
-        </div>
+        {/* CTAs using unified grid */}
+        <CTAGrid
+          whatsapp={business.whatsapp}
+          mapsQuery={`${business.name} ${business.address ?? business.neighborhood ?? ''}`}
+          phone={business.phone}
+          size="sm"
+        />
       </div>
     </div>
   );

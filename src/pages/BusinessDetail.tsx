@@ -8,7 +8,7 @@ import { ContactSection } from '@/components/listing/ContactSection';
 import { RelatedCarousel } from '@/components/listing/RelatedCarousel';
 import { EventsSection } from '@/components/listing/EventsSection';
 import { ReviewsSection } from '@/components/listing/ReviewsSection';
-import { Chip } from '@/components/ui/Chip';
+import { TagChip } from '@/components/ui/TagChip';
 import { businesses, deals, events } from '@/data/mockData';
 import { useFavorites } from '@/hooks/useFavorites';
 import { hasFeature } from '@/lib/planUtils';
@@ -117,9 +117,9 @@ export default function BusinessDetail() {
               <h3 className="font-semibold text-foreground mb-2">Diferenciais</h3>
               <div className="flex flex-wrap gap-2">
                 {business.tags.map((tag) => (
-                  <Chip key={tag} onClick={() => handleTagClick(tag)} size="sm" className="cursor-pointer">
+                  <TagChip key={tag} onClick={() => handleTagClick(tag)} size="sm" variant="tag">
                     {tag}
-                  </Chip>
+                  </TagChip>
                 ))}
               </div>
             </div>

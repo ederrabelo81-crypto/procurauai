@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Clock } from 'lucide-react';
-import { WhatsAppButton } from '@/components/ui/WhatsAppButton';
+import { BadgePill } from '@/components/ui/BadgePill';
+import { WhatsAppButton } from '@/components/ui/ActionButtons';
 import type { Deal } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
@@ -38,9 +39,10 @@ export function DealCard({ deal, variant = 'default', className }: DealCardProps
             className="w-full h-full object-cover"
             loading="lazy"
           />
+          {/* Badge: top-left */}
           {deal.isSponsored && (
-            <div className="absolute top-2 left-2 bg-foreground/70 text-background px-2 py-0.5 rounded text-2xs font-medium">
-              Patrocinado
+            <div className="absolute top-2 left-2">
+              <BadgePill variant="default">Patrocinado</BadgePill>
             </div>
           )}
         </div>
