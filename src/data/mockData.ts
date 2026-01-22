@@ -113,7 +113,7 @@ export interface Obituary {
 }
 
 // Dados Mock - Comércios e Serviços (Comer Agora + Serviços)
-export const businesses: Business[
+export const businesses: Business[] = [
 {
     id: "r001",
     name: "Emporio di Mineiro",
