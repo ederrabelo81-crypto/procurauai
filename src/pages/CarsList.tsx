@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Fuel, Gauge, X, ChevronDown } from 'lucide-react';
-import { SearchBar } from '@/components/ui/SearchBar';
-import { Chip } from '@/components/ui/Chip';
+import { MapPin, Fuel, Gauge, X, ChevronDown } from 'lucide-react';
+import { ListingTypeHeader } from '@/components/common/ListingTypeHeader';
+import { TagChip } from '@/components/ui/TagChip';
 import { cars } from '@/data/newListingTypes';
 import { filtersByCategory } from '@/data/mockData';
 import { 
@@ -62,40 +62,41 @@ export default function CarsList() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-3 mb-3">
-            <Link to="/" className="p-2 -ml-2 rounded-full hover:bg-muted touch-target">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <h1 className="text-lg font-bold">Carros</h1>
-              <p className="text-xs text-muted-foreground">Concessionárias e particulares</p>
-            </div>
-          </div>
-          <SearchBar value={query} onChange={setQuery} placeholder="Buscar carros..." />
+      <ListingTypeHeader
+        title="Carros"
+        subtitle="Concessionárias e particulares"
+        iconKey="carros"
+        searchPlaceholder="Buscar carros..."
+        searchValue={query}
+        onSearchChange={setQuery}
+      >
+        {filterOptions.length > 0 && (
           <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+            {activeFilters.length > 0 && (
+              <TagChip
+                onClick={clearFilters}
+                icon={X}
+                size="sm"
+                variant="filter"
+                className="border-destructive/40 text-destructive"
+              >
+                Limpar
+              </TagChip>
+            )}
             {filterOptions.map((filter) => (
-              <Chip
+              <TagChip
                 key={filter.key}
                 isActive={activeFilters.includes(filter.key)}
                 onClick={() => toggleFilter(filter.key)}
+                size="sm"
+                variant="filter"
               >
                 {filter.label}
-              </Chip>
+              </TagChip>
             ))}
-            {activeFilters.length > 0 && (
-              <Chip
-                onClick={clearFilters}
-                variant="outline"
-                className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/5"
-              >
-                <X className="w-3 h-3 mr-1" /> Limpar
-              </Chip>
-            )}
           </div>
-        </div>
-      </header>
+        )}
+      </ListingTypeHeader>
 
       <main className="px-4 py-4">
         {/* Sort & Results */}
