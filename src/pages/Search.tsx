@@ -1,8 +1,22 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, X, Clock, Tag, MapPin, Zap, Star, Briefcase, Home } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  X, 
+  Clock, 
+  Truck, 
+  CreditCard, 
+  Dog, 
+  Zap, 
+  Home as HomeIcon, 
+  CheckCircle, 
+  Star, 
+  Calendar as CalendarIcon,
+  Gift,
+  Tag as TagIcon
+} from 'lucide-react';
 import { SearchBar } from '@/components/ui/SearchBar';
-import { TagChip } from '@/components/ui/TagChip';
+import { Chip } from '@/components/ui/Chip';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { PaginatedList } from '@/components/ui/PaginatedList';
 import { CategoryCard } from '@/components/cards/CategoryCard';
@@ -11,35 +25,9 @@ import { ListingCard } from '@/components/cards/ListingCard';
 import { DealCard } from '@/components/cards/DealCard';
 import { EventCard } from '@/components/cards/EventCard';
 import { NewsCard } from '@/components/cards/NewsCard';
-import { categories, businesses, listings, deals, events, news, filtersByCategory } from '@/data/mockData';
-import { matchesAllFilters, normalizeText, matchesListingFilter } from '@/lib/tagUtils';
-import { getBusinessTags } from '@/lib/businessTags';
-import type { LucideIcon } from 'lucide-react';
-
-// Icon mapping for filter chips
-const FILTER_ICONS: Record<string, LucideIcon> = {
-  'aberto agora': Clock,
-  'delivery': Tag,
-  'oferta': Tag,
-  'ofertas': Tag,
-  'perto de mim': MapPin,
-  'urgente': Zap,
-  'destaque': Star,
-  'vaga': Briefcase,
-  'aluguel': Home,
-  'venda': Home,
-};
-
-function getFilterIcon(filter: string): LucideIcon | undefined {
-  const normalized = filter.toLowerCase().trim();
-  for (const [key, icon] of Object.entries(FILTER_ICONS)) {
-    if (normalized.includes(key)) return icon;
-  }
-  return undefined;
-}
-
-// Tipos de conteúdo suportados
-type ContentType = 'business' | 'listing' | 'deal' | 'event' | 'news';
+import { categories, filtersByCategory } from '@/data/mockData';
+import { normalizeText } from '@/lib/tagUtils';
+import { useSearch, ContentType } from '@/hooks/useSearch';
 
 // Limites de preview por seção
 const PREVIEW_LIMITS: Record<ContentType, number> = {
@@ -69,7 +57,10 @@ export default function Search() {
   const query = searchParams.get('q') || '';
   const activeType = searchParams.get('type') as ContentType | null;
   const filtersParam = searchParams.get('filters') || '';
-  const activeFilters = filtersParam ? filtersParam.split(',').filter(Boolean) : [];
+  const activeFilters = useMemo(() => 
+    filtersParam ? filtersParam.split(',').filter(Boolean) : [],
+    [filtersParam]
+  );
 
   // Paginação local
   const [currentPage, setCurrentPage] = useState(1);
@@ -86,13 +77,15 @@ export default function Search() {
     setIsLoadingMore(false);
   }, [activeType, query, filtersParam]);
 
-
   // Todos os filtros disponíveis
   const allFilters = useMemo(() => {
     const s = new Set<string>();
     Object.values(filtersByCategory).flat().forEach((f) => s.add(f));
     return Array.from(s);
   }, []);
+
+  // Hook de busca centralizado
+  const searchResults = useSearch(query, activeFilters);
 
   // Atualiza query na URL
   const setQuery = useCallback(
@@ -104,7 +97,6 @@ export default function Search() {
         params.delete('q');
       }
       setSearchParams(params, { replace: true });
-      setCurrentPage(1);
     },
     [searchParams, setSearchParams]
   );
@@ -129,7 +121,6 @@ export default function Search() {
       }
 
       setSearchParams(params, { replace: true });
-      setCurrentPage(1);
     },
     [searchParams, setSearchParams]
   );
@@ -139,7 +130,6 @@ export default function Search() {
     const params = new URLSearchParams(searchParams);
     params.delete('filters');
     setSearchParams(params, { replace: true });
-    setCurrentPage(1);
   }, [searchParams, setSearchParams]);
 
   // Limpar tipo (voltar para multi-seção)
@@ -147,124 +137,7 @@ export default function Search() {
     const params = new URLSearchParams(searchParams);
     params.delete('type');
     setSearchParams(params, { replace: true });
-    setCurrentPage(1);
   }, [searchParams, setSearchParams]);
-
-  // Filtragem de dados
-  const searchResults = useMemo(() => {
-    const hasQuery = !!query.trim();
-    const hasFilters = activeFilters.length > 0;
-    const lowerQuery = query.toLowerCase().trim();
-
-    // Businesses
-    let filteredBusinesses = businesses;
-    if (hasQuery) {
-      filteredBusinesses = filteredBusinesses.filter((b) => {
-        const tagHit = getBusinessTags(b).some((t) => t.toLowerCase().includes(lowerQuery));
-        return (
-          b.name.toLowerCase().includes(lowerQuery) ||
-          b.category.toLowerCase().includes(lowerQuery) ||
-          b.neighborhood.toLowerCase().includes(lowerQuery) ||
-          tagHit
-        );
-      });
-    }
-    if (hasFilters) {
-      filteredBusinesses = filteredBusinesses.filter((business) =>
-        matchesAllFilters(getBusinessTags(business), activeFilters, { hours: business.hours, checkOpenNow: true })
-      );
-    }
-
-    // Listings
-    let filteredListings = listings;
-    if (hasQuery) {
-      filteredListings = filteredListings.filter(
-        (l) => l.title.toLowerCase().includes(lowerQuery) || l.neighborhood.toLowerCase().includes(lowerQuery)
-      );
-    }
-    if (hasFilters) {
-      filteredListings = filteredListings.filter((listing) => matchesListingFilter(listing, activeFilters));
-    }
-
-    // Deals
-    let filteredDeals = deals;
-    if (hasQuery) {
-      filteredDeals = filteredDeals.filter(
-        (d) => d.title.toLowerCase().includes(lowerQuery) || d.businessName?.toLowerCase().includes(lowerQuery)
-      );
-    }
-    if (hasFilters) {
-      const normalizedFilters = activeFilters.map((f) => normalizeText(f));
-      filteredDeals = filteredDeals.filter((deal) => {
-        if (normalizedFilters.includes('valido hoje')) {
-          const today = new Date().toISOString().split('T')[0];
-          if (deal.validUntil < today) return false;
-        }
-        if (normalizedFilters.includes('entrega')) {
-          const text = `${deal.title} ${deal.subtitle || ''}`.toLowerCase();
-          if (!text.includes('entrega') && !text.includes('delivery')) return false;
-        }
-        return true;
-      });
-    }
-
-    // Events
-    let filteredEvents = events;
-    if (hasQuery) {
-      filteredEvents = filteredEvents.filter(
-        (e) =>
-          e.title.toLowerCase().includes(lowerQuery) ||
-          e.location.toLowerCase().includes(lowerQuery) ||
-          e.tags.some((t) => t.toLowerCase().includes(lowerQuery))
-      );
-    }
-    if (hasFilters) {
-      const normalizedFilters = activeFilters.map((f) => normalizeText(f));
-      filteredEvents = filteredEvents.filter((event) => {
-        if (normalizedFilters.includes('entrada gratuita')) {
-          const price = event.priceText.toLowerCase();
-          const ok =
-            price.includes('grátis') ||
-            price.includes('gratuito') ||
-            price.includes('free') ||
-            price === 'entrada livre';
-          if (!ok) return false;
-        }
-        if (normalizedFilters.includes('hoje')) {
-          const today = new Date().toISOString().split('T')[0];
-          if (!event.dateTime.startsWith(today)) return false;
-        }
-        if (normalizedFilters.includes('fim de semana')) {
-          const eventDate = new Date(event.dateTime);
-          const day = eventDate.getDay();
-          if (day !== 0 && day !== 6) return false;
-        }
-        const remainingFilters = activeFilters.filter(
-          (f) => !['entrada gratuita', 'hoje', 'fim de semana'].includes(normalizeText(f))
-        );
-        return matchesAllFilters(event.tags, remainingFilters, {});
-      });
-    }
-
-    // News
-    let filteredNews = news;
-    if (hasQuery) {
-      filteredNews = filteredNews.filter(
-        (n) =>
-          n.title.toLowerCase().includes(lowerQuery) ||
-          n.tag.toLowerCase().includes(lowerQuery) ||
-          n.snippet.toLowerCase().includes(lowerQuery)
-      );
-    }
-
-    return {
-      business: filteredBusinesses,
-      listing: filteredListings,
-      deal: filteredDeals,
-      event: filteredEvents,
-      news: filteredNews,
-    };
-  }, [query, activeFilters]);
 
   const totalResults =
     searchResults.business.length +
@@ -293,7 +166,7 @@ export default function Search() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-bold text-foreground">
+            <h1 className="text-lg font-extrabold text-foreground tracking-tight">
               {isSingleTypeMode ? TYPE_LABELS[activeType] : 'Buscar'}
             </h1>
           </div>
@@ -301,190 +174,195 @@ export default function Search() {
           <SearchBar value={query} onChange={setQuery} placeholder="O que você procura agora?" size="large" />
         </div>
 
-        {/* Filtros - unified TagChip with icons */}
+        {/* Filtros */}
         <div className="px-4 pb-3 -mx-4">
           <div className="flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide">
             {activeFilters.length > 0 && (
-              <TagChip
+              <Chip
                 onClick={clearFilters}
-                icon={X}
                 size="sm"
-                variant="filter"
-                className="border-destructive/40 text-destructive flex-shrink-0"
+                variant="outline"
+                className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/5 flex-shrink-0"
               >
+                <X className="w-3 h-3 mr-1" />
                 Limpar
-              </TagChip>
+              </Chip>
             )}
-            {allFilters.map((filter) => (
-              <TagChip
-                key={filter}
-                icon={getFilterIcon(filter)}
-                isActive={activeFilters.includes(filter)}
-                onClick={() => toggleFilter(filter)}
-                size="sm"
-                variant="filter"
-              >
-                {filter}
-              </TagChip>
-            ))}
+            {allFilters.map((filter) => {
+              const normalized = normalizeText(filter);
+              let Icon = null;
+              if (normalized.includes('aberto') || normalized.includes('agora')) Icon = Clock;
+              else if (normalized.includes('entrega') || normalized.includes('delivery')) Icon = Truck;
+              else if (normalized.includes('cartao') || normalized.includes('cartão')) Icon = CreditCard;
+              else if (normalized.includes('pet')) Icon = Dog;
+              else if (normalized.includes('24h')) Icon = Zap;
+              else if (normalized.includes('domicilio') || normalized.includes('casa')) Icon = HomeIcon;
+              else if (normalized.includes('orcamento') || normalized.includes('orçamento')) Icon = CheckCircle;
+              else if (normalized.includes('entrada gratuita') || normalized.includes('gratis')) Icon = Star;
+              else if (normalized.includes('hoje') || normalized.includes('fim de semana')) Icon = CalendarIcon;
+              else if (normalized.includes('doacao') || normalized.includes('doação')) Icon = Gift;
+              else if (normalized.includes('oferta') || normalized.includes('promocao')) Icon = TagIcon;
+
+              return (
+                <Chip
+                  key={filter}
+                  isActive={activeFilters.includes(filter)}
+                  onClick={() => toggleFilter(filter)}
+                  size="sm"
+                  className="gap-1.5"
+                >
+                  {Icon && <Icon className="w-3.5 h-3.5" />}
+                  {filter}
+                </Chip>
+              );
+            })}
           </div>
         </div>
       </header>
 
-      <main className="px-4 py-4">
-        {/* Categorias (estado inicial) - TODOS os 12 Listing Types */}
+      <main className="p-4 space-y-8">
+        {/* Categorias (apenas se não houver busca ativa) */}
         {showCategories && (
           <section>
-            <h2 className="text-lg font-bold text-foreground mb-3">Categorias</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-              {categories.map((category) => (
-                <CategoryCard 
-                  key={category.id} 
-                  id={category.id} 
-                  name={category.name} 
-                  iconKey={category.iconKey} 
-                  size="sm" 
-                />
+            <SectionHeader title="Categorias" />
+            <div className="grid grid-cols-4 gap-2">
+              {categories.map((cat) => (
+                <CategoryCard key={cat.id} id={cat.id} name={cat.name} iconKey={cat.iconKey} size="sm" />
               ))}
             </div>
           </section>
         )}
 
-        {/* Modo tipo único - Paginado */}
+        {/* Resultados - Modo Multi-seção */}
+        {!isSingleTypeMode && hasActiveSearch && (
+          <>
+            {totalResults === 0 ? (
+              <div className="py-12 text-center">
+                <p className="text-muted-foreground">Nenhum resultado encontrado para sua busca.</p>
+                <button onClick={clearFilters} className="mt-4 text-primary font-medium">
+                  Limpar filtros
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Comércios */}
+                {searchResults.business.length > 0 && (
+                  <section>
+                    <SectionHeader
+                      title="Comércios e Serviços"
+                      count={searchResults.business.length}
+                      previewLimit={PREVIEW_LIMITS.business}
+                      viewAllType="business"
+                    />
+                    <div className="grid grid-cols-1 gap-4">
+                      {searchResults.business.slice(0, PREVIEW_LIMITS.business).map((b) => (
+                        <BusinessCard key={b.id} business={b} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Ofertas */}
+                {searchResults.deal.length > 0 && (
+                  <section>
+                    <SectionHeader
+                      title="Ofertas"
+                      count={searchResults.deal.length}
+                      previewLimit={PREVIEW_LIMITS.deal}
+                      viewAllType="deal"
+                    />
+                    <div className="grid grid-cols-1 gap-4">
+                      {searchResults.deal.slice(0, PREVIEW_LIMITS.deal).map((d) => (
+                        <DealCard key={d.id} deal={d} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Classificados */}
+                {searchResults.listing.length > 0 && (
+                  <section>
+                    <SectionHeader
+                      title="Classificados"
+                      count={searchResults.listing.length}
+                      previewLimit={PREVIEW_LIMITS.listing}
+                      viewAllType="listing"
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      {searchResults.listing.slice(0, PREVIEW_LIMITS.listing).map((l) => (
+                        <ListingCard key={l.id} listing={l} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Eventos */}
+                {searchResults.event.length > 0 && (
+                  <section>
+                    <SectionHeader
+                      title="Eventos"
+                      count={searchResults.event.length}
+                      previewLimit={PREVIEW_LIMITS.event}
+                      viewAllType="event"
+                    />
+                    <div className="grid grid-cols-1 gap-4">
+                      {searchResults.event.slice(0, PREVIEW_LIMITS.event).map((e) => (
+                        <EventCard key={e.id} event={e} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Notícias */}
+                {searchResults.news.length > 0 && (
+                  <section>
+                    <SectionHeader
+                      title="Notícias"
+                      count={searchResults.news.length}
+                      previewLimit={PREVIEW_LIMITS.news}
+                      viewAllType="news"
+                    />
+                    <div className="grid grid-cols-1 gap-4">
+                      {searchResults.news.slice(0, PREVIEW_LIMITS.news).map((n) => (
+                        <NewsCard key={n.id} news={n} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+          </>
+        )}
+
+        {/* Resultados - Modo Tipo Único (Paginado) */}
         {isSingleTypeMode && (
-          <PaginatedList
-            items={singleTypeItems}
-            totalCount={singleTypeItems.length}
-            pageSize={PAGE_SIZE}
-            currentPage={currentPage}
-            onLoadMore={handleLoadMore}
-            isLoading={isLoadingMore}
-            onClearFilters={activeFilters.length > 0 ? clearFilters : undefined}
-            keyExtractor={(item: any) => item.id}
-            gridClassName={activeType === 'listing' ? 'grid grid-cols-2 sm:grid-cols-3 gap-3' : 'grid grid-cols-1 gap-3'}
-            renderItem={(item: any) => {
-              switch (activeType) {
-                case 'business':
-                  return <BusinessCard business={item} variant="compact" />;
-                case 'listing':
-                  return <ListingCard listing={item} />;
-                case 'deal':
-                  return <DealCard deal={item} variant="compact" />;
-                case 'event':
-                  return <EventCard event={item} variant="compact" />;
-                case 'news':
-                  return <NewsCard news={item} variant="compact" />;
-                default:
-                  return null;
-              }
-            }}
-          />
-        )}
-
-        {/* Modo multi-seção - Preview */}
-        {!isSingleTypeMode && hasActiveSearch && totalResults === 0 && (
-          <div className="text-center py-12">
-            <p className="text-4xl mb-3">🔍</p>
-            <p className="text-lg font-semibold text-foreground mb-1">Nenhum resultado</p>
-            <p className="text-muted-foreground mb-4">Tente buscar por outro termo ou remover filtros</p>
-            {activeFilters.length > 0 && (
-              <button
-                onClick={clearFilters}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-              >
-                Limpar filtros
-              </button>
-            )}
-          </div>
-        )}
-
-        {!isSingleTypeMode && hasActiveSearch && totalResults > 0 && (
-          <div className="space-y-6">
-            {/* Businesses */}
-            {searchResults.business.length > 0 && (
-              <section>
-                <SectionHeader
-                  title="Comércios e Serviços"
-                  count={searchResults.business.length}
-                  previewLimit={PREVIEW_LIMITS.business}
-                  viewAllType="business"
-                />
-                <div className="grid grid-cols-1 gap-3">
-                  {searchResults.business.slice(0, PREVIEW_LIMITS.business).map((business) => (
-                    <BusinessCard key={business.id} business={business} variant="compact" />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Listings */}
-            {searchResults.listing.length > 0 && (
-              <section>
-                <SectionHeader
-                  title="Classificados"
-                  count={searchResults.listing.length}
-                  previewLimit={PREVIEW_LIMITS.listing}
-                  viewAllType="listing"
-                />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {searchResults.listing.slice(0, PREVIEW_LIMITS.listing).map((listing) => (
-                    <ListingCard key={listing.id} listing={listing} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Deals */}
-            {searchResults.deal.length > 0 && (
-              <section>
-                <SectionHeader
-                  title="Ofertas"
-                  count={searchResults.deal.length}
-                  previewLimit={PREVIEW_LIMITS.deal}
-                  viewAllType="deal"
-                />
-                <div className="space-y-3">
-                  {searchResults.deal.slice(0, PREVIEW_LIMITS.deal).map((deal) => (
-                    <DealCard key={deal.id} deal={deal} variant="compact" />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Events */}
-            {searchResults.event.length > 0 && (
-              <section>
-                <SectionHeader
-                  title="Eventos"
-                  count={searchResults.event.length}
-                  previewLimit={PREVIEW_LIMITS.event}
-                  viewAllType="event"
-                />
-                <div className="space-y-3">
-                  {searchResults.event.slice(0, PREVIEW_LIMITS.event).map((event) => (
-                    <EventCard key={event.id} event={event} variant="compact" />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* News */}
-            {searchResults.news.length > 0 && (
-              <section>
-                <SectionHeader
-                  title="Notícias"
-                  count={searchResults.news.length}
-                  previewLimit={PREVIEW_LIMITS.news}
-                  viewAllType="news"
-                />
-                <div className="space-y-3">
-                  {searchResults.news.slice(0, PREVIEW_LIMITS.news).map((n) => (
-                    <NewsCard key={n.id} news={n} variant="compact" />
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
+          <section>
+            <PaginatedList
+              items={singleTypeItems}
+              pageSize={PAGE_SIZE}
+              currentPage={currentPage}
+              onLoadMore={handleLoadMore}
+              isLoadingMore={isLoadingMore}
+              renderItem={(item) => {
+                switch (activeType) {
+                  case 'business':
+                    return <BusinessCard business={item} />;
+                  case 'listing':
+                    return <ListingCard listing={item} />;
+                  case 'deal':
+                    return <DealCard deal={item} />;
+                  case 'event':
+                    return <EventCard event={item} />;
+                  case 'news':
+                    return <NewsCard news={item} />;
+                  default:
+                    return null;
+                }
+              }}
+              gridClassName={activeType === 'listing' ? 'grid-cols-2 gap-3' : 'grid-cols-1 gap-4'}
+              emptyMessage="Nenhum resultado encontrado nesta categoria."
+            />
+          </section>
         )}
       </main>
     </div>
