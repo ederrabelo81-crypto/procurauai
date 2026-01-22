@@ -1,16 +1,15 @@
 // Category.tsx
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, X, Clock, Tag, MapPin, Zap, Star } from 'lucide-react';
+import { X, Clock, Tag, MapPin, Zap, Star } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { TagChip } from '@/components/ui/TagChip';
-import { SearchBar } from '@/components/ui/SearchBar';
+import { ListingTypeHeader } from '@/components/common/ListingTypeHeader';
 import { BusinessCard } from '@/components/cards/BusinessCard';
 import { ListingCard } from '@/components/cards/ListingCard';
 import { DealCard } from '@/components/cards/DealCard';
 import { EventCard } from '@/components/cards/EventCard';
 import { NewsCard } from '@/components/cards/NewsCard';
 import { ObituaryCard } from '@/components/cards/ObituaryCard';
-import { GlassCategoryIcon } from '@/components/ui/GlassCategoryIcon';
 import {
   categories,
   businesses,
@@ -54,6 +53,18 @@ const searchPlaceholders: Record<string, string> = {
   agenda: 'Buscar eventos...',
   noticias: 'Buscar notícias...',
   falecimentos: 'Buscar...',
+};
+
+// Subtítulos por categoria
+const categorySubtitles: Record<string, string> = {
+  'comer-agora': 'Restaurantes e lanchonetes',
+  negocios: 'Lojas e estabelecimentos',
+  servicos: 'Profissionais e prestadores',
+  classificados: 'Compra e venda',
+  ofertas: 'Promoções e cupons da cidade',
+  agenda: 'Eventos e programação',
+  noticias: 'Últimas notícias da cidade',
+  falecimentos: 'Homenagens e memórias',
 };
 
 export default function Category() {
@@ -381,58 +392,43 @@ export default function Category() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-        <div className="px-4 py-3">
-          <div className="flex items-center gap-3 mb-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors touch-target"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <GlassCategoryIcon categoryId={category.iconKey} size="xs" />
-              <h1 className="text-lg font-bold text-foreground">{category.name}</h1>
-            </div>
+      <ListingTypeHeader
+        title={category.name}
+        subtitle={categorySubtitles[categoryId || '']}
+        iconKey={category.iconKey}
+        searchPlaceholder={placeholder}
+        searchValue={query}
+        onSearchChange={setQuery}
+        backTo="back"
+      >
+        {filters.length > 0 && (
+          <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+            {activeFilters.length > 0 && (
+              <TagChip
+                onClick={clearFilters}
+                icon={X}
+                size="sm"
+                variant="filter"
+                className="border-destructive/40 text-destructive"
+              >
+                Limpar
+              </TagChip>
+            )}
+            {filters.map((filter) => (
+              <TagChip
+                key={filter}
+                icon={getFilterIcon(filter)}
+                isActive={activeFilters.includes(filter)}
+                onClick={() => toggleFilter(filter)}
+                size="sm"
+                variant="filter"
+              >
+                {filter}
+              </TagChip>
+            ))}
           </div>
-          
-          {/* Barra de busca */}
-          <SearchBar 
-            value={query} 
-            onChange={setQuery} 
-            placeholder={placeholder} 
-          />
-
-          {/* Chips de filtro - unified TagChip with icons */}
-          {filters.length > 0 && (
-            <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
-              {activeFilters.length > 0 && (
-                <TagChip
-                  onClick={clearFilters}
-                  icon={X}
-                  size="sm"
-                  variant="filter"
-                  className="border-destructive/40 text-destructive"
-                >
-                  Limpar
-                </TagChip>
-              )}
-              {filters.map((filter) => (
-                <TagChip
-                  key={filter}
-                  icon={getFilterIcon(filter)}
-                  isActive={activeFilters.includes(filter)}
-                  onClick={() => toggleFilter(filter)}
-                  size="sm"
-                  variant="filter"
-                >
-                  {filter}
-                </TagChip>
-              ))}
-            </div>
-          )}
-        </div>
-      </header>
+        )}
+      </ListingTypeHeader>
 
       <main className="px-4 py-4">{renderContent()}</main>
     </div>
