@@ -13582,22 +13582,368 @@ export const obituaries: Obituary[] = [
 
 // ==================== MOCK DATA: PLACES ====================
 export const places: Place[] = [
-
+  {
+    id: "place001",
+    slug: "praca-matriz",
+    name: "Praça da Matriz",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    lat: -21.1878,
+    lng: -46.9753,
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipN8zZZ1YzVNOZdtbYZ7s2ZxvFHXzVQv3TnXzLXN=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipN8zZZ1YzVNOZdtbYZ7s2ZxvFHXzVQv3TnXzLXN=w800-h500-k-no",
+      "https://lh3.googleusercontent.com/p/AF1QipMpHQFpN1MwZGFKC3Y4PKQ8YgH2oMZA3rV7xTZ=w800-h500-k-no"
+    ],
+    shortDescription: "Praça central histórica com igreja matriz e coreto, ideal para passeios e eventos culturais.",
+    typeTag: "Praça",
+    openingHours: "24 horas",
+    priceLevel: "Grátis",
+    bestTimeToGo: "Final de tarde",
+    durationSuggestion: "1-2 horas",
+    highlights: ["Igreja Matriz", "Coreto histórico", "Feiras aos domingos"],
+    rating: 4.8,
+    reviewsCount: 127,
+    tags: ["Histórico", "Família", "Cultura"]
+  },
+  {
+    id: "place002",
+    slug: "cachoeira-do-cipo",
+    name: "Cachoeira do Cipó",
+    city: "Monte Santo de Minas",
+    neighborhood: "Zona Rural",
+    lat: -21.2012,
+    lng: -46.9834,
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipOv7G8K9LhF1TJ3WMxR4nZ6Hq8Y5xVP2mW9kLN=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipOv7G8K9LhF1TJ3WMxR4nZ6Hq8Y5xVP2mW9kLN=w800-h500-k-no"
+    ],
+    shortDescription: "Cachoeira natural com águas cristalinas, perfeita para banho e contato com a natureza.",
+    typeTag: "Natureza",
+    openingHours: "8h às 17h",
+    priceLevel: "$",
+    bestTimeToGo: "Manhã",
+    durationSuggestion: "3-4 horas",
+    highlights: ["Águas cristalinas", "Trilha ecológica", "Área para piquenique"],
+    rating: 4.6,
+    reviewsCount: 89,
+    tags: ["Ecoturismo", "Aventura", "Natureza"]
+  },
+  {
+    id: "place003",
+    slug: "mirante-serra-negra",
+    name: "Mirante da Serra Negra",
+    city: "Monte Santo de Minas",
+    neighborhood: "Serra Negra",
+    lat: -21.1756,
+    lng: -46.9912,
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipPKLmN2xR5Y7vW8Z3aB4cD5eF6gH7iJ8kL9mN=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipPKLmN2xR5Y7vW8Z3aB4cD5eF6gH7iJ8kL9mN=w800-h500-k-no"
+    ],
+    shortDescription: "Vista panorâmica de toda a região, ideal para ver o pôr do sol e fotografias.",
+    typeTag: "Mirante",
+    openingHours: "6h às 18h",
+    priceLevel: "Grátis",
+    bestTimeToGo: "Pôr do sol",
+    durationSuggestion: "1 hora",
+    highlights: ["Vista 360°", "Pôr do sol", "Fotografia"],
+    rating: 4.9,
+    reviewsCount: 156,
+    tags: ["Paisagem", "Romântico", "Fotografia"]
+  },
+  {
+    id: "place004",
+    slug: "museu-cafe",
+    name: "Museu do Café",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    lat: -21.1889,
+    lng: -46.9767,
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipQR2sT3uV4wX5yZ6aB7cD8eF9gH0iJ1kL2mN=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipQR2sT3uV4wX5yZ6aB7cD8eF9gH0iJ1kL2mN=w800-h500-k-no"
+    ],
+    shortDescription: "Museu que conta a história do café na região, com degustação e loja de produtos.",
+    typeTag: "Museu",
+    openingHours: "9h às 17h (Terça a Domingo)",
+    priceLevel: "$",
+    bestTimeToGo: "Manhã",
+    durationSuggestion: "2 horas",
+    highlights: ["Degustação de café", "História regional", "Loja de souvenirs"],
+    rating: 4.7,
+    reviewsCount: 203,
+    tags: ["Cultura", "Café", "História"]
+  }
 ];
 
 // ==================== MOCK DATA: CARS ====================
 export const cars: Car[] = [
-
+  {
+    id: "car001",
+    title: "Honda Civic EXL 2022",
+    brand: "Honda",
+    model: "Civic EXL",
+    year: 2022,
+    price: 145000,
+    mileageKm: 28000,
+    fuel: "flex",
+    transmission: "cvt",
+    condition: "seminovo",
+    doors: 4,
+    color: "Preto",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    sellerType: "concessionaria",
+    whatsapp: "5535999001122",
+    phone: "+55 35 99900-1122",
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipNHondaCivic2022ExampleImage=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipNHondaCivic2022ExampleImage=w800-h500-k-no",
+      "https://lh3.googleusercontent.com/p/AF1QipMHondaCivicInterior=w800-h500-k-no"
+    ],
+    description: "Honda Civic EXL 2022 impecável, único dono, todas as revisões na concessionária. Completo com teto solar, bancos em couro, central multimídia.",
+    features: ["Teto solar", "Bancos em couro", "Central multimídia", "Câmera de ré", "Sensor de estacionamento"],
+    tags: ["Seminovo", "Baixa km", "Garantia"]
+  },
+  {
+    id: "car002",
+    title: "Fiat Strada Freedom 2023",
+    brand: "Fiat",
+    model: "Strada Freedom",
+    year: 2023,
+    price: 98000,
+    mileageKm: 15000,
+    fuel: "flex",
+    transmission: "manual",
+    condition: "seminovo",
+    doors: 2,
+    color: "Branco",
+    city: "Monte Santo de Minas",
+    neighborhood: "Jd Santa Clara",
+    sellerType: "particular",
+    whatsapp: "5535998223344",
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipNFiatStrada2023Example=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipNFiatStrada2023Example=w800-h500-k-no"
+    ],
+    description: "Fiat Strada Freedom cabine simples, perfeita para trabalho e lazer. Motor 1.3 econômico, direção hidráulica, ar condicionado.",
+    features: ["Ar condicionado", "Direção hidráulica", "Rádio Bluetooth", "Caçamba revestida"],
+    tags: ["Pickup", "Econômico", "Trabalho"]
+  },
+  {
+    id: "car003",
+    title: "Volkswagen Polo TSI 2021",
+    brand: "Volkswagen",
+    model: "Polo TSI",
+    year: 2021,
+    price: 85000,
+    mileageKm: 42000,
+    fuel: "flex",
+    transmission: "automatico",
+    condition: "usado",
+    doors: 4,
+    color: "Prata",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    sellerType: "particular",
+    whatsapp: "5535997445566",
+    phone: "+55 35 99744-5566",
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipNVWPolo2021Example=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipNVWPolo2021Example=w800-h500-k-no"
+    ],
+    description: "VW Polo TSI 200 automático, motor turbo 1.0 muito econômico. IPVA 2024 pago, pneus novos, revisado.",
+    features: ["Câmbio automático", "Motor turbo", "Start/Stop", "Computador de bordo", "Airbags"],
+    tags: ["Econômico", "Automático", "Compacto"]
+  }
 ];
 
 // ==================== MOCK DATA: JOBS ====================
 export const jobs: Job[] = [
-
+  {
+    id: "job001",
+    jobTitle: "Vendedor(a) de Loja",
+    companyName: "Magazine Central",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    employmentType: "CLT",
+    workModel: "presencial",
+    salaryRange: "R$ 1.800 - R$ 2.500",
+    benefits: ["Vale transporte", "Vale refeição", "Comissão sobre vendas", "Plano de saúde"],
+    description: "Buscamos vendedor(a) proativo(a) para atendimento ao cliente, organização de vitrine e controle de estoque. Experiência em varejo será um diferencial.",
+    requirements: ["Ensino médio completo", "Experiência em vendas", "Boa comunicação"],
+    differentials: ["Conhecimento em moda", "Inglês básico"],
+    howToApply: "Envie seu currículo pelo WhatsApp ou compareça à loja com currículo impresso.",
+    whatsapp: "5535999112233",
+    email: "rh@magazinecentral.com.br",
+    postedAt: "2024-01-15",
+    expiresAt: "2024-02-15",
+    tags: ["Vendas", "CLT", "Presencial"],
+    logo: "https://lh3.googleusercontent.com/p/AF1QipNLogoMagazine=w200-h200-k-no"
+  },
+  {
+    id: "job002",
+    jobTitle: "Mecânico Automotivo",
+    companyName: "Auto Center Silva",
+    city: "Monte Santo de Minas",
+    neighborhood: "Jardim Boas Novas",
+    employmentType: "CLT",
+    workModel: "presencial",
+    salaryRange: "R$ 2.500 - R$ 4.000",
+    benefits: ["Vale transporte", "Almoço na empresa", "Ferramentas fornecidas"],
+    description: "Vaga para mecânico experiente em manutenção preventiva e corretiva de veículos leves. Conhecimento em injeção eletrônica é essencial.",
+    requirements: ["Experiência comprovada", "Curso de mecânica", "CNH B"],
+    differentials: ["Curso de injeção eletrônica", "Experiência com diagnóstico computadorizado"],
+    howToApply: "Compareça à oficina de segunda a sexta, das 8h às 17h.",
+    whatsapp: "5535998334455",
+    postedAt: "2024-01-18",
+    tags: ["Mecânica", "CLT", "Experiência"],
+    logo: "https://lh3.googleusercontent.com/p/AF1QipNLogoAutoCenter=w200-h200-k-no"
+  },
+  {
+    id: "job003",
+    jobTitle: "Atendente de Farmácia",
+    companyName: "Farmácia Popular",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    employmentType: "CLT",
+    workModel: "presencial",
+    salaryRange: "R$ 1.600 - R$ 2.200",
+    benefits: ["Vale transporte", "Vale alimentação", "Desconto em medicamentos"],
+    description: "Atendimento ao público, organização de prateleiras, controle de validade e operação de caixa. Treinamento oferecido pela empresa.",
+    requirements: ["Ensino médio completo", "Disponibilidade de horário", "Boa comunicação"],
+    differentials: ["Curso de atendente de farmácia", "Experiência anterior"],
+    howToApply: "Envie currículo por e-mail ou WhatsApp.",
+    whatsapp: "5535997556677",
+    email: "vagas@farmaciapopular.com.br",
+    postedAt: "2024-01-20",
+    expiresAt: "2024-02-20",
+    tags: ["Farmácia", "Atendimento", "CLT"],
+    logo: "https://lh3.googleusercontent.com/p/AF1QipNLogoFarmacia=w200-h200-k-no"
+  },
+  {
+    id: "job004",
+    jobTitle: "Desenvolvedor Full Stack",
+    companyName: "Tech Solutions MG",
+    city: "Monte Santo de Minas",
+    employmentType: "PJ",
+    workModel: "remoto",
+    salaryRange: "R$ 6.000 - R$ 10.000",
+    benefits: ["Horário flexível", "Home office", "Equipamento fornecido"],
+    description: "Desenvolvimento de aplicações web com React, Node.js e banco de dados. Participação em projetos para clientes de todo o Brasil.",
+    requirements: ["React/Next.js", "Node.js/TypeScript", "PostgreSQL ou MongoDB", "Git"],
+    differentials: ["AWS/GCP", "Docker", "Inglês técnico"],
+    howToApply: "Envie portfólio e currículo por e-mail.",
+    email: "careers@techsolutionsmg.com.br",
+    postedAt: "2024-01-22",
+    tags: ["Tecnologia", "Remoto", "PJ"]
+  }
 ];
 
 // ==================== MOCK DATA: REAL ESTATE ====================
 export const realEstate: RealEstate[] = [
-
+  {
+    id: "realestate001",
+    title: "Casa 3 Quartos com Quintal",
+    transactionType: "comprar",
+    propertyType: "casa",
+    price: 380000,
+    bedrooms: 3,
+    bathrooms: 2,
+    parkingSpots: 2,
+    areaM2: 180,
+    petFriendly: true,
+    furnished: "vazio",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    lat: -21.1885,
+    lng: -46.9761,
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipNCasa3QuartosExample=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipNCasa3QuartosExample=w800-h500-k-no",
+      "https://lh3.googleusercontent.com/p/AF1QipMCasaQuintal=w800-h500-k-no"
+    ],
+    description: "Linda casa com 3 quartos (1 suíte), sala ampla, cozinha planejada, quintal espaçoso com churrasqueira. Excelente localização, próximo a escolas e comércio.",
+    amenities: ["Churrasqueira", "Quintal gramado", "Cozinha planejada", "Aquecedor solar"],
+    whatsapp: "5535999778899",
+    phone: "+55 35 99977-8899",
+    availability: "imediata",
+    tags: ["Casa", "Quintal", "Família"]
+  },
+  {
+    id: "realestate002",
+    title: "Apartamento 2 Quartos - Novo",
+    transactionType: "alugar",
+    propertyType: "apartamento",
+    rentPrice: 1200,
+    condoFee: 150,
+    bedrooms: 2,
+    bathrooms: 1,
+    parkingSpots: 1,
+    areaM2: 65,
+    petFriendly: false,
+    furnished: "semimobiliado",
+    city: "Monte Santo de Minas",
+    neighborhood: "Jd Santa Clara",
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipNApto2QuartosExample=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipNApto2QuartosExample=w800-h500-k-no"
+    ],
+    description: "Apartamento novo em condomínio fechado, com 2 quartos, sala, cozinha americana e área de serviço. Condomínio com portaria 24h e playground.",
+    amenities: ["Portaria 24h", "Playground", "Salão de festas", "Interfone"],
+    whatsapp: "5535998001122",
+    availability: "imediata",
+    tags: ["Apartamento", "Aluguel", "Segurança"]
+  },
+  {
+    id: "realestate003",
+    title: "Terreno 300m² - Ótima Localização",
+    transactionType: "comprar",
+    propertyType: "terreno",
+    price: 95000,
+    bedrooms: 0,
+    bathrooms: 0,
+    parkingSpots: 0,
+    areaM2: 300,
+    petFriendly: true,
+    furnished: "vazio",
+    city: "Monte Santo de Minas",
+    neighborhood: "Jardim Boas Novas",
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipNTerrenoExample=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipNTerrenoExample=w800-h500-k-no"
+    ],
+    description: "Terreno plano de 300m², escriturado, pronto para construir. Rua asfaltada com água, luz e esgoto. Excelente para residência ou investimento.",
+    amenities: ["Escriturado", "Rua asfaltada", "Água e luz", "Esgoto"],
+    whatsapp: "5535997223344",
+    availability: "imediata",
+    tags: ["Terreno", "Investimento", "Plano"]
+  },
+  {
+    id: "realestate004",
+    title: "Kitnet Mobiliada - Centro",
+    transactionType: "alugar",
+    propertyType: "kitnet",
+    rentPrice: 650,
+    bedrooms: 1,
+    bathrooms: 1,
+    parkingSpots: 0,
+    areaM2: 28,
+    petFriendly: false,
+    furnished: "mobiliado",
+    city: "Monte Santo de Minas",
+    neighborhood: "Centro",
+    coverImage: "https://lh3.googleusercontent.com/p/AF1QipNKitnetExample=w800-h500-k-no",
+    gallery: [
+      "https://lh3.googleusercontent.com/p/AF1QipNKitnetExample=w800-h500-k-no"
+    ],
+    description: "Kitnet totalmente mobiliada, ideal para estudantes ou profissionais solteiros. Inclui cama, guarda-roupa, geladeira, fogão e ar condicionado.",
+    amenities: ["Mobiliada", "Ar condicionado", "Internet disponível", "Água inclusa"],
+    whatsapp: "5535996445566",
+    availability: "negociar",
+    tags: ["Kitnet", "Mobiliado", "Econômico"]
+  }
 ];
 
 export const filtersByNewType: Record<string, string[]> = {
