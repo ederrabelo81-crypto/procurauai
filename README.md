@@ -1,109 +1,104 @@
-# Procura UAI 🚀
+# Procura UAI
 
-O **Procura UAI** é uma plataforma digital hiperlocal projetada para conectar cidadãos, comércios e serviços em Monte Santo de Minas e região. Desenvolvido como um **Progressive Web App (PWA)**, o projeto oferece uma experiência fluida e otimizada para dispositivos móveis, funcionando como um guia completo da cidade na palma da mão.
+<div align="center">
 
----
+![Version](https://img.shields.io/badge/version-1.0.0--beta-blue)
+![License](https://img.shields.io/badge/license-Private-red)
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-## 🌟 Funcionalidades Principais
+**Plataforma regional de busca e descoberta de serviços, comércios e profissionais em Monte Santo de Minas e região**
 
-A plataforma é estruturada em torno de uma **Taxonomia Central de 3 camadas** (Tipo de Listagem → Categoria → Tags), permitindo uma navegação intuitiva e buscas precisas.
+[Demo](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) • [Documentação](#-documentação) • [Contribuir](#-como-contribuir) • [Roadmap](#-roadmap)
 
-| Módulo | Descrição |
-| :--- | :--- |
-| **🍽️ Comer Agora** | Foco em urgência alimentar, destacando estabelecimentos abertos e opções de delivery. |
-| **🏪 Negócios & Serviços** | Guia completo de comércio local, prestadores de serviço e profissionais liberais. |
-| **🛒 Classificados** | Espaço para compra, venda, troca e doações entre membros da comunidade. |
-| **💸 Ofertas** | Vitrine de descontos, cupons e promoções ativas por tempo limitado. |
-| **📅 Agenda da Cidade** | Calendário de eventos, shows, festas religiosas e workshops locais. |
-| **📍 Lugares** | Guia turístico e de lazer, destacando praças, parques e pontos históricos. |
-| **🏠 Imóveis** | Portal de aluguel e venda de casas, apartamentos e terrenos na região. |
-| **📰 Notícias & Utilidade** | Informações locais, comunicados oficiais e notas de falecimento (serviço comunitário). |
-| **🚗 Automotivo** | Compra e venda de veículos, motos e serviços relacionados. |
-| **💼 Empregos** | Mural de vagas e oportunidades profissionais locais. |
+</div>
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 📖 Sobre o Projeto
 
-O projeto utiliza o que há de mais moderno no ecossistema de desenvolvimento web para garantir performance e escalabilidade:
+O **Procura UAI** é uma plataforma digital hiperlocal projetada para conectar cidadãos, comércios e serviços. Desenvolvido como um **Progressive Web App (PWA)**, o projeto oferece uma experiência fluida e otimizada para dispositivos móveis, funcionando como um guia completo da cidade na palma da mão.
 
-*   **Framework:** [React](https://reactjs.org/) com [TypeScript](https://www.typescriptlang.org/)
-*   **Build Tool:** [Vite](https://vitejs.dev/)
-*   **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
-*   **Componentes UI:** [shadcn/ui](https://ui.shadcn.com/) (baseado em Radix UI)
-*   **Gerenciamento de Estado & Queries:** [TanStack Query (React Query)](https://tanstack.com/query/latest)
-*   **Roteamento:** [React Router DOM v6](https://reactrouter.com/)
-*   **Ícones:** [Lucide React](https://lucide.dev/)
-*   **Animações:** [Framer Motion](https://www.framer.com/motion/) e `tailwindcss-animate`
-*   **Testes:** [Vitest](https://vitest.dev/) e [Testing Library](https://testing-library.com/)
+Com foco em simplicidade e acessibilidade, o projeto facilita a descoberta de negócios locais através de uma taxonomia inteligente, busca eficiente e navegação intuitiva, fortalecendo a economia regional de Monte Santo de Minas.
+
+### 🎯 Diferenciais
+
+- ✨ **Foco Regional** - Especialmente desenvolvido para Monte Santo de Minas e região.
+- 📍 **Taxonomia de 3 Camadas** - Organização precisa por Tipo de Listagem, Categoria e Tags.
+- 📱 **Mobile First & PWA** - Instalável e otimizado para smartphones.
+- 🚀 **Performance** - Construído com Vite e React para carregamento instantâneo.
+- 🎨 **Interface Moderna** - Design limpo utilizando shadcn/ui e Tailwind CSS.
 
 ---
 
-## 📂 Estrutura do Projeto
+## ✨ Funcionalidades
 
-A arquitetura segue padrões de organização por responsabilidade:
+### MVP v1.0 (Concluído/Em Ajuste)
+
+- [x] **Taxonomia Centralizada:** Sistema de 3 camadas para categorização precisa.
+- [x] **Busca Global:** Barra de pesquisa inteligente com filtros por categoria.
+- [x] **Módulos Especializados:**
+    - `Comer Agora` (Urgência alimentar/Delivery)
+    - `Negócios & Serviços` (Guia comercial)
+    - `Classificados` (Compra/Venda/Doação)
+    - `Agenda` (Eventos locais)
+    - `Notícias & Falecimentos` (Utilidade pública)
+- [x] **Páginas de Detalhes:** Visualização rica de informações para cada tipo de negócio.
+- [x] **PWA Capabilities:** Manifesto e ícones configurados para instalação.
+- [x] **Dark Mode:** Suporte completo a temas claro e escuro.
+
+### Phase 2.0 (Próximos Passos)
+
+- [ ] **Sistema de Favoritos:** Salvar estabelecimentos e eventos preferidos.
+- [ ] **Geolocalização Avançada:** Integração com mapas para rotas diretas.
+- [ ] **Publicação Direta:** Fluxo para usuários cadastrarem seus próprios anúncios.
+- [ ] **Reviews & Avaliações:** Sistema de feedback da comunidade para negócios.
+- [ ] **Filtros Dinâmicos:** Refinamento de busca por tags específicas (ex: "Aberto Agora", "Aceita Cartão").
+
+### Phase 3.0 (Visão de Futuro)
+
+- [ ] **Dashboard para Lojistas:** Painel para gerenciamento de ofertas e métricas.
+- [ ] **Chat Integrado:** Comunicação direta via WhatsApp ou chat interno.
+- [ ] **Notificações Push:** Alertas de novas ofertas e eventos urgentes.
+- [ ] **Marketplace de Serviços:** Agendamento e contratação direta pela plataforma.
+
+---
+
+## 🛠️ Tecnologias
+
+O projeto utiliza o que há de mais moderno no ecossistema web:
+
+- **Core:** [React 18](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build:** [Vite](https://vitejs.dev/)
+- **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
+- **Componentes:** [shadcn/ui](https://ui.shadcn.com/)
+- **Estado:** [TanStack Query](https://tanstack.com/query/latest)
+- **Roteamento:** [React Router 6](https://reactrouter.com/)
+- **Ícones:** [Lucide React](https://lucide.dev/)
+
+---
+
+## 📂 Estrutura de Pastas
 
 ```text
 src/
-├── assets/          # Ativos estáticos (ícones, imagens)
-├── components/      # Componentes React reutilizáveis
-│   ├── cards/       # Cards específicos para cada tipo de listagem
-│   ├── home/        # Blocos e seções da página inicial
-│   ├── listing/     # Componentes para páginas de detalhes
-│   └── ui/          # Componentes de interface base (shadcn)
-├── data/            # Mock data e fontes de dados estáticas
-├── hooks/           # Hooks customizados (Busca, Favoritos, PWA, etc.)
-├── lib/             # Utilitários, taxonomia e configurações centrais
-├── pages/           # Páginas da aplicação (Views)
-└── test/            # Configurações e arquivos de teste
+├── components/
+│   ├── cards/       # Cards específicos (Business, Deal, Event, etc.)
+│   ├── home/        # Blocos da página inicial (ComerAgora, Ofertas, etc.)
+│   ├── listing/     # Seções de detalhes (Hero, Map, Reviews)
+│   └── ui/          # Componentes base (Buttons, Inputs, etc.)
+├── hooks/           # Lógica reutilizável (Search, PWA, Theme)
+├── lib/             # Taxonomia, utilitários e constantes
+└── pages/           # Views principais da aplicação
 ```
 
 ---
 
-## 🚀 Como Executar Localmente
+## 🚀 Como Executar
 
-### Pré-requisitos
-
-*   [Node.js](https://nodejs.org/) (versão 18 ou superior)
-*   Gerenciador de pacotes (npm, pnpm ou bun)
-
-### Instalação
-
-1.  Clone o repositório:
-    ```bash
-    git clone https://github.com/ederrabelo81-crypto/procurauai.git
-    ```
-
-2.  Acesse o diretório:
-    ```bash
-    cd procurauai
-    ```
-
-3.  Instale as dependências:
-    ```bash
-    npm install
-    ```
-
-4.  Inicie o servidor de desenvolvimento:
-    ```bash
-    npm run dev
-    ```
-
----
-
-## 📱 PWA (Progressive Web App)
-
-O Procura UAI foi concebido para ser instalado no smartphone do usuário sem a necessidade de lojas de aplicativos (App Store/Play Store).
-
-*   **Offline Ready:** Cache de recursos essenciais.
-*   **Mobile First:** Interface otimizada para toque e navegação por gestos.
-*   **Instalável:** Suporte a manifesto e service workers para adição à tela de início.
-
----
-
-## 📄 Licença
-
-Este projeto está sob a licença privada do proprietário. Consulte o arquivo `package.json` para mais detalhes sobre a versão e dependências.
+1. Clone o repositório: `git clone https://github.com/ederrabelo81-crypto/procurauai.git`
+2. Instale as dependências: `npm install`
+3. Inicie o dev server: `npm run dev`
 
 ---
 
