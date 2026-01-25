@@ -24,13 +24,9 @@ export default function Index() {
       {/* Header fixo com busca global */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
         <div className="px-4 py-4">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1">
-              <div className="flex items-center h-16 mb-2">
-                <img src="/logo.svg" alt="Procura UAI" className="h-full w-auto" />
-              </div>
-              <LocationSelector />
-            </div>
+          <div className="flex flex-col gap-3 mb-4">
+            <img src="/logo.svg" alt="Procura UAI" className="h-14 w-auto object-contain object-left" />
+            <LocationSelector />
           </div>
           {/* Busca global - sempre visível */}
           <SearchBar 
