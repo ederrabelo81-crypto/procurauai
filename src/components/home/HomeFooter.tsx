@@ -35,7 +35,7 @@ export function HomeFooter() {
   return (
     <footer className="bg-card border-t border-border mt-8 pb-24">
       <div className="px-4 py-6">
-        <div className="flex items-center h-12 mb-6 opacity-80 grayscale hover:grayscale-0 transition-all">
+        <div className="flex items-center h-10 mb-6 opacity-80 grayscale hover:grayscale-0 transition-all">
           <img src="/logo.svg" alt="Procura UAI" className="h-full w-auto" />
         </div>
         {/* CTA destacado */}
