@@ -25,7 +25,7 @@ import { ListingCard } from '@/components/cards/ListingCard';
 import { DealCard } from '@/components/cards/DealCard';
 import { EventCard } from '@/components/cards/EventCard';
 import { NewsCard } from '@/components/cards/NewsCard';
-import { categories, filtersByCategory } from '@/data/mockData';
+import { categories, filtersByCategory, Business, Listing, Deal, Event, News } from '@/data/mockData';
 import { normalizeText } from '@/lib/tagUtils';
 import { useSearch, ContentType } from '@/hooks/useSearch';
 
@@ -339,22 +339,24 @@ export default function Search() {
           <section>
             <PaginatedList
               items={singleTypeItems}
+              totalCount={singleTypeItems.length}
               pageSize={PAGE_SIZE}
               currentPage={currentPage}
               onLoadMore={handleLoadMore}
-              isLoadingMore={isLoadingMore}
-              renderItem={(item) => {
+              isLoading={isLoadingMore}
+              keyExtractor={(item: unknown) => (item as { id: string }).id}
+              renderItem={(item: unknown) => {
                 switch (activeType) {
                   case 'business':
-                    return <BusinessCard business={item} />;
+                    return <BusinessCard business={item as Business} />;
                   case 'listing':
-                    return <ListingCard listing={item} />;
+                    return <ListingCard listing={item as Listing} />;
                   case 'deal':
-                    return <DealCard deal={item} />;
+                    return <DealCard deal={item as Deal} />;
                   case 'event':
-                    return <EventCard event={item} />;
+                    return <EventCard event={item as Event} />;
                   case 'news':
-                    return <NewsCard news={item} />;
+                    return <NewsCard news={item as News} />;
                   default:
                     return null;
                 }
