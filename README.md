@@ -254,6 +254,6 @@ Eder Rabelo (@ederrabelo81-crypto)
 Comunidades de desenvolvedores Vue.js e TypeScript<br>
 Contributors e early adopters<br>
 Associações comerciais locais parceiras<br>
-Feito com ❤️ para conectar comunidades regionais 
 
-Desenvolvido com ❤️ para a comunidade de **Monte Santo de Minas**
+
+Desenvolvido com ❤️ para a comunidade de **Monte Santo de Minas** e região
