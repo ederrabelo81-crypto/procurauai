@@ -18,6 +18,8 @@ import ObituaryDetail from "./pages/ObituaryDetail";
 import Publish from "./pages/Publish";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import GoogleMaps from "./components/GoogleMaps";
+
 
 // List pages (novos tipos)
 import PlacesList from "./pages/PlacesList";
@@ -53,6 +55,7 @@ const App = () => (
               <Route path="/falecimento/:id" element={<ObituaryDetail />} />
               <Route path="/publicar" element={<Publish />} />
               <Route path="/perfil" element={<Profile />} />
+              <Route path="/mapa" element={<GoogleMaps />} />
 
               {/* Novos tipos - LISTA */}
               <Route path="/lugares" element={<PlacesList />} />
