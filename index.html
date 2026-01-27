@@ -1,35 +1,43 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-    <meta name="theme-color" content="#0077B6" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Procura UAI" />
-    <meta name="description" content="Procura UAI - Sua cidade na palma da mão. Comércios, classificados, ofertas, eventos e notícias locais em Monte Santo de Minas e região." />
-    
-    <meta property="og:title" content="Procura UAI" />
-    <meta property="og:description" content="Sua cidade na palma da mão. Comércios, classificados, ofertas, eventos e notícias locais." />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="pt_BR" />
-    <meta property="og:site_name" content="Procura UAI" />
-    
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Procura UAI" />
-    <meta name="twitter:description" content="Sua cidade na palma da mão. Comércios, classificados, ofertas, eventos e notícias locais." />
-    
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
-    <link rel="canonical" href="https://procurauai.lovable.app" />
-    
-    <title>Procura UAI</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Procura UAI - Firebase Maps Test</title>
+    <style>
+      #map {
+        height: 600px;
+        width: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+      .info-box {
+        padding: 10px;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div class="info-box">
+      <h1>Procura UAI - Teste de Geolocalização</h1>
+      <p>Clique no mapa para adicionar um novo local ou visualize os existentes.</p>
+      <p id="status-message"></p>
+    </div>
+    <div id="map"></div>
+
+    <!-- Carrega a Google Maps JavaScript API de forma assíncrona -->
+    <!-- Substitua '''YOUR_GOOGLE_MAPS_API_KEY''' pela sua chave de API -->
+    <!-- Adicione '''places''' à biblioteca para a API de geocodificação/lugares -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap&libraries=places"
+      defer
+    ></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
