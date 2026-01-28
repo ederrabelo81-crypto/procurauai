@@ -30,7 +30,7 @@ function guessCategorySlug(rawData: any): string {
 }
 
 // Função helper para normalizar dados da API
-function normalizeBusinessData(rawData: any): Business {
+export function normalizeBusinessData(rawData: any): Business {
   return {
     id: rawData.id || `temp_${Date.now()}`,
     name: rawData.name || 'Sem nome',
