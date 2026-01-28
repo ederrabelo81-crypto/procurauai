@@ -32,6 +32,7 @@ import PlaceDetail from "./pages/PlaceDetail";
 import CarDetail from "./pages/CarDetail";
 import JobDetail from "./pages/JobDetail";
 import RealEstateDetail from "./pages/RealEstateDetail";
+import DebugEnv from "./pages/DebugEnv";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/carros/:id" element={<CarDetail />} />
               <Route path="/empregos/:id" element={<JobDetail />} />
               <Route path="/imoveis/:id" element={<RealEstateDetail />} />
+              <Route path="/debug-env" element={<DebugEnv />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
