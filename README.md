@@ -1,233 +1,172 @@
-# Procura UAI
 
-<div align="center">
+# Procurauai - O seu guia comercial local
 
-![Version](https://img.shields.io/badge/version-1.0.0--beta-blue)
-![License](https://img.shields.io/badge/license-Private-red)
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+![Capa](https://procurauai.com.br/assets/img/og-image.png)
 
-**Plataforma regional de busca e descoberta de serviços, comércios e profissionais em Monte Santo de Minas e região**
+## 🚀 Sobre o Projeto
 
-[Demo](https://lovable.dev/projects/b00c6e7b-538e-41f7-adb4-d192ac6eb395) • [Documentação](#-documentação) • [Contribuir](#-como-contribuir) • [Roadmap](#-roadmap)
+O Procurauai é um guia comercial completo e moderno para a cidade de Monte Santo de Minas e região. A plataforma tem como objetivo conectar consumidores a negócios, serviços e eventos locais de forma rápida, intuitiva e eficiente.
 
-</div>
+### ✨ Funcionalidades Principais
 
----
+-   **Busca Inteligente:** Encontre o que precisa com filtros avançados e sugestões em tempo real.
+-   **Listagens Detalhadas:** Informações completas sobre cada negócio, incluindo fotos, horários, contato e localização no mapa.
+-   **Avaliações e Comentários:** Compartilhe suas experiências e ajude outros usuários.
+-   **Eventos e Ofertas:** Fique por dentro de tudo que acontece na cidade.
+-   **Perfil de Negócio:** Ferramentas para empresários gerenciarem suas listagens e interagirem com clientes.
 
-## 📖 Sobre o Projeto
+### 🛠️ Tecnologias Utilizadas
 
-O **Procura UAI** é uma plataforma digital hiperlocal projetada para conectar cidadãos, comércios e serviços. Desenvolvido como um **Progressive Web App (PWA)**, o projeto oferece uma experiência fluida e otimizada para dispositivos móveis, funcionando como um guia completo da cidade na palma da mão.
-
-Com foco em simplicidade e acessibilidade, o projeto facilita a descoberta de negócios locais através de uma taxonomia inteligente, busca eficiente e navegação intuitiva, fortalecendo a economia regional de Monte Santo de Minas.
-
-### 🎯 Diferenciais
-
-- ✨ **Foco Regional** - Especialmente desenvolvido para Monte Santo de Minas e região.
-- 📍 **Taxonomia de 3 Camadas** - Organização precisa por Tipo de Listagem, Categoria e Tags.
-- 📱 **Mobile First & PWA** - Instalável e otimizado para smartphones.
-- 🚀 **Performance** - Construído com Vite e React para carregamento instantâneo.
-- 🎨 **Interface Moderna** - Design limpo utilizando shadcn/ui e Tailwind CSS.
-
----
-
-## ✨ Funcionalidades
-
-### MVP v1.0 (Concluído/Em Ajuste)
-
-- [x] **Taxonomia Centralizada:** Sistema de 3 camadas para categorização precisa.
-- [x] **Busca Global:** Barra de pesquisa inteligente com filtros por categoria.
-- [x] **Módulos Especializados:**
-    - `Comer Agora` (Urgência alimentar/Delivery)
-    - `Negócios & Serviços` (Guia comercial)
-    - `Classificados` (Compra/Venda/Doação)
-    - `Agenda` (Eventos locais)
-    - `Notícias & Falecimentos` (Utilidade pública)
-    - `Empregos` (opprtinidades de trabalho na região)
-- [x] **Páginas de Detalhes:** Visualização rica de informações para cada tipo de negócio.
-- [x] **PWA Capabilities:** Manifesto e ícones configurados para instalação.
-- [x] **Dark Mode:** Suporte completo a temas claro e escuro.
-
-### Phase 2.0 (Próximos Passos)
-
-- [ ] **CMS Headless:** Usa WordPress no backend para entrada de dados.
-- [ ] **Sistema de Favoritos:** Salvar estabelecimentos e eventos preferidos.
-- [ ] **Geolocalização Avançada:** Integração com mapas para rotas diretas.
-- [ ] **Publicação Direta:** Fluxo para usuários cadastrarem seus próprios anúncios.
-- [ ] **Reviews & Avaliações:** Sistema de feedback da comunidade para negócios.
-- [ ] **Filtros Dinâmicos:** Refinamento de busca por tags específicas (ex: "Aberto Agora", "Aceita Cartão").
-
-### Phase 3.0 (Visão de Futuro)
-
-- [ ] **Dashboard para Lojistas:** Painel para gerenciamento de ofertas e métricas.
-- [ ] **Chat Integrado:** Comunicação direta via WhatsApp ou chat interno.
-- [ ] **Notificações Push:** Alertas de novas ofertas e eventos urgentes.
-- [ ] **Marketplace de Serviços:** Agendamento e contratação direta pela plataforma.
+-   **Frontend:**
+    -   [React](https://react.dev/)
+    -   [Vite](https://vitejs.dev/)
+    -   [TypeScript](https://www.typescriptlang.org/)
+    -   [Tailwind CSS](https://tailwindcss.com/)
+    -   [Shadcn UI](https://ui.shadcn.com/)
+-   **Backend & Infraestrutura:**
+    -   [Firebase](https://firebase.google.com/) (Firestore, Authentication, Storage)
+    -   [Vercel](https://vercel.com/) (Hospedagem e Deploy)
+-   **APIs Externas:**
+    -   [Google Maps API](https://developers.google.com/maps)
 
 ---
 
-## 🛠️ Tecnologias
+## 💻 Para Desenvolvedores
 
-O projeto utiliza o que há de mais moderno no ecossistema web:
+### 📋 Pré-requisitos
 
-- **Core:** [React 18](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
-- **Build:** [Vite](https://vitejs.dev/)
-- **Estilização:** [Tailwind CSS](https://tailwindcss.com/)
-- **Componentes:** [shadcn/ui](https://ui.shadcn.com/)
-- **Estado:** [TanStack Query](https://tanstack.com/query/latest)
-- **Roteamento:** [React Router 6](https://reactrouter.com/)
-- **Ícones:** [Lucide React](https://lucide.dev/)
+-   [Node.js](https://nodejs.org/) (versão 18 ou superior)
+-   [npm](https://www.npmjs.com/) (geralmente vem com o Node.js)
+-   Conta no [Firebase](https://firebase.google.com/) e um projeto criado.
+-   Conta na [Vercel](https://vercel.com/) para deploy.
+-   Chave de API do [Google Maps](https://developers.google.com/maps/gmp-get-started).
 
----
+### ⚙️ Instalação e Configuração
 
-## 📂 Estrutura de Pastas
+1.  **Clone o repositório:**
 
-```text
-src/
-├── components/
-│   ├── cards/       # Cards específicos (Business, Deal, Event, etc.)
-│   ├── home/        # Blocos da página inicial (ComerAgora, Ofertas, etc.)
-│   ├── listing/     # Seções de detalhes (Hero, Map, Reviews)
-│   └── ui/          # Componentes base (Buttons, Inputs, etc.)
-├── hooks/           # Lógica reutilizável (Search, PWA, Theme)
-├── lib/             # Taxonomia, utilitários e constantes
-└── pages/           # Views principais da aplicação
-```
+    ```bash
+    git clone https://github.com/ederrabelo81-crypto/procurauai.git
+    cd procurauai
+    ```
 
----
+2.  **Instale as dependências:**
 
-## 🚀 Como Executar
+    ```bash
+    npm install
+    ```
 
-### Pré-requisitos
+3.  **Configuração das Variáveis de Ambiente:**
 
-- Node.js >= 18.x
-- npm/yarn/pnpm
-- Docker e Docker Compose (opcional)
-- PostgreSQL 14+ com extensão PostGIS
+    -   Crie um arquivo `.env.local` na raiz do projeto.
+    -   Adicione as seguintes variáveis com as suas respectivas chaves obtidas nos serviços (Firebase, Google Maps):
 
-### Instalação
+        ```
+        # Configuração do Firebase
+        VITE_API_KEY=sua_api_key_do_firebase
+        VITE_AUTH_DOMAIN=seu_auth_domain_do_firebase
+        VITE_PROJECT_ID=seu_project_id_do_firebase
+        VITE_STORAGE_BUCKET=seu_storage_bucket_do_firebase
+        VITE_MESSAGING_SENDER_ID=seu_messaging_sender_id_do_firebase
+        VITE_APP_ID=seu_app_id_do_firebase
+
+        # Chave da API do Google Maps (opcional, para funcionalidades de mapa)
+        VITE_GOOGLE_MAPS_API_KEY=sua_api_key_do_google_maps
+        ```
+
+4.  **Execute o servidor de desenvolvimento:**
+
+    ```bash
+    npm run dev
+    ```
+
+    O servidor estará disponível em `http://localhost:5173`.
+
+### 📦 Build para Produção
+
+Para criar uma versão otimizada do projeto para produção, execute:
 
 ```bash
-# Clone o repositório
-git clone https://github.com/ederrabelo81-crypto/procurauai.git
-cd procurauai
-
-# Instale as dependências do frontend
-cd frontend
-npm install
-
-# Instale as dependências do backend
-cd ../backend
-npm install
-
-# Configure as variáveis de ambiente
-cp .env.example .env
-# Edite o arquivo .env com suas configurações
-
-# Inicie o banco de dados (Docker)
-
-docker-compose up -d postgres redis
-
-# Execute as migrations
-npm run migrate
-
-# Inicie o servidor de desenvolvimento
-npm run dev
+npm run build
 ```
 
-**Usando Docker**  (Recomendado)
-```bash
-#Clone o repositório
-git clone https://github.com/ederrabelo81-crypto/procurauai.git
-cd procurauai
+A saída será gerada na pasta `dist/`.
 
-#Configure o .env
-cp .env.example .env
+### 🚀 Deploy
 
-#Suba todos os serviços
-docker-compose up -d
+O deploy é feito automaticamente pela Vercel a cada `push` na branch `main`.
 
-#Acesse a aplicação
-Frontend: http://localhost:3000
-Backend API: http://localhost:3001
-PGAdmin: http://localhost:5050
-```
-📁 **Estrutura do Projeto**
-```bash
-procurauai/
-├── frontend/                 # Aplicação Vue 3
-│   ├── src/
-│   │   ├── assets/          # Imagens, fontes, ícones
-│   │   ├── components/      # Componentes reutilizáveis
-│   │   │   ├── ui/         # Componentes base (Button, Input, etc)
-│   │   │   ├── layout/     # Header, Footer, Sidebar
-│   │   │   └── features/   # Componentes de features
-│   │   ├── views/          # Páginas/Views
-│   │   ├── stores/         # Pinia stores
-│   │   ├── composables/    # Vue composables
-│   │   ├── utils/          # Funções utilitárias
-│   │   ├── types/          # TypeScript types
-│   │   ├── router/         # Vue Router config
-│   │   └── App.vue
-│   ├── public/
-│   ├── tests/
-│   └── package.json
-│
-├── backend/                  # API Node.js
-│   ├── src/
-│   │   ├── controllers/    # Controllers
-│   │   ├── models/         # Modelos do banco
-│   │   ├── routes/         # Rotas da API
-│   │   ├── middleware/     # Middlewares
-│   │   ├── services/       # Lógica de negócio
-│   │   ├── utils/          # Utilitários
-│   │   ├── config/         # Configurações
-│   │   └── server.ts
-│   ├── migrations/         # Database migrations
-│   ├── tests/
-│   └── package.json
-│
-├── docs/                     # Documentação adicional
-│   ├── API.md              # Documentação da API
-│   ├── DESIGN_SYSTEM.md    # Design system
-│   └── CONTRIBUTING.md     # Guia de contribuição
-│
-├── docker-compose.yml
-├── .github/
-│   └── workflows/          # GitHub Actions
-├── README.md
-└── LICENSE
-```
+1.  **Configure as Variáveis de Ambiente na Vercel:**
+
+    -   Acesse o painel do seu projeto na Vercel.
+    -   Vá para `Settings` -> `Environment Variables`.
+    -   Adicione as mesmas variáveis do seu arquivo `.env.local` (ex: `VITE_API_KEY`, `VITE_GOOGLE_MAPS_API_KEY`, etc.) com os seus respectivos valores.
+
+2.  **Faça o push do seu código:**
+
+    ```bash
+    git push origin main
+    ```
+
+    A Vercel irá iniciar um novo build e deploy automaticamente.
 
 ---
 
-### 📚 Documentação 
+## 🗺️ Roadmap do Projeto
 
-GET    /api/v1/search?q={termo}&lat={lat}&lng={lng}&radius=15<br>
-GET    /api/v1/categories<br>
-GET    /api/v1/business/{id}<br>
-GET    /api/v1/reviews/{businessId}<br>
-POST   /api/v1/reviews (auth required)<br>
-GET    /api/v1/user/profile (auth required)<br>
-POST   /api/v1/auth/register<br>
-POST   /api/v1/auth/login<br>
-POST   /api/v1/favorites (auth required)<br>
-GET    /api/v1/favorites (auth required)<br>
-
+-   [ ] **Módulo de Anúncios:** Sistema de banners e destaques pagos.
+-   [ ] **Integração com WhatsApp Business API:** Agendamentos e pedidos direto da plataforma.
+-   [ ] **App PWA (Progressive Web App):** Melhorias para instalação no celular e uso offline.
+-   [ ] **Painel Administrativo:** Gestão de usuários, listagens e conteúdo.
+-   [ ] **Sistema de Notificações:** Alertas sobre novas ofertas, eventos e mensagens.
 
 ---
-### 🤝 Como Contribuir  
-Contribuições são muito bem-vindas! <br>
-**Para contribuir:<br>**
-1. Fork o projeto<br>
-2. Crie uma branch para sua feature (git checkout -b feature/MinhaFeature)<br>
-3. Commit suas mudanças (git commit -m 'feat: adiciona nova funcionalidade')<br>
-4. Push para a branch (git push origin feature/MinhaFeature)<br>
-5. Abra um Pull Request<br>
 
+## 🤝 Como Contribuir
+
+Contribuições são o que fazem a comunidade de código aberto um lugar incrível para aprender, inspirar e criar. Qualquer contribuição que você fizer será **muito apreciada**.
+
+1.  **Faça um Fork** do projeto.
+2.  **Crie uma Branch** para sua Feature (`git checkout -b feature/AmazingFeature`).
+3.  **Faça o Commit** de suas mudanças (`git commit -m 'feat: Add some AmazingFeature'`).
+4.  **Faça o Push** para a Branch (`git push origin feature/AmazingFeature`).
+5.  **Abra um Pull Request**.
 
 ---
-### Padrões de Commit  
+
+## 📄 Licença
+
+Distribuído sob a Licença MIT. Veja `LICENSE` para mais informações.
+
+---
+
+## 🏆 Reconhecimento e Padrões
+
+-   **Estrutura de Pastas:** Mantemos uma estrutura organizada para facilitar a manutenção e escalabilidade.
+
+    ```
+    /src
+    ├── assets         # Imagens, fontes, etc.
+    ├── components     # Componentes React reutilizáveis
+    │   ├── ui         # Componentes de UI genéricos (botões, cards)
+    │   └── common     # Componentes de domínio específico
+    ├── data           # Mock data, dados estáticos
+    ├── hooks          # React Hooks customizados
+    ├── lib            # Funções utilitárias, configs
+    ├── pages          # Componentes de página (rotas)
+    ├── services       # Lógica de negócio, chamadas de API
+    ├── styles         # Estilos globais
+    └── App.tsx        # Componente principal
+    └── main.tsx       # Ponto de entrada da aplicação
+    ```
+
+-   **Qualidade de Código:**
+    -   **ESLint:** Para garantir um padrão de código consistente.
+    -   **Prettier:** Para formatação automática do código.
+
+---
+
+### Padrões de Commit
 **Seguimos Conventional Commits:<br>**
 feat: nova funcionalidade <br>
 fix: correção de bug <br>
@@ -239,17 +178,18 @@ chore: tarefas de manutenção <br>
 
 
 ---
+
 ### 👥 Time <br>
 Criado e mantido por:<br>
 Eder Rabelo (@ederrabelo81-crypto)
 
-### 📞 Contato  
+### 📞 Contato
 
 📧 Email: ederrabelo81@gmail.com<br>
 💬 Issues: GitHub Issues<br>
 📱 WhatsApp: (11) 98193-7266<br>
 
-### 🙏 Agradecimentos  
+### 🙏 Agradecimentos
 
 Comunidades de desenvolvedores Vue.js e TypeScript<br>
 Contributors e early adopters<br>
