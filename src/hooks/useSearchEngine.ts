@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { auth, db } from '@/firebase'; 
-import { listings, deals, events, news } from '@/data/mockData';
+import { listings, deals, events, news, businesses as mockBusinesses } from '@/data/mockData';
 import { matchesAllFilters, normalizeText } from '@/lib/tagUtils';
 import { getBusinessTags } from '@/lib/businessTags';
 import { LISTING_TYPES } from '@/lib/taxonomy';
@@ -34,18 +34,23 @@ function useFirestoreBusinesses() {
   useEffect(() => {
     const fetchBusinesses = async () => {
       setIsLoading(true);
+      const fallbackBusinesses = mockBusinesses.map((business) => normalizeBusinessData(business));
       try {
         if (!auth.currentUser) {
-          await signInAnonymously(auth);
+          try {
+            await signInAnonymously(auth);
+          } catch (authError) {
+            console.warn("Falha ao autenticar anonimamente. Continuando sem autenticação.", authError);
+          }
         }
         const querySnapshot = await getDocs(collection(db, 'businesses'));
         const businessesData = querySnapshot.docs.map(doc => 
           normalizeBusinessData({ ...doc.data(), id: doc.id })
         );
-        setBusinesses(businessesData);
+        setBusinesses(businessesData.length > 0 ? businessesData : fallbackBusinesses);
       } catch (error) {
         console.error("Erro ao buscar negócios do Firestore:", error);
-        setBusinesses([]); 
+        setBusinesses(fallbackBusinesses); 
       }
       setIsLoading(false);
     };

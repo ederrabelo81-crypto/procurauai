@@ -15,6 +15,8 @@ import { EventsSection } from '@/components/listing/EventsSection';
 import { ReviewsSection } from '@/components/listing/ReviewsSection';
 import { TagChip } from '@/components/ui/TagChip';
 import { useFavorites } from '@/hooks/useFavorites';
+import { businesses as mockBusinesses } from '@/data/mockData';
+import { normalizeBusinessData } from '@/lib/dataNormalization';
 
 export default function BusinessDetail() {
   const { id } = useParams<{ id: string }>();
@@ -32,21 +34,43 @@ export default function BusinessDetail() {
       if (!id) return;
       setLoading(true);
 
+      const fallbackBusinesses = mockBusinesses.map((business) => normalizeBusinessData(business));
+      const loadFallbackData = () => {
+        const fallbackBusiness = fallbackBusinesses.find((item) => item.id === id);
+        if (!fallbackBusiness) {
+          setBusiness(null);
+          setRelatedBusinesses([]);
+          setBusinessDeals([]);
+          setBusinessEvents([]);
+          return;
+        }
+        setBusiness(fallbackBusiness);
+        setRelatedBusinesses(
+          fallbackBusinesses.filter((item) => item.categorySlug === fallbackBusiness.categorySlug && item.id !== id).slice(0, 6)
+        );
+        setBusinessDeals([]);
+        setBusinessEvents([]);
+      };
+
       try {
         if (!auth.currentUser) {
-          await signInAnonymously(auth);
+          try {
+            await signInAnonymously(auth);
+          } catch (authError) {
+            console.warn("Falha ao autenticar anonimamente. Continuando sem autenticação.", authError);
+          }
         }
         // Buscar o negócio principal
         const businessDocRef = doc(db, 'businesses', id);
         const businessDoc = await getDoc(businessDocRef);
 
         if (!businessDoc.exists()) {
-          setBusiness(null);
+          loadFallbackData();
           setLoading(false);
           return;
         }
 
-        const businessData = { id: businessDoc.id, ...businessDoc.data() };
+        const businessData = normalizeBusinessData({ id: businessDoc.id, ...businessDoc.data() });
         setBusiness(businessData);
 
         // Buscar dados relacionados em paralelo
@@ -65,12 +89,13 @@ export default function BusinessDetail() {
           getDocs(eventsQuery)
         ]);
 
-        setRelatedBusinesses(relatedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        setRelatedBusinesses(relatedSnapshot.docs.map(doc => normalizeBusinessData({ id: doc.id, ...doc.data() })));
         setBusinessDeals(dealsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
         setBusinessEvents(eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
       } catch (error) {
         console.error("Erro ao buscar dados do negócio:", error);
+        loadFallbackData();
       } finally {
         setLoading(false);
       }
