@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/buscar" element={<Search />} />
               <Route path="/categoria/:categoryId" element={<Category />} />
+              <Route path="/comercio/:categorySlug/:id" element={<BusinessDetail />} />
               <Route path="/comercio/:id" element={<BusinessDetail />} />
               <Route path="/anuncio/:id" element={<ListingDetail />} />
               <Route path="/oferta/:id" element={<DealDetail />} />
