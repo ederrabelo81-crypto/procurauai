@@ -47,7 +47,18 @@ function useFirestoreBusinesses() {
         const businessesData = querySnapshot.docs.map(doc => 
           normalizeBusinessData({ ...doc.data(), id: doc.id })
         );
-        setBusinesses(businessesData.length > 0 ? businessesData : fallbackBusinesses);
+        const uniqueBusinesses = new Map<string, Business>();
+        businessesData.forEach((business) => uniqueBusinesses.set(business.id, business));
+        fallbackBusinesses.forEach((business) => {
+          if (!uniqueBusinesses.has(business.id)) {
+            uniqueBusinesses.set(business.id, business);
+          }
+        });
+        setBusinesses(
+          businessesData.length > 0
+            ? Array.from(uniqueBusinesses.values())
+            : fallbackBusinesses
+        );
       } catch (error) {
         console.error("Erro ao buscar negócios do Firestore:", error);
         setBusinesses(fallbackBusinesses); 
