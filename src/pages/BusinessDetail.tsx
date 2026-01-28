@@ -114,9 +114,9 @@ export default function BusinessDetail() {
 
   const isLiked = isFavorite('business', business.id);
 
-  const ratingMatch = business.description?.match(/Nota\s+(\d+\.?\d*)\s*\((\d+)/i);
-  const rating = ratingMatch ? parseFloat(ratingMatch[1]) : undefined;
-  const reviewCount = ratingMatch ? parseInt(ratingMatch[2]) : undefined;
+  const rating = business.averageRating;
+  const reviewCount = business.reviewCount;
+  const reviews = business.reviews ?? [];
 
   const websiteMatch = business.description?.match(/Site:\s*(https?:\/\/[^\s]+|[^\s]+\.[a-z]{2,}[^\s]*)/i);
   const website = business.website || (websiteMatch ? websiteMatch[1] : undefined);
@@ -141,11 +141,6 @@ export default function BusinessDetail() {
     image: b.coverImages[0],
   }));
 
-  const mockReviews = rating ? [
-    { id: '1', author: 'Maria S.', rating: 5, text: 'Excelente atendimento! Recomendo muito.', date: 'há 2 dias' },
-    { id: '2', author: 'João P.', rating: 4, text: 'Ótimo lugar, bom custo-benefício.', date: 'há 1 semana' },
-  ] : [];
-
   const tabs: TabItem[] = [
     { id: 'perfil', label: 'Perfil', icon: <User className="w-4 h-4" />,
       content: (
@@ -161,7 +156,16 @@ export default function BusinessDetail() {
       content: <div className="px-4"><GallerySection images={business.coverImages} title="Fotos" /></div>,
     },
     { id: 'avaliacoes', label: 'Avaliações', icon: <Star className="w-4 h-4" />, count: reviewCount,
-      content: <div className="px-4"><ReviewsSection reviews={mockReviews} averageRating={rating} reviewCount={reviewCount} /></div>,
+      content: (
+        <div className="px-4">
+          <ReviewsSection
+            reviews={reviews}
+            averageRating={rating}
+            reviewCount={reviewCount}
+            plan={business.plan}
+          />
+        </div>
+      ),
     },
     { id: 'eventos', label: 'Eventos', icon: <CalendarDays className="w-4 h-4" />, count: businessDeals.length + businessEvents.length, hideIfEmpty: businessDeals.length === 0 && businessEvents.length === 0,
       content: <div className="px-4"><EventsSection events={businessEvents} deals={businessDeals} /></div>,

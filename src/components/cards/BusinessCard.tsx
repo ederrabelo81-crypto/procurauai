@@ -28,9 +28,8 @@ export function BusinessCard({ business: rawBusiness, variant = 'default', class
   const open = isOpenNow(business.hours);
   const position = rawBusiness.latitude && rawBusiness.longitude ? { lat: rawBusiness.latitude, lng: rawBusiness.longitude } : null;
 
-  const ratingMatch = business.description?.match(/Nota\s+(\d+(?:\.\d+)?)\s*\((\d+)/i);
-  const rating = ratingMatch ? parseFloat(ratingMatch[1]) : undefined;
-  const reviewCount = ratingMatch ? parseInt(ratingMatch[2]) : undefined;
+  const rating = business.averageRating;
+  const reviewCount = business.reviewCount;
 
   return (
     <div
