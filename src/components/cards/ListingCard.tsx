@@ -11,7 +11,7 @@ interface ListingCardProps {
   className?: string;
 }
 
-const API_KEY = "AIzaSyDIyDkwKhYR_zUk93how05riX1aXWoxvP8"; // Make sure to replace with your key
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 export function ListingCard({ listing, className }: ListingCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();

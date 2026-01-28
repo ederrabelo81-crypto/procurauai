@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/firebase'; 
+import { signInAnonymously } from 'firebase/auth';
+import { auth, db } from '@/firebase'; 
 import { listings, deals, events, news } from '@/data/mockData';
 import { matchesAllFilters, normalizeText } from '@/lib/tagUtils';
 import { getBusinessTags } from '@/lib/businessTags';
@@ -34,6 +35,9 @@ function useFirestoreBusinesses() {
     const fetchBusinesses = async () => {
       setIsLoading(true);
       try {
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
         const querySnapshot = await getDocs(collection(db, 'businesses'));
         const businessesData = querySnapshot.docs.map(doc => 
           normalizeBusinessData({ ...doc.data(), id: doc.id })

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps';
-import { collection, addDoc, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, startAt, endAt } from 'firebase/firestore';
 import { signInAnonymously } from 'firebase/auth';
 import { geohashForLocation, geohashQueryBounds, distanceBetween } from 'geofire-common';
 import { db, auth } from '@/firebase';
@@ -72,8 +72,13 @@ const GoogleMaps: React.FC = () => {
     const radiusInM = radiusInKm * 1000;
     const bounds = geohashQueryBounds(center, radiusInM);
 
-    const promises = bounds.map(b => {
-      const q = query(collection(db, 'businesses'), orderBy('geohash'));
+    const promises = bounds.map(([start, end]) => {
+      const q = query(
+        collection(db, 'businesses'),
+        orderBy('geohash'),
+        startAt(start),
+        endAt(end)
+      );
       return getDocs(q);
     });
 

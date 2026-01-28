@@ -2,7 +2,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { db } from '@/firebase';
+import { signInAnonymously } from 'firebase/auth';
+import { auth, db } from '@/firebase';
 import { User, Images, Phone as PhoneIcon, Info, CalendarDays, Star, BadgeCheck } from 'lucide-react';
 import { ListingHero } from '@/components/listing/ListingHero';
 import { ListingActionsBar } from '@/components/listing/ListingActionsBar';
@@ -32,6 +33,9 @@ export default function BusinessDetail() {
       setLoading(true);
 
       try {
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
         // Buscar o negócio principal
         const businessDocRef = doc(db, 'businesses', id);
         const businessDoc = await getDoc(businessDocRef);
