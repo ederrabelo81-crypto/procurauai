@@ -1,5 +1,39 @@
 import { supabase } from "@/lib/supabaseClient";
 
+const FOOD_KEYWORDS = [
+  "restaurante",
+  "lanchonete",
+  "pizzaria",
+  "hamburguer",
+  "bar",
+  "cafe",
+  "café",
+  "padaria",
+  "panificadora",
+  "confeitaria",
+  "gastro",
+  "sorveteria",
+];
+
+const BUSINESS_KEYWORDS = [
+  "madeireira",
+  "material de construcao",
+  "materiais de construção",
+  "construcao",
+  "construção",
+  "loja",
+  "mercado",
+  "farmacia",
+  "farmácia",
+  "autopecas",
+  "autopeças",
+  "pet shop",
+  "boutique",
+];
+
+const FOOD_REGEX = new RegExp(FOOD_KEYWORDS.join("|"), "i");
+const BUSINESS_REGEX = new RegExp(BUSINESS_KEYWORDS.join("|"), "i");
+
 // Formato que o bloco da Home precisa (parecido com o mock)
 export type UiBusiness = {
   id: string;
@@ -13,6 +47,29 @@ export type UiBusiness = {
   plan?: "free" | "pro" | "destaque";
   isVerified?: boolean;
 };
+
+function deriveCategorySlug(name?: string, category?: string, fallback = "servicos"): string {
+  const inputText = `${name ?? ""} ${category ?? ""}`.toLowerCase();
+
+  if (FOOD_REGEX.test(inputText)) return "comer-agora";
+  if (BUSINESS_REGEX.test(inputText)) return "negocios";
+
+  return fallback;
+}
+
+function buildFallbackFilters(slug: string): string | null {
+  if (slug === "comer-agora") {
+    return FOOD_KEYWORDS.flatMap((keyword) => [
+      `category.ilike.%${keyword}%`,
+      `name.ilike.%${keyword}%`,
+    ]).join(",");
+  }
+
+  const normalizedSlug = slug.replace(/-/g, " ");
+  if (!normalizedSlug) return null;
+
+  return [`category.ilike.%${normalizedSlug}%`, `name.ilike.%${normalizedSlug}%`].join(",");
+}
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
   // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
@@ -34,9 +91,27 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     .eq("category_slug", slug)
     .limit(limit);
 
-  if (error) {
-    console.error("Supabase error (getBusinessesByCategorySlug):", error);
-    throw error;
+  if (error || (data ?? []).length === 0) {
+    if (error) {
+      console.error("Supabase error (getBusinessesByCategorySlug):", error);
+    }
+
+    const fallbackFilters = buildFallbackFilters(slug);
+
+    if (fallbackFilters) {
+      const fallbackResponse = await supabase
+        .from("businesses")
+        .select(baseSelect)
+        .or(fallbackFilters)
+        .limit(limit);
+
+      if (fallbackResponse.error) {
+        console.error("Supabase error (fallback businesses):", fallbackResponse.error);
+        throw fallbackResponse.error;
+      }
+
+      data = fallbackResponse.data ?? [];
+    }
   }
 
   // Converte do formato do banco para o formato do UI
