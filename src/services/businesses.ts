@@ -15,7 +15,7 @@ export type UiBusiness = {
 };
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
-  // JOIN com categories e filtra por slug
+  // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
   const { data, error } = await supabase
     .from("businesses")
     .select(
@@ -27,13 +27,11 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       is_open_now,
       plan,
       is_verified,
-      categories!inner (
-        name,
-        slug
-      )
+      category,
+      category_slug
     `
     )
-    .eq("categories.slug", slug)
+    .eq("category_slug", slug)
     .limit(limit);
 
   if (error) {
@@ -50,8 +48,8 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     isOpenNow: !!row.is_open_now,
     plan: row.plan ?? "free",
     isVerified: !!row.is_verified,
-    category: row.categories?.name ?? "",
-    categorySlug: row.categories?.slug ?? slug,
+    category: row.category ?? "",
+    categorySlug: row.category_slug ?? slug,
     tags: [], // ainda não temos chips/tags ligados no seed
   }));
 }
