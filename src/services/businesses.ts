@@ -34,6 +34,16 @@ const BUSINESS_KEYWORDS = [
 const FOOD_REGEX = new RegExp(FOOD_KEYWORDS.join("|"), "i");
 const BUSINESS_REGEX = new RegExp(BUSINESS_KEYWORDS.join("|"), "i");
 
+function buildSlugCandidates(slug: string): string[] {
+  const candidates = [
+    slug,
+    slug.replace(/-/g, "_"),
+    slug.replace(/-/g, " "),
+  ];
+
+  return Array.from(new Set(candidates.filter(Boolean)));
+}
+
 // Formato que o bloco da Home precisa (parecido com o mock)
 export type UiBusiness = {
   id: string;
@@ -59,6 +69,13 @@ function deriveCategorySlug(name?: string, category?: string, fallback = "servic
 
 function buildFallbackFilters(slug: string): string | null {
   if (slug === "comer-agora") {
+    const slugPhrase = slug.replace(/[-_]/g, " ");
+    return FOOD_KEYWORDS.flatMap((keyword) => [
+      `category.ilike.%${keyword}%`,
+      `name.ilike.%${keyword}%`,
+    ])
+      .concat([`category.ilike.%${slugPhrase}%`, `name.ilike.%${slugPhrase}%`])
+      .join(",");
     return FOOD_KEYWORDS.flatMap((keyword) => [
       `category.ilike.%${keyword}%`,
       `name.ilike.%${keyword}%`,
@@ -72,6 +89,7 @@ function buildFallbackFilters(slug: string): string | null {
 }
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
+  const baseSelect = `
   // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
   const { data, error } = await supabase
     .from("businesses")
@@ -86,6 +104,14 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       is_verified,
       category,
       category_slug
+    `;
+
+  // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
+  const slugCandidates = buildSlugCandidates(slug);
+  let { data, error } = await supabase
+    .from("businesses")
+    .select(baseSelect)
+    .in("category_slug", slugCandidates)
     `
     )
     .eq("category_slug", slug)
@@ -124,6 +150,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     plan: row.plan ?? "free",
     isVerified: !!row.is_verified,
     category: row.category ?? "",
+    categorySlug: row.category_slug ?? deriveCategorySlug(row.name, row.category, slug),
     categorySlug: row.category_slug ?? slug,
     tags: [], // ainda não temos chips/tags ligados no seed
   }));
