@@ -76,10 +76,6 @@ function buildFallbackFilters(slug: string): string | null {
     ])
       .concat([`category.ilike.%${slugPhrase}%`, `name.ilike.%${slugPhrase}%`])
       .join(",");
-    return FOOD_KEYWORDS.flatMap((keyword) => [
-      `category.ilike.%${keyword}%`,
-      `name.ilike.%${keyword}%`,
-    ]).join(",");
   }
 
   const normalizedSlug = slug.replace(/-/g, " ");
@@ -90,21 +86,16 @@ function buildFallbackFilters(slug: string): string | null {
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
   const baseSelect = `
-  // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
-  const { data, error } = await supabase
-    .from("businesses")
-    .select(
-      `
-      id,
-      name,
-      neighborhood,
-      cover_images,
-      is_open_now,
-      plan,
-      is_verified,
-      category,
-      category_slug
-    `;
+    id,
+    name,
+    neighborhood,
+    cover_images,
+    is_open_now,
+    plan,
+    is_verified,
+    category,
+    category_slug
+  `;
 
   // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
   const slugCandidates = buildSlugCandidates(slug);
@@ -112,9 +103,6 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     .from("businesses")
     .select(baseSelect)
     .in("category_slug", slugCandidates)
-    `
-    )
-    .eq("category_slug", slug)
     .limit(limit);
 
   if (error || (data ?? []).length === 0) {
@@ -151,7 +139,6 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     isVerified: !!row.is_verified,
     category: row.category ?? "",
     categorySlug: row.category_slug ?? deriveCategorySlug(row.name, row.category, slug),
-    categorySlug: row.category_slug ?? slug,
     tags: [], // ainda não temos chips/tags ligados no seed
   }));
 }
