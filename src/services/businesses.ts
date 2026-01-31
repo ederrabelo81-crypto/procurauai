@@ -72,7 +72,11 @@ function buildFallbackFilters(slug: string): string | null {
 }
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
-  const baseSelect = `
+  // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
+  const { data, error } = await supabase
+    .from("businesses")
+    .select(
+      `
       id,
       name,
       neighborhood,
@@ -82,12 +86,8 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       is_verified,
       category,
       category_slug
-    `;
-
-  // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
-  let { data, error } = await supabase
-    .from("businesses")
-    .select(baseSelect)
+    `
+    )
     .eq("category_slug", slug)
     .limit(limit);
 
@@ -124,7 +124,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     plan: row.plan ?? "free",
     isVerified: !!row.is_verified,
     category: row.category ?? "",
-    categorySlug: row.category_slug ?? deriveCategorySlug(row.name, row.category, slug),
+    categorySlug: row.category_slug ?? slug,
     tags: [], // ainda não temos chips/tags ligados no seed
   }));
 }
