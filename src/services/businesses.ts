@@ -67,34 +67,55 @@ function deriveCategorySlug(name?: string, category?: string, fallback = "servic
   return fallback;
 }
 
-function buildFallbackFilters(slug: string): string | null {
+function buildFallbackFilters(slug: string, categoryField = "category"): string | null {
   if (slug === "comer-agora") {
     const slugPhrase = slug.replace(/[-_]/g, " ");
     return FOOD_KEYWORDS.flatMap((keyword) => [
-      `category.ilike.%${keyword}%`,
+      `${categoryField}.ilike.%${keyword}%`,
       `name.ilike.%${keyword}%`,
     ])
-      .concat([`category.ilike.%${slugPhrase}%`, `name.ilike.%${slugPhrase}%`])
+      .concat([`${categoryField}.ilike.%${slugPhrase}%`, `name.ilike.%${slugPhrase}%`])
       .join(",");
-    return FOOD_KEYWORDS.flatMap((keyword) => [
-      `category.ilike.%${keyword}%`,
-      `name.ilike.%${keyword}%`,
-    ]).join(",");
   }
 
   const normalizedSlug = slug.replace(/-/g, " ");
   if (!normalizedSlug) return null;
 
-  return [`category.ilike.%${normalizedSlug}%`, `name.ilike.%${normalizedSlug}%`].join(",");
+  return [
+    `${categoryField}.ilike.%${normalizedSlug}%`,
+    `name.ilike.%${normalizedSlug}%`,
+  ].join(",");
+}
+
+function isMissingColumnError(error: { message?: string } | null, column: string): boolean {
+  if (!error?.message) return false;
+  return error.message.includes(`column "${column}" does not exist`);
 }
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
   const baseSelect = `
-  // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
-  const { data, error } = await supabase
+    id,
+    name,
+    neighborhood,
+    cover_images,
+    is_open_now,
+    plan,
+    is_verified,
+    category,
+    category_slug
+  `;
+
+  const slugCandidates = buildSlugCandidates(slug);
+  let usedCategoryRelation = false;
+  let { data, error } = await supabase
     .from("businesses")
-    .select(
-      `
+    .select(baseSelect)
+    .in("category_slug", slugCandidates)
+    .limit(limit);
+
+  if (isMissingColumnError(error, "category_slug") || isMissingColumnError(error, "category")) {
+    usedCategoryRelation = true;
+    const relationSelect = `
       id,
       name,
       neighborhood,
@@ -102,22 +123,47 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       is_open_now,
       plan,
       is_verified,
-      category,
-      category_slug
+      category_id,
+      categories:categories!inner (
+        name,
+        slug
+      )
     `;
 
-  // Filtra direto na coluna category_slug (não há tabela categories no schema atual)
-  const slugCandidates = buildSlugCandidates(slug);
-  let { data, error } = await supabase
-    .from("businesses")
-    .select(baseSelect)
-    .in("category_slug", slugCandidates)
-    `
-    )
-    .eq("category_slug", slug)
-    .limit(limit);
+    const relationResponse = await supabase
+      .from("businesses")
+      .select(relationSelect)
+      .in("categories.slug", slugCandidates)
+      .limit(limit);
 
-  if (error || (data ?? []).length === 0) {
+    data = relationResponse.data ?? [];
+    error = relationResponse.error;
+
+    if (error || (data ?? []).length === 0) {
+      if (error) {
+        console.error("Supabase error (getBusinessesByCategorySlug):", error);
+      }
+
+      const fallbackFilters = buildFallbackFilters(slug, "categories.name");
+
+      if (fallbackFilters) {
+        const fallbackResponse = await supabase
+          .from("businesses")
+          .select(relationSelect)
+          .or(fallbackFilters)
+          .limit(limit);
+
+        if (fallbackResponse.error) {
+          console.error("Supabase error (fallback businesses):", fallbackResponse.error);
+          throw fallbackResponse.error;
+        }
+
+        data = fallbackResponse.data ?? [];
+      }
+    }
+  }
+
+  if (!usedCategoryRelation && (error || (data ?? []).length === 0)) {
     if (error) {
       console.error("Supabase error (getBusinessesByCategorySlug):", error);
     }
@@ -149,9 +195,11 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     isOpenNow: !!row.is_open_now,
     plan: row.plan ?? "free",
     isVerified: !!row.is_verified,
-    category: row.category ?? "",
-    categorySlug: row.category_slug ?? deriveCategorySlug(row.name, row.category, slug),
-    categorySlug: row.category_slug ?? slug,
+    category: row.category ?? row.categories?.name ?? "",
+    categorySlug:
+      row.category_slug ??
+      row.categories?.slug ??
+      deriveCategorySlug(row.name, row.category ?? row.categories?.name, slug),
     tags: [], // ainda não temos chips/tags ligados no seed
   }));
 }
