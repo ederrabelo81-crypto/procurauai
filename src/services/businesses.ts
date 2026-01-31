@@ -113,6 +113,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     .in("category_slug", slugCandidates)
     .limit(limit);
 
+  // Fallback para schema com category_id/relacionamento de categorias (sem category/category_slug)
   if (isMissingColumnError(error, "category_slug") || isMissingColumnError(error, "category")) {
     usedCategoryRelation = true;
     const relationSelect = `
