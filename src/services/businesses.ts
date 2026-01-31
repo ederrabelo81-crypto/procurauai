@@ -201,6 +201,8 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       row.category_slug ??
       row.categories?.slug ??
       deriveCategorySlug(row.name, row.category ?? row.categories?.name, slug),
+    category: row.category ?? "",
+    categorySlug: row.category_slug ?? deriveCategorySlug(row.name, row.category, slug),
     tags: [], // ainda não temos chips/tags ligados no seed
   }));
 }
