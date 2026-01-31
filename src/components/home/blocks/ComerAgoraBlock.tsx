@@ -1,31 +1,30 @@
 import { useEffect, useState } from "react";
-import { getBusinessesByCategorySlug } from "@/services/businesses";
+import { Link } from "react-router-dom";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Clock, MapPin, Utensils } from "lucide-react";
+import { getBusinessesByCategorySlug, UiBusiness } from "@/services/businesses";
 
-type Business = {
-  id: string;
-  name: string;
-  neighborhood?: string | null;
-  address?: string | null;
-  logo_url?: string | null;
-  cover_images?: string[] | null;
-  plan?: "free" | "pro" | "destaque";
-  is_verified?: boolean;
-};
-
-export default function ComerAgoraSection() {
-  const [items, setItems] = useState<Business[]>([]);
+export function ComerAgoraBlock() {
+  const [items, setItems] = useState<UiBusiness[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
       try {
         setLoading(true);
-        const data = await getBusinessesByCategorySlug("comer-agora");
-        setItems((data ?? []) as unknown as Business[]);
-      } catch (e: any) {
+        const data = await getBusinessesByCategorySlug("comer-agora", 8);
+
+        /**
+         * IMPORTANTE:
+         * No mock, você filtrava "abertos agora". No banco, isso depende de is_open_now.
+         * Como seus dados seed provavelmente NÃO têm is_open_now calculado, pode vir tudo false.
+         * Então aqui a gente NÃO filtra por aberto (senão some tudo).
+         * Mais pra frente, quando você tiver horários reais, a gente ativa o filtro.
+         */
+        setItems(data);
+      } catch (e) {
         console.error(e);
-        setError("Não foi possível carregar Comer Agora.");
+        setItems([]);
       } finally {
         setLoading(false);
       }
@@ -33,44 +32,77 @@ export default function ComerAgoraSection() {
     load();
   }, []);
 
-  if (loading) return <div className="p-4">Carregando Comer Agora...</div>;
-  if (error) return <div className="p-4">{error}</div>;
+  // Enquanto carrega, pode esconder ou mostrar placeholder.
+  // Vou deixar escondido para não "poluir" a Home.
+  if (loading) return null;
+
+  // Se não há nenhum, não renderiza
+  if (items.length === 0) return null;
 
   return (
-    <section className="p-4">
-      <h2 className="text-xl font-semibold mb-3">Comer Agora</h2>
+    <section>
+      <SectionHeader
+        title="Comer Agora"
+        icon={Utensils}
+        iconVariant="warning"
+        action={{ label: "Ver todos", to: "/categoria/comer-agora" }}
+      />
 
-      {items.length === 0 ? (
-        <div>Nenhum item encontrado.</div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {items.slice(0, 8).map((b) => {
-            const img = b.logo_url || b.cover_images?.[0] || "";
-            return (
-              <div key={b.id} className="border rounded-lg p-3">
-                {img ? (
-                  <img
-                    src={img}
-                    alt={b.name}
-                    className="w-full h-28 object-cover rounded-md mb-2"
-                  />
-                ) : (
-                  <div className="w-full h-28 bg-gray-200 rounded-md mb-2" />
-                )}
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+        {items.map((place) => (
+          <Link
+            key={place.id}
+            to={`/comercio/${place.id}`}
+            className="flex-shrink-0 w-[200px] bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+          >
+            <div className="aspect-[4/3] relative">
+              <img
+                src={place.coverImages?.[0] || "/placeholder.svg"}
+                alt={place.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
 
-                <div className="font-medium">{b.name}</div>
-                <div className="text-sm opacity-70">
-                  {b.neighborhood || b.address || ""}
+              {/* Se o banco informar que está aberto, mostra a badge */}
+              {place.isOpenNow && (
+                <div className="absolute top-2 left-2 flex items-center gap-1 bg-green-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                  <Clock className="w-3 h-3" />
+                  Aberto
                 </div>
+              )}
+            </div>
 
-                <div className="text-xs mt-2 opacity-70">
-                  Plano: {b.plan || "free"} {b.is_verified ? "• Verificado" : ""}
-                </div>
+            <div className="p-3">
+              <h3 className="font-semibold text-foreground text-sm line-clamp-1 mb-0.5">
+                {place.name}
+              </h3>
+
+              <p className="text-xs text-muted-foreground mb-1.5 line-clamp-1">
+                {place.category}
+              </p>
+
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="w-3 h-3" />
+                {place.neighborhood}
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              {/* Tags ainda não estão conectadas no banco (chips). Mantive compatível. */}
+              {place.tags?.length > 0 && (
+                <div className="flex gap-1 mt-2 flex-wrap">
+                  {place.tags.slice(0, 2).map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-1.5 py-0.5 bg-muted text-muted-foreground text-[10px] rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
