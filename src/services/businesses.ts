@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabaseClient";
 import { reportError } from "@/lib/errors/errorHandler";
 import { executeSupabase } from "@/services/supabaseRequest";
+import { resolveListingTypeId } from "@/lib/taxonomy";
 
 const FOOD_KEYWORDS = [
   "restaurante",
@@ -44,6 +45,11 @@ function buildSlugCandidates(slug: string): string[] {
   ];
 
   return Array.from(new Set(candidates.filter(Boolean)));
+}
+
+function normalizeCategorySlug(slug: string): string {
+  if (!slug) return slug;
+  return resolveListingTypeId(slug);
 }
 
 // Formato que o bloco da Home precisa (parecido com o mock)
@@ -141,6 +147,10 @@ function toUiBusiness(row: BusinessRow, fallbackSlug: string): UiBusiness {
 }
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
+  const normalizedSlug = normalizeCategorySlug(slug);
+  const slugCandidates = Array.from(
+    new Set([...buildSlugCandidates(normalizedSlug), ...buildSlugCandidates(slug)])
+  );
   const baseSelect = `
     id,
     name,
@@ -172,7 +182,6 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     is_verified
   `;
 
-  const slugCandidates = buildSlugCandidates(slug);
   let usedCategoryRelation = false;
   let data: BusinessRow[] | null = null;
   let error: { message?: string } | null = null;
@@ -238,7 +247,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       }
 
       if (isMissingRelationError(error, "categories")) {
-        const fallbackFilters = buildFallbackFilters(slug, ["name"]);
+        const fallbackFilters = buildFallbackFilters(normalizedSlug, ["name"]);
         if (fallbackFilters) {
           const fallbackResponse = await executeSupabase(() =>
             supabase
@@ -260,7 +269,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     }
 
     if ((!data || data.length === 0) && !isMissingRelationError(error, "categories")) {
-      const fallbackFilters = buildFallbackFilters(slug, ["categories.name", "name"]);
+      const fallbackFilters = buildFallbackFilters(normalizedSlug, ["categories.name", "name"]);
 
       if (fallbackFilters) {
         const fallbackResponse = await executeSupabase(() =>
@@ -286,7 +295,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       reportError(error, { scope: "getBusinessesByCategorySlug" });
     }
 
-    const fallbackFilters = buildFallbackFilters(slug, ["category", "name"]);
+    const fallbackFilters = buildFallbackFilters(normalizedSlug, ["category", "name"]);
     const fallbackSelect = isMissingColumnError(error, "category")
       ? baseSelectWithoutCategory
       : baseSelect;
@@ -314,7 +323,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     isMissingColumnError(error, "category_slug") &&
     !isMissingColumnError(error, "category")
   ) {
-    const fallbackFilters = buildFallbackFilters(slug, ["name"]);
+    const fallbackFilters = buildFallbackFilters(normalizedSlug, ["name"]);
 
     if (fallbackFilters) {
       const fallbackResponse = await executeSupabase(() =>
@@ -335,5 +344,5 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
   }
 
   // Converte do formato do banco para o formato do UI usando helper
-  return (data ?? []).map((row) => toUiBusiness(row, slug));
+  return (data ?? []).map((row) => toUiBusiness(row, normalizedSlug || slug));
 }
