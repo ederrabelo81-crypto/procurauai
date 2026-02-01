@@ -1,32 +1,37 @@
-
 import React, { useState, useEffect } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps';
-import { collection, addDoc, getDocs, query, orderBy, startAt, endAt } from 'firebase/firestore';
-import { signInAnonymously } from 'firebase/auth';
-import { geohashForLocation, geohashQueryBounds, distanceBetween } from 'geofire-common';
-import { db, auth, firebaseEnabled } from '@/firebase';
+import { supabase } from '@/lib/supabaseClient';
 
-// Interface expandida para incluir todos os campos de um negócio
 interface BusinessDoc {
-  id?: string;
+  id: string;
   name: string;
-  address: string;
-  placeId?: string;
+  address?: string;
   latitude: number;
   longitude: number;
-  geohash: string;
-  timestamp: number;
-  category: string;
-  categorySlug: string;
-  neighborhood: string;
-  tags: string[];
-  coverImages: string[];
-  logo?: string;
+  category?: string;
+  categorySlug?: string;
+  neighborhood?: string;
+  coverImages?: string[];
   phone?: string;
   whatsapp?: string;
   hours?: string;
   description?: string;
-  isVerified: boolean;
+  isVerified?: boolean;
+}
+
+// Calcula distância entre duas coordenadas em km (fórmula de Haversine)
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Raio da Terra em km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
 const GoogleMaps: React.FC = () => {
@@ -38,136 +43,81 @@ const GoogleMaps: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      try {
-        if (!firebaseEnabled || !auth || !db) {
-          setStatusMessage('Firebase não configurado. Exibindo mapa sem dados.');
-          return;
-        }
-        await signInAnonymously(auth);
-        setStatusMessage('Autenticado. Obtendo localização...');
+      setStatusMessage('Obtendo localização...');
 
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
-              setUserLocation(pos);
-              setStatusMessage('Localização obtida. Carregando locais...');
-              loadAndDisplayLocations(pos.lat, pos.lng);
-            },
-            () => {
-              setStatusMessage('Erro ao obter localização. Carregando locais padrão...');
-              loadAndDisplayLocations(-20.8903, -46.7029); // Localização padrão
-            }
-          );
-        } else {
-          setStatusMessage('Geolocalização não suportada. Carregando locais padrão...');
-          loadAndDisplayLocations(-20.8903, -46.7029); // Localização padrão
-        }
-      } catch (error) {
-        console.error('Erro de autenticação:', error);
-        setStatusMessage('Erro de autenticação com o Firebase.');
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
+            setUserLocation(pos);
+            setStatusMessage('Localização obtida. Carregando locais...');
+            loadAndDisplayLocations(pos.lat, pos.lng);
+          },
+          () => {
+            setStatusMessage('Erro ao obter localização. Carregando locais padrão...');
+            loadAndDisplayLocations(-20.8903, -46.7029);
+          }
+        );
+      } else {
+        setStatusMessage('Geolocalização não suportada. Carregando locais padrão...');
+        loadAndDisplayLocations(-20.8903, -46.7029);
       }
     };
     init();
   }, []);
 
   const loadAndDisplayLocations = async (lat: number, lng: number, radiusInKm: number = 25) => {
-    if (!firebaseEnabled || !db) {
-      setMarkers([]);
-      setStatusMessage('Firebase não configurado. Não foi possível carregar locais.');
-      return;
-    }
-    const center: [number, number] = [lat, lng];
-    const radiusInM = radiusInKm * 1000;
-    const bounds = geohashQueryBounds(center, radiusInM);
-
-    const promises = bounds.map(([start, end]) => {
-      const q = query(
-        collection(db, 'businesses'),
-        orderBy('geohash'),
-        startAt(start),
-        endAt(end)
-      );
-      return getDocs(q);
-    });
-
     try {
-      const snapshots = await Promise.all(promises);
-      const uniqueDocs = new Set<string>();
-      const matchingDocs: BusinessDoc[] = [];
+      // Busca todos os negócios que têm coordenadas
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('id, name, address, latitude, longitude, category, category_slug, neighborhood, cover_images, phone, whatsapp, hours, description, is_verified')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
 
-      snapshots.forEach(snapshot => {
-        snapshot.docs.forEach(doc => {
-          if (doc.exists()) {
-            const data = doc.data() as BusinessDoc;
-            if (data.latitude && data.longitude) {
-                const distance = distanceBetween([data.latitude, data.longitude], center);
-                if (distance <= radiusInM && !uniqueDocs.has(doc.id)) {
-                    matchingDocs.push({ ...data, id: doc.id });
-                    uniqueDocs.add(doc.id);
-                }
-            }
-          }
-        });
-      });
+      if (error) {
+        console.error('Erro ao carregar locais:', error);
+        setStatusMessage('Erro ao carregar locais do banco de dados.');
+        setMarkers([]);
+        return;
+      }
 
-      setMarkers(matchingDocs);
-      setStatusMessage(`${matchingDocs.length} locais carregados.`);
+      if (!data || data.length === 0) {
+        setStatusMessage('Nenhum local com coordenadas encontrado.');
+        setMarkers([]);
+        return;
+      }
+
+      // Filtra por distância no cliente
+      const nearbyBusinesses: BusinessDoc[] = data
+        .filter((row) => {
+          const distance = calculateDistance(lat, lng, row.latitude, row.longitude);
+          return distance <= radiusInKm;
+        })
+        .map((row) => ({
+          id: row.id,
+          name: row.name,
+          address: row.address,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          category: row.category,
+          categorySlug: row.category_slug,
+          neighborhood: row.neighborhood,
+          coverImages: row.cover_images,
+          phone: row.phone,
+          whatsapp: row.whatsapp,
+          hours: row.hours,
+          description: row.description,
+          isVerified: row.is_verified,
+        }));
+
+      setMarkers(nearbyBusinesses);
+      setStatusMessage(`${nearbyBusinesses.length} locais carregados.`);
     } catch (error) {
       console.error('Erro ao carregar locais:', error);
-      setStatusMessage('Erro ao carregar locais do Firestore.');
+      setStatusMessage('Erro ao carregar locais.');
+      setMarkers([]);
     }
-  };
-
-  const handleMapClick = async (event: google.maps.MapMouseEvent) => {
-    if (!event.latLng) return;
-    if (!firebaseEnabled || !db) {
-      setStatusMessage('Firebase não configurado. Não foi possível salvar local.');
-      return;
-    }
-    const lat = event.latLng.lat();
-    const lng = event.latLng.lng();
-
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: { lat, lng } }, async (results, status) => {
-      if (status === 'OK' && results && results[0]) {
-        const firstResult = results[0];
-        const addressComponents = firstResult.address_components;
-        const getAddressComponent = (type: string) => addressComponents.find(c => c.types.includes(type))?.long_name || '';
-
-        const newBusiness: BusinessDoc = {
-          name: `Novo Local - ${getAddressComponent('route') || getAddressComponent('political')}`,
-          address: firstResult.formatted_address,
-          placeId: firstResult.place_id,
-          latitude: lat,
-          longitude: lng,
-          geohash: geohashForLocation([lat, lng]),
-          timestamp: Date.now(),
-          category: 'Negócio', // Categoria padrão
-          categorySlug: 'negocios', // Slug padrão
-          neighborhood: getAddressComponent('sublocality_level_1') || getAddressComponent('political'),
-          tags: ['Novo'],
-          coverImages: [], // Inicia sem imagens
-          logo: '',
-          phone: '',
-          whatsapp: '',
-          hours: 'Não informado',
-          description: 'Descrição pendente.',
-          isVerified: false,
-        };
-
-        try {
-          const docRef = await addDoc(collection(db, 'businesses'), newBusiness);
-          setMarkers(prev => [...prev, { ...newBusiness, id: docRef.id }]);
-          setStatusMessage('Novo local adicionado ao Firestore!');
-        } catch (error) {
-          console.error('Erro ao salvar local:', error);
-          setStatusMessage('Erro ao salvar novo local.');
-        }
-      } else {
-        setStatusMessage('Falha na geocodificação.');
-      }
-    });
   };
 
   const handleMarkerClick = (location: BusinessDoc) => {
@@ -175,23 +125,34 @@ const GoogleMaps: React.FC = () => {
     setInfoWindowShown(true);
   };
 
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <p className="text-muted-foreground">
+          Google Maps API Key não configurada. Defina VITE_GOOGLE_MAPS_API_KEY.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+    <APIProvider apiKey={apiKey}>
       <div style={{ height: '100vh', width: '100%' }}>
-        <h1>Procura UAI - Mapa</h1>
-        <p>{statusMessage}</p>
+        <h1 className="p-4 text-xl font-semibold">Procura UAI - Mapa</h1>
+        <p className="px-4 pb-2 text-sm text-muted-foreground">{statusMessage}</p>
         <Map
           defaultCenter={{ lat: -20.8903, lng: -46.7029 }}
           defaultZoom={13}
           mapId="procura-uai-map"
-          onClick={handleMapClick}
         >
           {userLocation && (
             <AdvancedMarker position={userLocation} title="Sua Localização">
               <Pin background={'blue'} borderColor={'white'} glyphColor={'white'} />
             </AdvancedMarker>
           )}
-          {markers.map(location => (
+          {markers.map((location) => (
             <AdvancedMarker
               key={location.id}
               position={{ lat: location.latitude, lng: location.longitude }}
@@ -205,18 +166,20 @@ const GoogleMaps: React.FC = () => {
               onCloseClick={() => setInfoWindowShown(false)}
             >
               <div>
-                <h3>{selectedLocation.name}</h3>
-                <p>{selectedLocation.address}</p>
-                <a 
-                  href={`https://www.google.com/maps/search/?api=1&query=${selectedLocation.latitude},${selectedLocation.longitude}&query_place_id=${selectedLocation.placeId}`}
+                <h3 className="font-semibold">{selectedLocation.name}</h3>
+                {selectedLocation.address && <p className="text-sm">{selectedLocation.address}</p>}
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${selectedLocation.latitude},${selectedLocation.longitude}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="text-primary text-sm underline"
                 >
                   Ver no Google Maps
                 </a>
               </div>
             </InfoWindow>
-          )}        </Map>
+          )}
+        </Map>
       </div>
     </APIProvider>
   );
