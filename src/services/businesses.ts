@@ -100,6 +100,28 @@ function isMissingRelationError(error: { message?: string } | null, relation: st
   );
 }
 
+// Helper para converter qualquer resultado do Supabase para UiBusiness
+function toUiBusiness(row: any, fallbackSlug: string): UiBusiness {
+  const categoryName = row.category ?? row.categories?.name ?? "";
+  const categorySlug =
+    row.category_slug ??
+    row.categories?.slug ??
+    deriveCategorySlug(row.name, categoryName, fallbackSlug);
+
+  return {
+    id: row.id,
+    name: row.name,
+    neighborhood: row.neighborhood || "",
+    coverImages: Array.isArray(row.cover_images) ? row.cover_images : [],
+    isOpenNow: !!row.is_open_now,
+    plan: row.plan ?? "free",
+    isVerified: !!row.is_verified,
+    category: categoryName,
+    categorySlug,
+    tags: [],
+  };
+}
+
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
   const baseSelect = `
     id,
@@ -134,21 +156,32 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
 
   const slugCandidates = buildSlugCandidates(slug);
   let usedCategoryRelation = false;
-  let { data, error } = await supabase
+  let data: any[] | null = null;
+  let error: any = null;
+
+  // Primeira tentativa: buscar com category e category_slug
+  const result1 = await supabase
     .from("businesses")
     .select(baseSelect)
     .in("category_slug", slugCandidates)
     .limit(limit);
+  
+  data = result1.data;
+  error = result1.error;
 
+  // Se category não existe mas category_slug existe
   if (isMissingColumnError(error, "category") && !isMissingColumnError(error, "category_slug")) {
-    ({ data, error } = await supabase
+    const result2 = await supabase
       .from("businesses")
       .select(baseSelectWithoutCategory)
       .in("category_slug", slugCandidates)
-      .limit(limit));
+      .limit(limit);
+    
+    data = result2.data;
+    error = result2.error;
   }
 
-  // Fallback para schema com category_id/relacionamento de categorias (sem category/category_slug)
+  // Fallback para schema com category_id/relacionamento de categorias
   if (isMissingColumnError(error, "category_slug") || isMissingColumnError(error, "category")) {
     usedCategoryRelation = true;
     const relationSelect = `
@@ -269,25 +302,6 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     }
   }
 
-  // Converte do formato do banco para o formato do UI
-  return (data ?? []).map((row: any) => {
-    const categoryName = row.category ?? row.categories?.name ?? "";
-    const categorySlug =
-      row.category_slug ??
-      row.categories?.slug ??
-      deriveCategorySlug(row.name, categoryName, slug);
-
-    return {
-      id: row.id,
-      name: row.name,
-      neighborhood: row.neighborhood || "",
-      coverImages: Array.isArray(row.cover_images) ? row.cover_images : [],
-      isOpenNow: !!row.is_open_now,
-      plan: row.plan ?? "free",
-      isVerified: !!row.is_verified,
-      category: categoryName,
-      categorySlug,
-      tags: [], // ainda não temos chips/tags ligados no seed
-    };
-  });
+  // Converte do formato do banco para o formato do UI usando helper
+  return (data ?? []).map((row: any) => toUiBusiness(row, slug));
 }

@@ -1,8 +1,5 @@
-
 import { useState, useEffect, useMemo } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { signInAnonymously } from 'firebase/auth';
-import { auth, db, firebaseEnabled } from '@/firebase'; 
+import { supabase } from '@/lib/supabaseClient';
 import { listings, deals, events, news, businesses as mockBusinesses } from '@/data/mockData';
 import { matchesAllFilters, normalizeText } from '@/lib/tagUtils';
 import { getBusinessTags } from '@/lib/businessTags';
@@ -15,11 +12,11 @@ export interface SearchFilters {
   query: string;
   activeFilters: string[];
   listingType?: string;
-  categorySlug?: string; // Adicionado para filtrar por categoria
+  categorySlug?: string;
 }
 
 export interface SearchResults {
-  business: Business[]; 
+  business: Business[];
   listing: typeof listings;
   deal: typeof deals;
   event: typeof events;
@@ -27,7 +24,7 @@ export interface SearchResults {
   isLoading: boolean;
 }
 
-function useFirestoreBusinesses() {
+function useSupabaseBusinesses() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,41 +32,68 @@ function useFirestoreBusinesses() {
     const fetchBusinesses = async () => {
       setIsLoading(true);
       const fallbackBusinesses = mockBusinesses.map((business) => normalizeBusinessData(business));
-      if (!firebaseEnabled || !auth || !db) {
-        setBusinesses(fallbackBusinesses);
-        setIsLoading(false);
-        return;
-      }
+
       try {
-        if (!auth.currentUser) {
-          try {
-            await signInAnonymously(auth);
-          } catch (authError) {
-            console.warn("Falha ao autenticar anonimamente. Continuando sem autenticação.", authError);
-          }
+        const { data, error } = await supabase
+          .from('businesses')
+          .select('*');
+
+        if (error) {
+          console.error('Erro ao buscar negócios do Supabase:', error);
+          setBusinesses(fallbackBusinesses);
+          setIsLoading(false);
+          return;
         }
-        const querySnapshot = await getDocs(collection(db, 'businesses'));
-        const businessesData = querySnapshot.docs.map(doc => 
-          normalizeBusinessData({ ...doc.data(), id: doc.id })
+
+        if (!data || data.length === 0) {
+          setBusinesses(fallbackBusinesses);
+          setIsLoading(false);
+          return;
+        }
+
+        // Normaliza os dados do Supabase (snake_case -> camelCase)
+        const normalizedData = data.map((row) =>
+          normalizeBusinessData({
+            id: row.id,
+            name: row.name,
+            category: row.category,
+            categorySlug: row.category_slug,
+            tags: row.tags,
+            neighborhood: row.neighborhood,
+            hours: row.hours,
+            phone: row.phone,
+            whatsapp: row.whatsapp,
+            coverImages: row.cover_images,
+            isOpenNow: row.is_open_now,
+            isVerified: row.is_verified,
+            description: row.description,
+            address: row.address,
+            averageRating: row.average_rating,
+            reviewCount: row.review_count,
+            plan: row.plan,
+            website: row.website,
+            instagram: row.instagram,
+            logo: row.logo,
+          })
         );
+
+        // Merge com dados mock para garantir conteúdo inicial
         const uniqueBusinesses = new Map<string, Business>();
-        businessesData.forEach((business) => uniqueBusinesses.set(business.id, business));
+        normalizedData.forEach((business) => uniqueBusinesses.set(business.id, business));
         fallbackBusinesses.forEach((business) => {
           if (!uniqueBusinesses.has(business.id)) {
             uniqueBusinesses.set(business.id, business);
           }
         });
-        setBusinesses(
-          businessesData.length > 0
-            ? Array.from(uniqueBusinesses.values())
-            : fallbackBusinesses
-        );
+
+        setBusinesses(Array.from(uniqueBusinesses.values()));
       } catch (error) {
-        console.error("Erro ao buscar negócios do Firestore:", error);
-        setBusinesses(fallbackBusinesses); 
+        console.error('Erro ao buscar negócios:', error);
+        setBusinesses(fallbackBusinesses);
       }
       setIsLoading(false);
     };
+
     fetchBusinesses();
   }, []);
 
@@ -77,21 +101,21 @@ function useFirestoreBusinesses() {
 }
 
 export function useSearchEngine(filters: SearchFilters): SearchResults {
-  const { businesses: allBusinesses, isLoading } = useFirestoreBusinesses();
+  const { businesses: allBusinesses, isLoading } = useSupabaseBusinesses();
 
   return useMemo(() => {
-    const { query, activeFilters, categorySlug } = filters; // Pega o categorySlug
+    const { query, activeFilters, categorySlug } = filters;
     const hasQuery = !!query.trim();
     const hasFilters = activeFilters.length > 0;
     const lowerQuery = query.toLowerCase().trim();
 
     let filteredBusinesses = allBusinesses;
 
-    // 1. Filtra por Categoria (NOVO)
+    // 1. Filtra por Categoria
     if (categorySlug) {
-        filteredBusinesses = filteredBusinesses.filter(
-            (b) => b.categorySlug === categorySlug
-        );
+      filteredBusinesses = filteredBusinesses.filter(
+        (b) => b.categorySlug === categorySlug
+      );
     }
 
     // 2. Filtra por Query de Texto
@@ -101,7 +125,7 @@ export function useSearchEngine(filters: SearchFilters): SearchResults {
         const category = (b.category || '').toLowerCase();
         const neighborhood = (b.neighborhood || '').toLowerCase();
         const tagHit = getBusinessTags(b).some((t) => (t || '').toLowerCase().includes(lowerQuery));
-        
+
         return name.includes(lowerQuery) || category.includes(lowerQuery) || neighborhood.includes(lowerQuery) || tagHit;
       });
     }
@@ -109,29 +133,28 @@ export function useSearchEngine(filters: SearchFilters): SearchResults {
     // 3. Filtra por Filtros Ativos (tags, etc.)
     if (hasFilters) {
       filteredBusinesses = filteredBusinesses.filter((business) =>
-        matchesAllFilters(getBusinessTags(business), activeFilters, { 
-          hours: business.hours, 
-          checkOpenNow: true 
+        matchesAllFilters(getBusinessTags(business), activeFilters, {
+          hours: business.hours,
+          checkOpenNow: true,
         })
       );
     }
-    
+
     return {
       business: filteredBusinesses,
-      listing: listings, // Dados estáticos por enquanto
-      deal: deals,       // Dados estáticos por enquanto
-      event: events,     // Dados estáticos por enquanto
-      news: news,       // Dados estáticos por enquanto
+      listing: listings,
+      deal: deals,
+      event: events,
+      news: news,
       isLoading,
     };
   }, [filters.query, filters.activeFilters, filters.categorySlug, allBusinesses, isLoading]);
 }
 
-// A função de obter filtros de taxonomia permanece a mesma
 export function getAllTaxonomyFilters(): { key: string; label: string; icon?: string }[] {
-    const allTags = new Set<string>();
-    Object.values(LISTING_TYPES).forEach(type => {
-        type.tags.forEach(tag => allTags.add(tag));
-    });
-    return Array.from(allTags).map(tag => ({ key: normalizeText(tag), label: tag }));
+  const allTags = new Set<string>();
+  Object.values(LISTING_TYPES).forEach((type) => {
+    type.tags.forEach((tag) => allTags.add(tag));
+  });
+  return Array.from(allTags).map((tag) => ({ key: normalizeText(tag), label: tag }));
 }

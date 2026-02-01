@@ -1,10 +1,7 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { signInAnonymously } from 'firebase/auth';
-import { auth, db, firebaseEnabled } from '@/firebase';
-import { User, Images, Phone as PhoneIcon, Info, CalendarDays, Star, BadgeCheck } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import { User, Images, Phone as PhoneIcon, CalendarDays, Star, BadgeCheck } from 'lucide-react';
 import { ListingHero } from '@/components/listing/ListingHero';
 import { ListingActionsBar } from '@/components/listing/ListingActionsBar';
 import { ListingTabs, TabItem } from '@/components/listing/ListingTabs';
@@ -16,16 +13,41 @@ import { ReviewsSection } from '@/components/listing/ReviewsSection';
 import { TagChip } from '@/components/ui/TagChip';
 import { useFavorites } from '@/hooks/useFavorites';
 import { businesses as mockBusinesses } from '@/data/mockData';
-import { normalizeBusinessData } from '@/lib/dataNormalization';
+import { normalizeBusinessData, type Business } from '@/lib/dataNormalization';
+
+function normalizeSupabaseRow(row: any): Business {
+  return normalizeBusinessData({
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    categorySlug: row.category_slug,
+    tags: row.tags,
+    neighborhood: row.neighborhood,
+    hours: row.hours,
+    phone: row.phone,
+    whatsapp: row.whatsapp,
+    coverImages: row.cover_images,
+    isOpenNow: row.is_open_now,
+    isVerified: row.is_verified,
+    description: row.description,
+    address: row.address,
+    averageRating: row.average_rating,
+    reviewCount: row.review_count,
+    plan: row.plan,
+    website: row.website,
+    instagram: row.instagram,
+    logo: row.logo,
+  });
+}
 
 export default function BusinessDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const [business, setBusiness] = useState<any>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedBusinesses, setRelatedBusinesses] = useState<any[]>([]);
+  const [relatedBusinesses, setRelatedBusinesses] = useState<Business[]>([]);
   const [businessDeals, setBusinessDeals] = useState<any[]>([]);
   const [businessEvents, setBusinessEvents] = useState<any[]>([]);
 
@@ -34,7 +56,7 @@ export default function BusinessDetail() {
       if (!id) return;
       setLoading(true);
 
-      const fallbackBusinesses = mockBusinesses.map((business) => normalizeBusinessData(business));
+      const fallbackBusinesses = mockBusinesses.map((b) => normalizeBusinessData(b));
       const loadFallbackData = () => {
         const fallbackBusiness = fallbackBusinesses.find((item) => item.id === id);
         if (!fallbackBusiness) {
@@ -46,60 +68,55 @@ export default function BusinessDetail() {
         }
         setBusiness(fallbackBusiness);
         setRelatedBusinesses(
-          fallbackBusinesses.filter((item) => item.categorySlug === fallbackBusiness.categorySlug && item.id !== id).slice(0, 6)
+          fallbackBusinesses
+            .filter((item) => item.categorySlug === fallbackBusiness.categorySlug && item.id !== id)
+            .slice(0, 6)
         );
         setBusinessDeals([]);
         setBusinessEvents([]);
       };
 
       try {
-        if (!firebaseEnabled || !auth || !db) {
-          loadFallbackData();
-          setLoading(false);
-          return;
-        }
-        if (!auth.currentUser) {
-          try {
-            await signInAnonymously(auth);
-          } catch (authError) {
-            console.warn("Falha ao autenticar anonimamente. Continuando sem autenticação.", authError);
-          }
-        }
         // Buscar o negócio principal
-        const businessDocRef = doc(db, 'businesses', id);
-        const businessDoc = await getDoc(businessDocRef);
+        const { data: businessData, error: businessError } = await supabase
+          .from('businesses')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
 
-        if (!businessDoc.exists()) {
+        if (businessError || !businessData) {
+          console.warn('Negócio não encontrado no Supabase, usando fallback:', businessError);
           loadFallbackData();
           setLoading(false);
           return;
         }
 
-        const businessData = normalizeBusinessData({ id: businessDoc.id, ...businessDoc.data() });
-        setBusiness(businessData);
+        const normalizedBusiness = normalizeSupabaseRow(businessData);
+        setBusiness(normalizedBusiness);
 
         // Buscar dados relacionados em paralelo
-        const relatedQuery = query(
-          collection(db, 'businesses'), 
-          where('categorySlug', '==', businessData.categorySlug), 
-          where('__name__', '!=', id), 
-          limit(6)
-        );
-        const dealsQuery = query(collection(db, 'deals'), where('businessId', '==', id));
-        const eventsQuery = query(collection(db, 'events'), where('businessId', '==', id));
-
-        const [relatedSnapshot, dealsSnapshot, eventsSnapshot] = await Promise.all([
-          getDocs(relatedQuery),
-          getDocs(dealsQuery),
-          getDocs(eventsQuery)
+        const [relatedResult, dealsResult, eventsResult] = await Promise.all([
+          supabase
+            .from('businesses')
+            .select('*')
+            .eq('category_slug', businessData.category_slug)
+            .neq('id', id)
+            .limit(6),
+          supabase.from('deals').select('*').eq('business_id', id),
+          supabase.from('events').select('*').eq('business_id', id),
         ]);
 
-        setRelatedBusinesses(relatedSnapshot.docs.map(doc => normalizeBusinessData({ id: doc.id, ...doc.data() })));
-        setBusinessDeals(dealsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-        setBusinessEvents(eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-
+        if (relatedResult.data) {
+          setRelatedBusinesses(relatedResult.data.map(normalizeSupabaseRow));
+        }
+        if (dealsResult.data) {
+          setBusinessDeals(dealsResult.data);
+        }
+        if (eventsResult.data) {
+          setBusinessEvents(eventsResult.data);
+        }
       } catch (error) {
-        console.error("Erro ao buscar dados do negócio:", error);
+        console.error('Erro ao buscar dados do negócio:', error);
         loadFallbackData();
       } finally {
         setLoading(false);
@@ -110,15 +127,22 @@ export default function BusinessDetail() {
   }, [id]);
 
   if (loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><p>Carregando...</p></div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p>Carregando...</p>
+      </div>
+    );
   }
 
   if (!business) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground">Comércio não encontrado</p></div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Comércio não encontrado</p>
+      </div>
+    );
   }
 
   const isLiked = isFavorite('business', business.id);
-
   const rating = business.averageRating;
   const reviewCount = business.reviewCount;
   const reviews = business.reviews ?? [];
@@ -147,20 +171,58 @@ export default function BusinessDetail() {
   }));
 
   const tabs: TabItem[] = [
-    { id: 'perfil', label: 'Perfil', icon: <User className="w-4 h-4" />,
+    {
+      id: 'perfil',
+      label: 'Perfil',
+      icon: <User className="w-4 h-4" />,
       content: (
         <div className="space-y-6 px-4">
-          {business.isVerified && <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-lg w-fit"><BadgeCheck className="w-4 h-4 text-primary" /><span className="text-sm font-medium text-primary">Anunciante Verificado</span></div>}
-          {business.description && <div><h3 className="font-semibold text-foreground mb-2">Sobre</h3><p className="text-muted-foreground leading-relaxed">{business.description}</p></div>}
-          {business.tags && business.tags.length > 0 && <div><h3 className="font-semibold text-foreground mb-2">Diferenciais</h3><div className="flex flex-wrap gap-2">{business.tags.map((tag) => <TagChip key={tag} onClick={() => handleTagClick(tag)} size="sm" variant="tag">{tag}</TagChip>)}</div></div>}
-          {relatedItemsForCarousel.length > 0 && <RelatedCarousel title="Similares na região" items={relatedItemsForCarousel} className="pt-4" />}
+          {business.isVerified && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-lg w-fit">
+              <BadgeCheck className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">Anunciante Verificado</span>
+            </div>
+          )}
+          {business.description && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Sobre</h3>
+              <p className="text-muted-foreground leading-relaxed">{business.description}</p>
+            </div>
+          )}
+          {business.tags && business.tags.length > 0 && (
+            <div>
+              <h3 className="font-semibold text-foreground mb-2">Diferenciais</h3>
+              <div className="flex flex-wrap gap-2">
+                {business.tags.map((tag) => (
+                  <TagChip key={tag} onClick={() => handleTagClick(tag)} size="sm" variant="tag">
+                    {tag}
+                  </TagChip>
+                ))}
+              </div>
+            </div>
+          )}
+          {relatedItemsForCarousel.length > 0 && (
+            <RelatedCarousel title="Similares na região" items={relatedItemsForCarousel} className="pt-4" />
+          )}
         </div>
       ),
     },
-    { id: 'galeria', label: 'Galeria', icon: <Images className="w-4 h-4" />, count: business.coverImages.length,
-      content: <div className="px-4"><GallerySection images={business.coverImages} title="Fotos" /></div>,
+    {
+      id: 'galeria',
+      label: 'Galeria',
+      icon: <Images className="w-4 h-4" />,
+      count: business.coverImages.length,
+      content: (
+        <div className="px-4">
+          <GallerySection images={business.coverImages} title="Fotos" />
+        </div>
+      ),
     },
-    { id: 'avaliacoes', label: 'Avaliações', icon: <Star className="w-4 h-4" />, count: reviewCount,
+    {
+      id: 'avaliacoes',
+      label: 'Avaliações',
+      icon: <Star className="w-4 h-4" />,
+      count: reviewCount,
       content: (
         <div className="px-4">
           <ReviewsSection
@@ -172,11 +234,33 @@ export default function BusinessDetail() {
         </div>
       ),
     },
-    { id: 'eventos', label: 'Eventos', icon: <CalendarDays className="w-4 h-4" />, count: businessDeals.length + businessEvents.length, hideIfEmpty: businessDeals.length === 0 && businessEvents.length === 0,
-      content: <div className="px-4"><EventsSection events={businessEvents} deals={businessDeals} /></div>,
+    {
+      id: 'eventos',
+      label: 'Eventos',
+      icon: <CalendarDays className="w-4 h-4" />,
+      count: businessDeals.length + businessEvents.length,
+      hideIfEmpty: businessDeals.length === 0 && businessEvents.length === 0,
+      content: (
+        <div className="px-4">
+          <EventsSection events={businessEvents} deals={businessDeals} />
+        </div>
+      ),
     },
-    { id: 'contato', label: 'Contato', icon: <PhoneIcon className="w-4 h-4" />,
-      content: <div className="px-4"><ContactSection address={business.address} neighborhood={business.neighborhood} hours={business.hours} phone={business.phone} businessName={business.name} /></div>,
+    {
+      id: 'contato',
+      label: 'Contato',
+      icon: <PhoneIcon className="w-4 h-4" />,
+      content: (
+        <div className="px-4">
+          <ContactSection
+            address={business.address}
+            neighborhood={business.neighborhood}
+            hours={business.hours}
+            phone={business.phone}
+            businessName={business.name}
+          />
+        </div>
+      ),
     },
   ];
 
