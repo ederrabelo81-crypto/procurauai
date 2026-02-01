@@ -176,6 +176,15 @@ CREATE TABLE IF NOT EXISTS businesses (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE businesses
+  ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'Serviços',
+  ADD COLUMN IF NOT EXISTS category_slug TEXT NOT NULL DEFAULT 'servicos',
+  ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS cover_images TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS hours TEXT,
+  ADD COLUMN IF NOT EXISTS logo TEXT,
+  ADD COLUMN IF NOT EXISTS logo_url TEXT;
+
 CREATE INDEX IF NOT EXISTS businesses_location_idx ON businesses USING GIST (location);
 CREATE INDEX IF NOT EXISTS businesses_category_idx ON businesses (category_id);
 CREATE INDEX IF NOT EXISTS businesses_plan_idx ON businesses (plan);
