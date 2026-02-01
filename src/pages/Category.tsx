@@ -1,7 +1,7 @@
 
 import { useParams } from 'react-router-dom';
 import { useState, useMemo } from 'react';
-import { useSearchEngine } from '@/hooks/useSearchEngine';
+import { useCategoryBusinesses } from '@/hooks/useCategoryBusinesses';
 import { ListingTypeHeader } from '@/components/common/ListingTypeHeader';
 import { BusinessCard } from '@/components/cards/BusinessCard';
 import { TagChip } from '@/components/ui/TagChip';
@@ -9,6 +9,7 @@ import { categories, filtersByCategory } from '@/data/mockData';
 import { X, Clock, Tag, MapPin, Zap, Star } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { resolveListingTypeId } from '@/lib/taxonomy';
 
 // --- Helpers e Constantes (mantidos do arquivo original) ---
 const FILTER_ICONS: Record<string, LucideIcon> = { 'aberto agora': Clock, 'delivery': Tag, 'oferta': Tag, 'ofertas': Tag, 'perto de mim': MapPin, 'urgente': Zap, 'destaque': Star };
@@ -34,17 +35,27 @@ export default function Category() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [query, setQuery] = useState('');
+  const normalizedCategoryId = useMemo(
+    () => (categoryId ? resolveListingTypeId(categoryId) : undefined),
+    [categoryId]
+  );
 
-  // A fonte da verdade agora é o hook centralizado `useSearchEngine`
-  const { business: filteredBusinesses, isLoading } = useSearchEngine({
+  // A fonte da verdade agora é o hook centralizado por categoria
+  const { businesses: filteredBusinesses, isLoading } = useCategoryBusinesses({
     query,
     activeFilters,
-    categorySlug: categoryId, // Passa a categoria da URL diretamente para o motor de busca
+    categorySlug: normalizedCategoryId,
   });
 
   // Informações da categoria (buscadas do mockData estático)
-  const category = useMemo(() => categories.find((c) => c.id === categoryId), [categoryId]);
-  const filtersForCategory = useMemo(() => filtersByCategory[categoryId || ''] || [], [categoryId]);
+  const category = useMemo(
+    () => categories.find((c) => c.id === normalizedCategoryId),
+    [normalizedCategoryId]
+  );
+  const filtersForCategory = useMemo(
+    () => filtersByCategory[normalizedCategoryId || ''] || [],
+    [normalizedCategoryId]
+  );
 
   if (!category) {
     return (
@@ -65,9 +76,9 @@ export default function Category() {
       {/* Header (reutilizado e controlado pelo estado local) */}
       <ListingTypeHeader
         title={category.name}
-        subtitle={categorySubtitles[categoryId || 'default']}
+        subtitle={categorySubtitles[normalizedCategoryId || 'default']}
         iconKey={category.iconKey}
-        searchPlaceholder={searchPlaceholders[categoryId || 'default']}
+        searchPlaceholder={searchPlaceholders[normalizedCategoryId || 'default']}
         searchValue={query}
         onSearchChange={setQuery}
         backTo="back"
