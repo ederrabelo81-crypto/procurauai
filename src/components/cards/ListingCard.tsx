@@ -5,13 +5,14 @@ import { BadgePill } from '@/components/ui/BadgePill';
 import type { Listing } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 import { useFavorites } from '@/hooks/useFavorites';
+import { env } from '@/config/env';
 
 interface ListingCardProps {
   listing: Listing & { latitude?: number; longitude?: number };
   className?: string;
 }
 
-const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const API_KEY = env.VITE_GOOGLE_MAPS_API_KEY ?? "";
 
 export function ListingCard({ listing, className }: ListingCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
