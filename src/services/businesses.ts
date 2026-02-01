@@ -67,29 +67,37 @@ function deriveCategorySlug(name?: string, category?: string, fallback = "servic
   return fallback;
 }
 
-function buildFallbackFilters(slug: string, categoryField = "category"): string | null {
+function buildFallbackFilters(slug: string, fields: string[] = ["category", "name"]): string | null {
+  const activeFields = fields.filter(Boolean);
+  if (activeFields.length === 0) return null;
+
   if (slug === "comer-agora") {
     const slugPhrase = slug.replace(/[-_]/g, " ");
-    return FOOD_KEYWORDS.flatMap((keyword) => [
-      `${categoryField}.ilike.%${keyword}%`,
-      `name.ilike.%${keyword}%`,
-    ])
-      .concat([`${categoryField}.ilike.%${slugPhrase}%`, `name.ilike.%${slugPhrase}%`])
+    return FOOD_KEYWORDS.flatMap((keyword) =>
+      activeFields.map((field) => `${field}.ilike.%${keyword}%`)
+    )
+      .concat(activeFields.map((field) => `${field}.ilike.%${slugPhrase}%`))
       .join(",");
   }
 
   const normalizedSlug = slug.replace(/-/g, " ");
   if (!normalizedSlug) return null;
 
-  return [
-    `${categoryField}.ilike.%${normalizedSlug}%`,
-    `name.ilike.%${normalizedSlug}%`,
-  ].join(",");
+  return activeFields.map((field) => `${field}.ilike.%${normalizedSlug}%`).join(",");
 }
 
 function isMissingColumnError(error: { message?: string } | null, column: string): boolean {
   if (!error?.message) return false;
   return error.message.includes(`column "${column}" does not exist`);
+}
+
+function isMissingRelationError(error: { message?: string } | null, relation: string): boolean {
+  if (!error?.message) return false;
+  return (
+    error.message.includes(`relationship`) &&
+    error.message.includes(relation) &&
+    error.message.includes(`schema cache`)
+  );
 }
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
@@ -104,6 +112,25 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     category,
     category_slug
   `;
+  const baseSelectWithoutCategory = `
+    id,
+    name,
+    neighborhood,
+    cover_images,
+    is_open_now,
+    plan,
+    is_verified,
+    category_slug
+  `;
+  const baseSelectMinimal = `
+    id,
+    name,
+    neighborhood,
+    cover_images,
+    is_open_now,
+    plan,
+    is_verified
+  `;
 
   const slugCandidates = buildSlugCandidates(slug);
   let usedCategoryRelation = false;
@@ -112,6 +139,14 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     .select(baseSelect)
     .in("category_slug", slugCandidates)
     .limit(limit);
+
+  if (isMissingColumnError(error, "category") && !isMissingColumnError(error, "category_slug")) {
+    ({ data, error } = await supabase
+      .from("businesses")
+      .select(baseSelectWithoutCategory)
+      .in("category_slug", slugCandidates)
+      .limit(limit));
+  }
 
   // Fallback para schema com category_id/relacionamento de categorias (sem category/category_slug)
   if (isMissingColumnError(error, "category_slug") || isMissingColumnError(error, "category")) {
@@ -145,7 +180,28 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
         console.error("Supabase error (getBusinessesByCategorySlug):", error);
       }
 
-      const fallbackFilters = buildFallbackFilters(slug, "categories.name");
+      if (isMissingRelationError(error, "categories")) {
+        const fallbackFilters = buildFallbackFilters(slug, ["name"]);
+        if (fallbackFilters) {
+          const fallbackResponse = await supabase
+            .from("businesses")
+            .select(baseSelectMinimal)
+            .or(fallbackFilters)
+            .limit(limit);
+
+          if (fallbackResponse.error) {
+            console.error("Supabase error (fallback businesses):", fallbackResponse.error);
+            throw fallbackResponse.error;
+          }
+
+          data = fallbackResponse.data ?? [];
+        }
+        error = null;
+      }
+    }
+
+    if ((!data || data.length === 0) && !isMissingRelationError(error, "categories")) {
+      const fallbackFilters = buildFallbackFilters(slug, ["categories.name", "name"]);
 
       if (fallbackFilters) {
         const fallbackResponse = await supabase
@@ -169,12 +225,38 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
       console.error("Supabase error (getBusinessesByCategorySlug):", error);
     }
 
-    const fallbackFilters = buildFallbackFilters(slug);
+    const fallbackFilters = buildFallbackFilters(slug, ["category", "name"]);
+    const fallbackSelect = isMissingColumnError(error, "category")
+      ? baseSelectWithoutCategory
+      : baseSelect;
 
     if (fallbackFilters) {
       const fallbackResponse = await supabase
         .from("businesses")
-        .select(baseSelect)
+        .select(fallbackSelect)
+        .or(fallbackFilters)
+        .limit(limit);
+
+      if (fallbackResponse.error) {
+        console.error("Supabase error (fallback businesses):", fallbackResponse.error);
+        throw fallbackResponse.error;
+      }
+
+      data = fallbackResponse.data ?? [];
+    }
+  }
+
+  if (
+    !usedCategoryRelation &&
+    isMissingColumnError(error, "category_slug") &&
+    !isMissingColumnError(error, "category")
+  ) {
+    const fallbackFilters = buildFallbackFilters(slug, ["name"]);
+
+    if (fallbackFilters) {
+      const fallbackResponse = await supabase
+        .from("businesses")
+        .select(baseSelectMinimal)
         .or(fallbackFilters)
         .limit(limit);
 
@@ -188,21 +270,24 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
   }
 
   // Converte do formato do banco para o formato do UI
-  return (data ?? []).map((row: any) => ({
-    id: row.id,
-    name: row.name,
-    neighborhood: row.neighborhood || "",
-    coverImages: Array.isArray(row.cover_images) ? row.cover_images : [],
-    isOpenNow: !!row.is_open_now,
-    plan: row.plan ?? "free",
-    isVerified: !!row.is_verified,
-    category: row.category ?? row.categories?.name ?? "",
-    categorySlug:
+  return (data ?? []).map((row: any) => {
+    const categoryName = row.category ?? row.categories?.name ?? "";
+    const categorySlug =
       row.category_slug ??
       row.categories?.slug ??
-      deriveCategorySlug(row.name, row.category ?? row.categories?.name, slug),
-    category: row.category ?? "",
-    categorySlug: row.category_slug ?? deriveCategorySlug(row.name, row.category, slug),
-    tags: [], // ainda não temos chips/tags ligados no seed
-  }));
+      deriveCategorySlug(row.name, categoryName, slug);
+
+    return {
+      id: row.id,
+      name: row.name,
+      neighborhood: row.neighborhood || "",
+      coverImages: Array.isArray(row.cover_images) ? row.cover_images : [],
+      isOpenNow: !!row.is_open_now,
+      plan: row.plan ?? "free",
+      isVerified: !!row.is_verified,
+      category: categoryName,
+      categorySlug,
+      tags: [], // ainda não temos chips/tags ligados no seed
+    };
+  });
 }
