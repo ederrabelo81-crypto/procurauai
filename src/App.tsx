@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { reportError } from "@/lib/errors/errorHandler";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -34,7 +35,18 @@ import JobDetail from "./pages/JobDetail";
 import RealEstateDetail from "./pages/RealEstateDetail";
 import DebugEnv from "./pages/DebugEnv";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60,
+      retry: (failureCount, error) => {
+        const normalized = reportError(error, { scope: "react-query" });
+        if (!normalized.retryable) return false;
+        return failureCount < 2;
+      },
+    },
+  },
+});
 
 const App = () => (
   <ErrorBoundary>
