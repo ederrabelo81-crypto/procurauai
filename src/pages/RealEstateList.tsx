@@ -1,223 +1,76 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { MapPin, Bed, Bath, Car, Maximize, X, ChevronDown } from 'lucide-react';
-import { ListingTypeHeader } from '@/components/common/ListingTypeHeader';
-import { TagChip } from '@/components/ui/TagChip';
-import { realEstate } from '@/data/mockData';
-import { filtersByCategory } from '@/data/mockData';
-import { 
-  createFilterOptions, 
-  formatTag, 
-  matchesAnyFilter, 
-  sortItems,
-  SORT_OPTIONS 
-} from '@/lib/tags';
+import { useMemo, useState } from "react";
+import { ListingTypeHeader } from "@/components/common/ListingTypeHeader";
+import { BusinessCard } from "@/components/cards/BusinessCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useRealEstate } from "@/hooks/useCategories";
+
+function BusinessCardSkeleton() {
+  return (
+    <div className="flex flex-col space-y-3 p-1">
+      <Skeleton className="h-32 w-full rounded-xl" />
+      <div className="space-y-2">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+    </div>
+  );
+}
 
 export default function RealEstateList() {
-  const [query, setQuery] = useState('');
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [sortKey, setSortKey] = useState('');
-  const [showSortMenu, setShowSortMenu] = useState(false);
-  
-  const filterOptions = useMemo(
-    () => createFilterOptions(filtersByCategory['imoveis'] || []),
-    []
-  );
-  const sortOptions = SORT_OPTIONS['imoveis'] || [];
+  const [query, setQuery] = useState("");
+  const { data: listings = [], isLoading, error } = useRealEstate();
 
-  const filtered = useMemo(() => {
-    let result = realEstate.filter((item) => {
-      const matchesQuery = !query || 
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.neighborhood.toLowerCase().includes(query.toLowerCase());
-      
-      const matchesFiltersResult = matchesAnyFilter(item, activeFilters, 'imoveis');
-      
-      return matchesQuery && matchesFiltersResult;
+  const filteredListings = useMemo(() => {
+    const trimmed = query.trim().toLowerCase();
+    if (!trimmed) return listings;
+    return listings.filter((listing) => {
+      const name = listing.name.toLowerCase();
+      const category = listing.category.toLowerCase();
+      const neighborhood = listing.neighborhood.toLowerCase();
+      return (
+        name.includes(trimmed) ||
+        category.includes(trimmed) ||
+        neighborhood.includes(trimmed)
+      );
     });
-    
-    if (sortKey) {
-      result = sortItems(result, sortKey, 'imoveis');
-    }
-    
-    return result;
-  }, [query, activeFilters, sortKey]);
-
-  const toggleFilter = (filterKey: string) => {
-    setActiveFilters(prev => 
-      prev.includes(filterKey) ? prev.filter(f => f !== filterKey) : [...prev, filterKey]
-    );
-  };
-
-  const clearFilters = () => {
-    setActiveFilters([]);
-    setSortKey('');
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
-  };
-
-  const currentSort = sortOptions.find(s => s.key === sortKey);
+  }, [listings, query]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
       <ListingTypeHeader
         title="Imóveis"
-        subtitle="Compra e aluguel"
-        iconKey="imoveis"
+        subtitle="Residenciais e comerciais"
+        iconKey="realestate"
         searchPlaceholder="Buscar imóveis..."
         searchValue={query}
         onSearchChange={setQuery}
-      >
-        {filterOptions.length > 0 && (
-          <div className="flex gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
-            {activeFilters.length > 0 && (
-              <TagChip
-                onClick={clearFilters}
-                icon={X}
-                size="sm"
-                variant="filter"
-                className="border-destructive/40 text-destructive"
-              >
-                Limpar
-              </TagChip>
-            )}
-            {filterOptions.map((filter) => (
-              <TagChip
-                key={filter.key}
-                isActive={activeFilters.includes(filter.key)}
-                onClick={() => toggleFilter(filter.key)}
-                size="sm"
-                variant="filter"
-              >
-                {filter.label}
-              </TagChip>
+        backTo="back"
+      />
+
+      <main className="px-4 py-4">
+        <p className="text-sm text-muted-foreground mb-4">
+          Mostrando {filteredListings.length} de {listings.length} imóveis
+        </p>
+
+        {isLoading && (
+          <div className="grid grid-cols-1 gap-4">
+            {[...Array(6)].map((_, index) => (
+              <BusinessCardSkeleton key={index} />
             ))}
           </div>
         )}
-      </ListingTypeHeader>
 
-      <main className="px-4 py-4">
-        {/* Sort & Results */}
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {filtered.length} de {realEstate.length} imóveis
-          </p>
-          
-          <div className="relative">
-            <button
-              onClick={() => setShowSortMenu(!showSortMenu)}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-            >
-              {currentSort?.label || 'Ordenar'} <ChevronDown className="w-4 h-4" />
-            </button>
-            {showSortMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-lg shadow-lg z-50 min-w-[150px]">
-                {sortOptions.map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => { setSortKey(opt.key); setShowSortMenu(false); }}
-                    className={`block w-full text-left px-3 py-2 text-sm hover:bg-muted ${sortKey === opt.key ? 'text-primary' : ''}`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
+        {!isLoading && error && (
+          <div className="text-center py-12 text-sm text-destructive">
+            Erro ao carregar imóveis. Tente novamente mais tarde.
           </div>
-        </div>
+        )}
 
-
-        <div className="space-y-4">
-          {filtered.map((item) => (
-            <Link
-              key={item.id}
-              to={`/imoveis/${item.id}`}
-              className="block bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
-            >
-              <div className="relative aspect-video">
-                <img
-                  src={item.coverImage}
-                  alt={item.title}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <div className="absolute top-2 left-2 flex gap-1">
-                  <span className="px-2 py-1 bg-primary text-primary-foreground rounded-full text-xs font-medium">
-                    {formatTag(item.transactionType)}
-                  </span>
-                  <span className="px-2 py-1 bg-background/90 rounded-full text-xs font-medium">
-                    {formatTag(item.propertyType)}
-                  </span>
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
-                <p className="text-lg font-bold text-primary mb-2">
-                  {item.transactionType === 'alugar' 
-                    ? `${formatPrice(item.rentPrice || 0)}/mês`
-                    : formatPrice(item.price || 0)
-                  }
-                  {item.condoFee && item.condoFee > 0 && (
-                    <span className="text-xs font-normal text-muted-foreground ml-1">
-                      + {formatPrice(item.condoFee)} cond.
-                    </span>
-                  )}
-                </p>
-                
-                {/* Tags - formatted */}
-                {item.tags && item.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {item.tags.slice(0, 4).map((tag) => (
-                      <span key={tag} className="px-2 py-0.5 bg-muted rounded-full text-xs text-muted-foreground">
-                        {formatTag(tag)}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  {item.bedrooms > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Bed className="w-3.5 h-3.5" />
-                      {item.bedrooms}
-                    </span>
-                  )}
-                  {item.bathrooms > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Bath className="w-3.5 h-3.5" />
-                      {item.bathrooms}
-                    </span>
-                  )}
-                  {item.parkingSpots > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Car className="w-3.5 h-3.5" />
-                      {item.parkingSpots}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1">
-                    <Maximize className="w-3.5 h-3.5" />
-                    {item.areaM2}m²
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {item.neighborhood}
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Nenhum imóvel encontrado</p>
-            {activeFilters.length > 0 && (
-              <button onClick={clearFilters} className="text-primary text-sm mt-2 hover:underline">
-                Limpar filtros
-              </button>
-            )}
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 gap-4">
+            {filteredListings.map((listing) => (
+              <BusinessCard key={listing.id} business={listing} />
+            ))}
           </div>
         )}
       </main>
