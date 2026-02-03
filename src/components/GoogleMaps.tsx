@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { APIProvider, Map, AdvancedMarker, Pin, InfoWindow } from '@vis.gl/react-google-maps';
 import { supabase } from '@/lib/supabaseClient';
+import { cache, BUSINESS_CACHE_KEYS } from '@/lib/cache';
+import { getUserLocation } from '@/lib/geolocation';
 
 interface BusinessDoc {
   id: string;
@@ -68,6 +70,17 @@ const GoogleMaps: React.FC = () => {
 
   const loadAndDisplayLocations = async (lat: number, lng: number, radiusInKm: number = 25) => {
     try {
+      // Create cache key based on location and radius
+      const cacheKey = BUSINESS_CACHE_KEYS.byLocation(lat, lng, radiusInKm);
+      
+      // Check if we have cached data
+      const cachedData = cache.get<BusinessDoc[]>(cacheKey);
+      if (cachedData) {
+        setMarkers(cachedData);
+        setStatusMessage(`${cachedData.length} locais carregados do cache.`);
+        return;
+      }
+
       // Busca todos os negócios que têm coordenadas
       const { data, error } = await supabase
         .from('businesses')
@@ -110,6 +123,9 @@ const GoogleMaps: React.FC = () => {
           description: row.description,
           isVerified: row.is_verified,
         }));
+
+      // Cache the results for 10 minutes
+      cache.set(cacheKey, nearbyBusinesses, 10 * 60 * 1000);
 
       setMarkers(nearbyBusinesses);
       setStatusMessage(`${nearbyBusinesses.length} locais carregados.`);

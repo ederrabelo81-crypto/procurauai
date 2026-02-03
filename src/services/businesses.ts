@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { reportError } from "@/lib/errors/errorHandler";
 import { executeSupabase } from "@/services/supabaseRequest";
 import { resolveListingTypeId } from "@/lib/taxonomy";
+import { cache, BUSINESS_CACHE_KEYS } from "@/lib/cache";
 
 const FOOD_KEYWORDS = [
   "restaurante",
@@ -147,6 +148,13 @@ function toUiBusiness(row: BusinessRow, fallbackSlug: string): UiBusiness {
 }
 
 export async function getBusinessesByCategorySlug(slug: string, limit = 8): Promise<UiBusiness[]> {
+  // Check cache first
+  const cacheKey = BUSINESS_CACHE_KEYS.byCategorySlug(slug, limit);
+  const cachedResult = cache.get<UiBusiness[]>(cacheKey);
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   const normalizedSlug = normalizeCategorySlug(slug);
   const slugCandidates = Array.from(
     new Set([...buildSlugCandidates(normalizedSlug), ...buildSlugCandidates(slug)])
@@ -344,5 +352,10 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
   }
 
   // Converte do formato do banco para o formato do UI usando helper
-  return (data ?? []).map((row) => toUiBusiness(row, normalizedSlug || slug));
+  const result = (data ?? []).map((row) => toUiBusiness(row, normalizedSlug || slug));
+  
+  // Cache the result for 5 minutes
+  cache.set(cacheKey, result, 5 * 60 * 1000);
+  
+  return result;
 }
