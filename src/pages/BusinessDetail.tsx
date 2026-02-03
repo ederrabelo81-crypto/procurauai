@@ -214,9 +214,6 @@ export default function BusinessDetail() {
             </div>
           </div>
         )}
-        {relatedItemsForCarousel.length > 0 && (
-          <RelatedCarousel title="Similares na região" items={relatedItemsForCarousel} className="pt-4" />
-        )}
       </section>
       
       {/* Gallery Section */}
@@ -251,6 +248,12 @@ export default function BusinessDetail() {
           businessName={business.name}
         />
       </section>
+      
+      {relatedItemsForCarousel.length > 0 && (
+        <section className="mt-8 px-4">
+          <RelatedCarousel title="Similares na região" items={relatedItemsForCarousel} className="pt-4" />
+        </section>
+      )}
       
       <ListingActionsBar
         whatsapp={business.whatsapp}
