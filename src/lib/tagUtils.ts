@@ -1,4 +1,5 @@
 // Utilitários de normalização de tags e verificação de horário
+import { getCurrentTime } from './serverTime';
 
 /**
  * Normaliza texto: lowercase, remove acentos, trim, remove pontuação
@@ -170,7 +171,8 @@ export function isOpenNow(hoursString: string): boolean | null {
     return null;
   }
 
-  const now = new Date();
+  // Use server time to avoid client device time issues
+  const now = getCurrentTime();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
   
   const { openMinutes, closeMinutes } = timeRange;
