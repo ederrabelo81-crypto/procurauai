@@ -3,10 +3,18 @@ import { vi } from "vitest";
 import { useSearch } from "../useSearch";
 
 vi.mock("../useSearchEngine", () => ({
-  useSearchEngine: () => ({ results: [], isLoading: false, error: null }),
+  useSearchEngine: () => ({ 
+    business: [], 
+    listing: [], 
+    deal: [], 
+    event: [], 
+    news: [], 
+    isLoading: false 
+  }),
 }));
 
 test("returns search results shape", () => {
   const { result } = renderHook(() => useSearch("", []));
-  expect(result.current.results).toEqual([]);
+  expect(result.current.business).toEqual([]);
+  expect(result.current.isLoading).toBe(false);
 });
