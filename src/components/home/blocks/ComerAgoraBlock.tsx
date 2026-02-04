@@ -14,14 +14,9 @@ export function ComerAgoraBlock() {
         setLoading(true);
         const data = await getBusinessesByCategorySlug("comer-agora", 8);
 
-        /**
-         * IMPORTANTE:
-         * No mock, você filtrava "abertos agora". No banco, isso depende de is_open_now.
-         * Como seus dados seed provavelmente NÃO têm is_open_now calculado, pode vir tudo false.
-         * Então aqui a gente NÃO filtra por aberto (senão some tudo).
-         * Mais pra frente, quando você tiver horários reais, a gente ativa o filtro.
-         */
-        setItems(data);
+        // Filtrar apenas os estabelecimentos que estão abertos agora
+        const openNow = data.filter(place => place.isOpenNow);
+        setItems(openNow);
       } catch (e) {
         console.error(e);
         setItems([]);
