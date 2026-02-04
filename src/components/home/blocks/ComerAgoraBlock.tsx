@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Clock, MapPin, Utensils } from "lucide-react";
 import { getBusinessesByCategorySlug, UiBusiness } from "@/services/businesses";
+import { isOpenNow } from "@/lib/tagUtils";
 
 export function ComerAgoraBlock() {
   const [items, setItems] = useState<UiBusiness[]>([]);
@@ -15,7 +16,17 @@ export function ComerAgoraBlock() {
         const data = await getBusinessesByCategorySlug("comer-agora", 8);
 
         // Filtrar apenas os estabelecimentos que estão abertos agora
-        const openNow = data.filter(place => place.isOpenNow);
+        // Usando a função isOpenNow para verificar horários reais
+        const openNow = data.filter(place => {
+          // Primeiro tenta usar o campo is_open_now do banco
+          if (place.isOpenNow) return true;
+          
+          // Se não tiver o campo is_open_now ou for falso, tenta analisar os horários
+          // Isso é importante porque o campo no banco pode estar desatualizado
+          // e precisamos calcular se está realmente aberto agora
+          return isOpenNow(place.hours || '');
+        });
+        
         setItems(openNow);
       } catch (e) {
         console.error(e);
