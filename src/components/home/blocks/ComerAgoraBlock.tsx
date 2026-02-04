@@ -13,7 +13,23 @@ export function ComerAgoraBlock() {
     async function load() {
       try {
         setLoading(true);
-        const data = await getBusinessesByCategorySlug("comer-agora", 8);
+        // Primeiro tenta buscar pela categoria padrão
+        let data = await getBusinessesByCategorySlug("comer-agora", 8);
+        
+        // Se não encontrar resultados suficientes, tenta buscar por outras categorias
+        // como fallback, já que muitos registros podem ter sido cadastrados como "serviços"
+        if (data.length < 2) {
+          const fallbackData = await getBusinessesByCategorySlug("servicos", 20);
+          
+          // Filtrar apenas os estabelecimentos que parecem ser do tipo "comer-agora"
+          const foodKeywords = ["restaurante", "lanchonete", "pizzaria", "hamburguer", "bar", "cafe", "caf", "padaria", "panificadora", "confeitaria", "gastro", "sorveteria"];
+          const foodPlaces = fallbackData.filter(place => {
+            const placeText = `${place.name} ${place.category}`.toLowerCase();
+            return foodKeywords.some(keyword => placeText.includes(keyword));
+          }).slice(0, 8); // Limitar a 8 itens após filtrar
+          
+          data = foodPlaces;
+        }
 
         // Filtrar apenas os estabelecimentos que estão abertos agora
         // Usando a função isOpenNow para verificar horários reais
