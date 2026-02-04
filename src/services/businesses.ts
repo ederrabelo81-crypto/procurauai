@@ -35,6 +35,7 @@ export type UiBusiness = {
   neighborhood: string;
   coverImages: string[];
   isOpenNow: boolean;
+  hours?: string; // Adicionando o campo hours para verificação de horário
   tags: string[];
   plan?: "free" | "pro" | "destaque";
   isVerified?: boolean;
@@ -80,6 +81,7 @@ function toUiBusiness(row: any, fallbackSlug: string): UiBusiness {
     neighborhood: row.neighborhood || "",
     coverImages: Array.isArray(row.cover_images) ? row.cover_images : [],
     isOpenNow: !!row.is_open_now,
+    hours: row.hours || row.business_hours || '', // Adicionando o campo hours do banco
     plan: row.plan ?? "free",
     isVerified: !!row.is_verified,
     category: categoryName,
@@ -101,7 +103,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
   // Simplified query: try with category_slug first
   const { data, error } = await supabase
     .from("businesses")
-    .select("id, name, neighborhood, cover_images, is_open_now, plan, is_verified, category, category_slug")
+    .select("id, name, neighborhood, cover_images, is_open_now, plan, is_verified, category, category_slug, hours, business_hours")
     .in("category_slug", slugCandidates)
     .limit(limit);
 
@@ -113,7 +115,7 @@ export async function getBusinessesByCategorySlug(slug: string, limit = 8): Prom
     if (fallbackFilters) {
       const fallbackResponse = await supabase
         .from("businesses")
-        .select("id, name, neighborhood, cover_images, is_open_now, plan, is_verified")
+        .select("id, name, neighborhood, cover_images, is_open_now, plan, is_verified, hours, business_hours")
         .or(fallbackFilters)
         .limit(limit);
 
