@@ -1,4 +1,3 @@
-```ts
-// Only source code file was modified, no build artifacts, dependencies, or temp files detected
-// No changes needed to .gitignore
+```
+node_modules/
 ```
