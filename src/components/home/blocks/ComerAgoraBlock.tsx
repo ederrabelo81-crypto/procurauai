@@ -3,7 +3,43 @@ import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Clock, MapPin, Utensils } from "lucide-react";
 import { getBusinessesByCategorySlug, UiBusiness } from "@/services/businesses";
-import { isOpenNow } from "@/lib/tagUtils";
+import { businesses as mockBusinesses } from "@/data/mockData";
+
+// Keywords para identificar estabelecimentos de comida
+const FOOD_KEYWORDS = [
+  "restaurante", "lanchonete", "pizzaria", "hamburguer", "hamburgueria",
+  "bar", "cafe", "café", "padaria", "panificadora", "confeitaria",
+  "gastro", "sorveteria", "açaí", "acai", "sushi", "japonês", "japones",
+  "churrasco", "churrascaria", "espetinho", "marmita", "marmitex",
+  "pastelaria", "pastel", "food", "delivery", "fast food", "comida"
+];
+
+function isFoodBusiness(name: string, category: string): boolean {
+  const text = `${name} ${category}`.toLowerCase();
+  return FOOD_KEYWORDS.some(keyword => text.includes(keyword));
+}
+
+function getMockFoodBusinesses(): UiBusiness[] {
+  return mockBusinesses
+    .filter(b => 
+      b.categorySlug === "comer-agora" || 
+      isFoodBusiness(b.name, b.category)
+    )
+    .slice(0, 8)
+    .map(b => ({
+      id: b.id,
+      name: b.name,
+      category: b.category,
+      categorySlug: b.categorySlug || "comer-agora",
+      neighborhood: b.neighborhood,
+      coverImages: b.coverImages || [],
+      isOpenNow: b.isOpenNow,
+      hours: b.hours,
+      tags: b.tags || [],
+      plan: b.plan,
+      isVerified: b.isVerified,
+    }));
+}
 
 export function ComerAgoraBlock() {
   const [items, setItems] = useState<UiBusiness[]>([]);
@@ -13,31 +49,34 @@ export function ComerAgoraBlock() {
     async function load() {
       try {
         setLoading(true);
-        // Primeiro tenta buscar pela categoria padrão
+        
+        // 1. Tenta buscar pela categoria "comer-agora"
         let data = await getBusinessesByCategorySlug("comer-agora", 8);
         
-        // Se não encontrar resultados suficientes, tenta buscar por outras categorias
-        // como fallback, já que muitos registros podem ter sido cadastrados como "serviços"
-        if (data.length < 2) {
-          const fallbackData = await getBusinessesByCategorySlug("servicos", 20);
+        // 2. Se poucos resultados, busca em "servicos" e filtra por keywords de comida
+        if (data.length < 4) {
+          const fallbackData = await getBusinessesByCategorySlug("servicos", 30);
+          const foodPlaces = fallbackData.filter(place => 
+            isFoodBusiness(place.name, place.category)
+          );
           
-          // Filtrar apenas os estabelecimentos que parecem ser do tipo "comer-agora"
-          const foodKeywords = ["restaurante", "lanchonete", "pizzaria", "hamburguer", "bar", "cafe", "caf", "padaria", "panificadora", "confeitaria", "gastro", "sorveteria"];
-          const foodPlaces = fallbackData.filter(place => {
-            const placeText = `${place.name} ${place.category}`.toLowerCase();
-            return foodKeywords.some(keyword => placeText.includes(keyword));
-          }).slice(0, 8); // Limitar a 8 itens após filtrar
-          
-          data = foodPlaces;
+          // Merge sem duplicatas
+          const existingIds = new Set(data.map(d => d.id));
+          const newItems = foodPlaces.filter(p => !existingIds.has(p.id));
+          data = [...data, ...newItems].slice(0, 8);
         }
 
-        // Exibe todos os itens encontrados, independentemente do status de aberto/fechado
-        // A funcionalidade de horários pode ser ajustada posteriormente
+        // 3. Fallback final: usa mockData se ainda não tiver dados suficientes
+        if (data.length < 2) {
+          console.log("ComerAgoraBlock: Usando mockData como fallback");
+          data = getMockFoodBusinesses();
+        }
+
         setItems(data);
-        console.log("Dados carregados para Comer Agora:", data); // Adicionando log para debug
       } catch (e) {
         console.error("Erro ao carregar dados para Comer Agora:", e);
-        setItems([]);
+        // Em caso de erro, usa mockData
+        setItems(getMockFoodBusinesses());
       } finally {
         setLoading(false);
       }
@@ -45,12 +84,31 @@ export function ComerAgoraBlock() {
     load();
   }, []);
 
-  // Enquanto carrega, pode esconder ou mostrar placeholder.
-  // Vou deixar escondido para não "poluir" a Home.
-  if (loading) return <div>Carregando Comer Agora...</div>; // Mostrar indicador de carregamento
+  if (loading) {
+    return (
+      <section>
+        <SectionHeader
+          title="Comer Agora"
+          icon={Utensils}
+          iconVariant="warning"
+        />
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex-shrink-0 w-[200px] bg-card rounded-2xl overflow-hidden animate-pulse">
+              <div className="aspect-[4/3] bg-muted" />
+              <div className="p-3 space-y-2">
+                <div className="h-4 bg-muted rounded w-3/4" />
+                <div className="h-3 bg-muted rounded w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
-  // Se não há nenhum, não renderiza
-  if (items.length === 0) return <div>Nenhum item encontrado para Comer Agora</div>; // Mostrar mensagem quando não há itens
+  // Se não há nenhum item, não renderiza a seção
+  if (items.length === 0) return null;
 
   return (
     <section>
@@ -76,9 +134,8 @@ export function ComerAgoraBlock() {
                 loading="lazy"
               />
 
-              {/* Se o banco informar que está aberto, mostra a badge */}
               {place.isOpenNow && (
-                <div className="absolute top-2 left-2 flex items-center gap-1 bg-green-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                <div className="absolute top-2 left-2 flex items-center gap-1 bg-emerald-500 text-emerald-50 text-xs font-medium px-2 py-0.5 rounded-full">
                   <Clock className="w-3 h-3" />
                   Aberto
                 </div>
@@ -99,7 +156,6 @@ export function ComerAgoraBlock() {
                 {place.neighborhood}
               </div>
 
-              {/* Tags ainda não estão conectadas no banco (chips). Mantive compatível. */}
               {place.tags?.length > 0 && (
                 <div className="flex gap-1 mt-2 flex-wrap">
                   {place.tags.slice(0, 2).map((tag) => (
