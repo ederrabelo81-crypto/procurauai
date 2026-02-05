@@ -34,8 +34,9 @@ export function ComerAgoraBlock() {
         // Exibe todos os itens encontrados, independentemente do status de aberto/fechado
         // A funcionalidade de horários pode ser ajustada posteriormente
         setItems(data);
+        console.log("Dados carregados para Comer Agora:", data); // Adicionando log para debug
       } catch (e) {
-        console.error(e);
+        console.error("Erro ao carregar dados para Comer Agora:", e);
         setItems([]);
       } finally {
         setLoading(false);
@@ -46,10 +47,10 @@ export function ComerAgoraBlock() {
 
   // Enquanto carrega, pode esconder ou mostrar placeholder.
   // Vou deixar escondido para não "poluir" a Home.
-  if (loading) return null;
+  if (loading) return <div>Carregando Comer Agora...</div>; // Mostrar indicador de carregamento
 
   // Se não há nenhum, não renderiza
-  if (items.length === 0) return null;
+  if (items.length === 0) return <div>Nenhum item encontrado para Comer Agora</div>; // Mostrar mensagem quando não há itens
 
   return (
     <section>
