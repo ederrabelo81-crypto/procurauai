@@ -31,19 +31,9 @@ export function ComerAgoraBlock() {
           data = foodPlaces;
         }
 
-        // Filtrar apenas os estabelecimentos que estão abertos agora
-        // Usando a função isOpenNow para verificar horários reais
-        const openNow = data.filter(place => {
-          // Primeiro tenta usar o campo is_open_now do banco
-          if (place.isOpenNow) return true;
-          
-          // Se não tiver o campo is_open_now ou for falso, tenta analisar os horários
-          // Isso é importante porque o campo no banco pode estar desatualizado
-          // e precisamos calcular se está realmente aberto agora
-          return isOpenNow(place.hours || '');
-        });
-        
-        setItems(openNow);
+        // Exibe todos os itens encontrados, independentemente do status de aberto/fechado
+        // A funcionalidade de horários pode ser ajustada posteriormente
+        setItems(data);
       } catch (e) {
         console.error(e);
         setItems([]);
