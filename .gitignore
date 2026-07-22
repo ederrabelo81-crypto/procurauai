@@ -8,3 +8,6 @@ dist-ssr/
 coverage/
 playwright-report/
 test-results/
+
+# Saída da coleta de dados (scripts/collect-places.mjs)
+data/places/
