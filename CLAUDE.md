@@ -329,14 +329,18 @@ Rodam com Node, **fora** do app, e usam `process.env` (não `import.meta.env`):
 
 | Script | O que faz |
 | --- | --- |
-| `collect-places.mjs` | coleta comércios via Google Places API (New) → JSON + CSV em `data/places/` (git-ignored) |
+| `collect-places.mjs` | coleta comércios via Google Places API (New) → JSON + CSV em `data/places/` (git-ignored); aceita `--dry-run`, `--cities`, `--categories`, `--max-pages`, `--help` |
 | `import-businesses.mjs` | importa o JSON revisado para `businesses`, deduplicando por `google_place_id`; aceita `--dry-run`, `--update`, `--limit` |
 | `translate-businesses.mjs` | traduz `description` para pt-BR via DeepL e normaliza `rating` |
 | `check-database-content.ts` | inspeciona categorias/contagens no banco |
 
 Os três primeiros exigem `SUPABASE_SERVICE_ROLE_KEY` e/ou
 `GOOGLE_MAPS_API_KEY` / `DEEPL_API_KEY` no ambiente. Sempre ofereça
-`--dry-run` antes de escrever no banco. Documentação:
+`--dry-run` antes de escrever no banco. `collect-places.mjs` também lê a chave
+de `.env.local` (`process.loadEnvFile`) — a chave dos scripts precisa ser
+**separada** da `VITE_GOOGLE_MAPS_API_KEY` do front-end, que é restrita por
+referenciador HTTP e falha fora do navegador. Testes dos helpers puros do script
+ficam em `scripts/__tests__/` (incluídos no `vitest.config.ts`). Documentação:
 [`docs/coleta-de-dados.md`](docs/coleta-de-dados.md) e
 [`docs/supabase/translation-script.md`](docs/supabase/translation-script.md).
 

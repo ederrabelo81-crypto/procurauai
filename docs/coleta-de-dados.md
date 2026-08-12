@@ -30,15 +30,43 @@
    - Crie uma chave de API em *APIs e serviços → Credenciais*. Restrinja a chave à Places API (New).
    - Ative o faturamento (exigido), mas configure **alertas de orçamento** (ex.: US$ 5) por segurança.
 
-2. **Rodar o script de coleta** (já incluído neste repositório):
+   ⚠️ **Use uma chave separada da do front-end.** A chave do app
+   (`VITE_GOOGLE_MAPS_API_KEY`) é restrita por *referenciador HTTP*, e o Google
+   recusa chamadas de servidor feitas com ela (`Requests from referer <empty>
+   are blocked`). Crie uma segunda chave **sem restrição de referenciador** (ou
+   restrita por IP), limitada à Places API (New), e use só nos scripts.
+
+2. **Guardar a chave** — no shell na hora de rodar, ou em `.env.local`
+   (git-ignored; o script carrega esse arquivo sozinho):
    ```bash
+   # .env.local
+   GOOGLE_MAPS_API_KEY=sua_chave_de_servidor
+   ```
+
+3. **Testar antes de gastar cota** (`--dry-run` faz 1 busca, mostra um registro
+   de exemplo e não grava nada):
+   ```bash
+   node scripts/collect-places.mjs --dry-run
+   ```
+   O script valida a chave antes de começar a varredura: se ela estiver errada,
+   sem a API ativada, sem faturamento ou restrita por referenciador, ele para na
+   primeira requisição e diz exatamente o que corrigir.
+
+4. **Rodar a coleta completa:**
+   ```bash
+   node scripts/collect-places.mjs
+   # ou, sem guardar a chave em arquivo:
    GOOGLE_MAPS_API_KEY=sua_chave node scripts/collect-places.mjs
    ```
    - Padrão: varre ~40 categorias em Monte Santo de Minas (~40–120 requisições).
    - Gera `data/places/places-AAAA-MM-DD.json` e `.csv`.
    - Para outra cidade depois: `--cities="Guaxupé - MG"`.
+   - `--help` lista todas as opções (`--categories`, `--out`, `--max-pages`).
+   - Buscas que falharem por instabilidade são repetidas com backoff; as que
+     falharem de vez aparecem numa lista no final, para você rodar de novo só
+     aquelas categorias.
 
-3. **Custo real:** a busca textual com telefone/horário usa o SKU "Enterprise" da Places API (New), que tem **1.000 chamadas grátis/mês**. Uma cidade consome 40–120 chamadas. Ou seja: **1–2 cidades por mês = R$ 0**. Para varrer a região inteira de uma vez, espere algo em torno de US$ 10–25 — ou simplesmente distribua 1–2 cidades por mês e pague nada (confira os valores atuais em [developers.google.com/maps/billing-and-pricing](https://developers.google.com/maps/billing-and-pricing/pricing), eles mudam).
+5. **Custo real:** a busca textual com telefone/horário usa o SKU "Enterprise" da Places API (New), que tem **1.000 chamadas grátis/mês**. Uma cidade consome 40–120 chamadas. Ou seja: **1–2 cidades por mês = R$ 0**. Para varrer a região inteira de uma vez, espere algo em torno de US$ 10–25 — ou simplesmente distribua 1–2 cidades por mês e pague nada (confira os valores atuais em [developers.google.com/maps/billing-and-pricing](https://developers.google.com/maps/billing-and-pricing/pricing), eles mudam).
 
 ### Etapa 2 — Revisão humana no Google Sheets (2–4 horas)
 
