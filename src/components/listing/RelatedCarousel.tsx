@@ -57,14 +57,14 @@ export function RelatedCarousel({ title = 'Relacionados', items, className }: Re
   return (
     <section className={cn('', className)}>
       <h3 className="text-lg font-bold text-foreground mb-3">{title}</h3>
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
         {items.map((item) => (
           <button
             key={item.id}
             onClick={() => navigate(getPath(item))}
             className="flex-shrink-0 w-36 text-left group"
           >
-            <div className="aspect-square rounded-xl overflow-hidden bg-muted mb-2">
+            <div className="aspect-square rounded-lg overflow-hidden bg-muted mb-2">
               <img
                 src={item.image}
                 alt={item.title}

@@ -85,7 +85,7 @@ export default function RealEstateDetail() {
       content: (
         <div className="space-y-6 px-4">
           {/* Preço destacado */}
-          <div className="bg-primary/5 rounded-2xl p-4 border border-primary/20">
+          <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
             <p className="text-2xl font-bold text-primary">{priceText}</p>
             {item.condoFee && item.condoFee > 0 && (
               <p className="text-sm text-muted-foreground mt-1">
@@ -97,27 +97,27 @@ export default function RealEstateDetail() {
           {/* Características principais */}
           <div className="grid grid-cols-4 gap-2">
             {item.bedrooms > 0 && (
-              <div className="bg-muted/50 rounded-xl p-3 text-center">
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <Bed className="w-5 h-5 mx-auto text-primary mb-1" />
                 <div className="text-sm font-medium">{item.bedrooms}</div>
                 <div className="text-xs text-muted-foreground">Quartos</div>
               </div>
             )}
             {item.bathrooms > 0 && (
-              <div className="bg-muted/50 rounded-xl p-3 text-center">
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <Bath className="w-5 h-5 mx-auto text-primary mb-1" />
                 <div className="text-sm font-medium">{item.bathrooms}</div>
                 <div className="text-xs text-muted-foreground">Banheiros</div>
               </div>
             )}
             {item.parkingSpots > 0 && (
-              <div className="bg-muted/50 rounded-xl p-3 text-center">
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
                 <Car className="w-5 h-5 mx-auto text-primary mb-1" />
                 <div className="text-sm font-medium">{item.parkingSpots}</div>
                 <div className="text-xs text-muted-foreground">Vagas</div>
               </div>
             )}
-            <div className="bg-muted/50 rounded-xl p-3 text-center">
+            <div className="bg-muted/50 rounded-lg p-3 text-center">
               <Maximize className="w-5 h-5 mx-auto text-primary mb-1" />
               <div className="text-sm font-medium">{item.areaM2}</div>
               <div className="text-xs text-muted-foreground">m²</div>
@@ -126,15 +126,15 @@ export default function RealEstateDetail() {
 
           {/* Info adicional */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-muted/50 rounded-xl p-3">
+            <div className="bg-muted/50 rounded-lg p-3">
               <div className="text-muted-foreground text-xs mb-1">Mobília</div>
               <div className="font-medium">{formatTag(item.furnished)}</div>
             </div>
-            <div className="bg-muted/50 rounded-xl p-3">
+            <div className="bg-muted/50 rounded-lg p-3">
               <div className="text-muted-foreground text-xs mb-1">Disponibilidade</div>
               <div className="font-medium">{item.availability === 'imediata' ? 'Imediata' : 'A negociar'}</div>
             </div>
-            <div className="bg-muted/50 rounded-xl p-3 col-span-2">
+            <div className="bg-muted/50 rounded-lg p-3 col-span-2">
               <div className="text-muted-foreground text-xs mb-1">Pet Friendly</div>
               <div className="font-medium">{item.petFriendly ? '✓ Aceita pets' : '✗ Não aceita pets'}</div>
             </div>
@@ -183,7 +183,7 @@ export default function RealEstateDetail() {
         <div className="px-4">
           <div className="grid grid-cols-2 gap-2">
             {item.amenities?.map((amenity) => (
-              <div key={amenity} className="bg-muted/50 rounded-xl p-3 text-sm flex items-center gap-2">
+              <div key={amenity} className="bg-muted/50 rounded-lg p-3 text-sm flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-primary" />
                 {amenity}
               </div>
@@ -245,7 +245,7 @@ export default function RealEstateDetail() {
           {item.whatsapp && (
             <button
               onClick={handleWhatsApp}
-              className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
+              className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
             >
               <MessageCircle className="w-5 h-5" />
               <span>WhatsApp</span>
@@ -256,7 +256,7 @@ export default function RealEstateDetail() {
           {item.phone && (
             <button
               onClick={handleCall}
-              className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+              className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center gap-2 text-foreground transition-colors"
             >
               <Phone className="w-5 h-5" />
               <span className="hidden sm:inline text-sm font-medium">Ligar</span>
@@ -268,7 +268,7 @@ export default function RealEstateDetail() {
             href={mapsUrl}
             target="_blank"
             rel="noreferrer"
-            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center gap-2 text-foreground transition-colors"
           >
             <Navigation className="w-5 h-5" />
             <span className="hidden sm:inline text-sm font-medium">Mapa</span>
@@ -277,7 +277,7 @@ export default function RealEstateDetail() {
           {/* Favoritar */}
           <button
             onClick={() => toggleFavorite('realestate', item.id)}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           >
             <Heart className={isLiked ? 'w-5 h-5 fill-destructive text-destructive' : 'w-5 h-5'} />
@@ -286,7 +286,7 @@ export default function RealEstateDetail() {
           {/* Compartilhar */}
           <button
             onClick={handleShare}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label="Compartilhar"
           >
             <Share2 className="w-5 h-5" />

@@ -46,7 +46,7 @@ export function LockedFeature({
       {/* Mensagem informativa - sem CTA */}
       <div
         className={cn(
-          'flex flex-col items-center justify-center text-center p-6 rounded-xl bg-muted/50',
+          'flex flex-col items-center justify-center text-center p-6 rounded-lg bg-muted/50',
           showBlurred ? 'absolute inset-0 bg-background/60 backdrop-blur-[2px]' : ''
         )}
       >

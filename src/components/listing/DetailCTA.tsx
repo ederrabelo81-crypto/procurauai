@@ -16,7 +16,7 @@ export function DetailCTA({
   className,
 }: DetailCTAProps) {
   return (
-    <section className={cn('py-6 px-4 bg-muted/30 rounded-2xl text-center', className)}>
+    <section className={cn('py-6 px-4 bg-muted/30 rounded-lg text-center', className)}>
       <h3 className="font-semibold text-foreground mb-2">
         Você tem um {listingTypeName} para anunciar?
       </h3>
@@ -25,7 +25,7 @@ export function DetailCTA({
       </p>
       <Link
         to="/publicar"
-        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-semibold hover:opacity-90 transition-opacity"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
       >
         <Plus className="w-5 h-5" />
         Anunciar na Cidade

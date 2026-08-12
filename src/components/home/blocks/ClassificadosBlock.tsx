@@ -29,7 +29,7 @@ export function ClassificadosBlock() {
         action={{ label: 'Ver todos', to: '/categoria/classificados' }}
       />
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
         {recentListings.map((listing) => {
           const isDonation = listing.type === 'doacao';
 
@@ -37,7 +37,7 @@ export function ClassificadosBlock() {
             <Link
               key={listing.id}
               to={`/anuncio/${listing.id}`}
-              className="flex-shrink-0 w-[160px] bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+              className="flex-shrink-0 w-[160px] almanac-card overflow-hidden"
             >
               <div className="aspect-square relative">
                 <img
@@ -48,7 +48,7 @@ export function ClassificadosBlock() {
                 />
                 {/* Tag de Doação sempre visível quando aplicável */}
                 {isDonation && (
-                  <div className="absolute top-2 left-2 flex items-center gap-1 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  <div className="absolute top-2 left-2 flex items-center gap-1 bg-status-open text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                     <Heart className="w-3 h-3" />
                     Doação
                   </div>
@@ -62,7 +62,7 @@ export function ClassificadosBlock() {
                   <MapPin className="w-3 h-3" />
                   {listing.neighborhood}
                 </p>
-                <p className={isDonation ? "text-green-600 font-bold text-sm" : "text-primary font-bold text-sm"}>
+                <p className={isDonation ? "text-status-open font-bold text-sm" : "text-primary font-bold text-sm"}>
                   {isDonation ? 'Grátis' : formatPrice(listing.price || 0)}
                 </p>
               </div>

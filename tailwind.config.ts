@@ -1,4 +1,6 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
+import typography from "@tailwindcss/typography";
 
 export default {
   darkMode: ["class"],
@@ -73,14 +75,35 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        // Interface e corpo de texto
+        sans: ["Archivo", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Títulos: serifa variável com eixos SOFT/WONK
+        display: ["Fraunces", "ui-serif", "Georgia", "serif"],
+        // Micro-labels, números e metadados
+        mono: ["'Azeret Mono'", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       fontSize: {
-        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
+      },
+      letterSpacing: {
+        label: "0.18em",
       },
       spacing: {
-        '18': '4.5rem',
-        '22': '5.5rem',
+        "18": "4.5rem",
+        "22": "5.5rem",
+      },
+      backgroundImage: {
+        // Hachura diagonal fina, para faixas e cabeçalhos
+        hatch:
+          "repeating-linear-gradient(45deg, hsl(var(--foreground) / 0.07) 0 1px, transparent 1px 7px)",
+        // Papel milimetrado suave
+        grid:
+          "linear-gradient(hsl(var(--foreground) / 0.05) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / 0.05) 1px, transparent 1px)",
+      },
+      backgroundSize: {
+        // Passo da malha `bg-grid`. Nome distinto para não colidir com a
+        // classe gerada por `backgroundImage.grid`.
+        "grid-cell": "22px 22px",
       },
       keyframes: {
         "accordion-down": {
@@ -100,7 +123,7 @@ export default {
           to: { opacity: "1" },
         },
         "scale-in": {
-          from: { transform: "scale(0.95)", opacity: "0" },
+          from: { transform: "scale(0.96)", opacity: "0" },
           to: { transform: "scale(1)", opacity: "1" },
         },
         "bounce-in": {
@@ -109,16 +132,34 @@ export default {
           "70%": { transform: "scale(0.9)" },
           "100%": { transform: "scale(1)", opacity: "1" },
         },
+        // Letreiro rolante do cabeçalho da home
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
+        // Brilho que percorre skeletons e selos
+        sheen: {
+          from: { transform: "translateX(-120%)" },
+          to: { transform: "translateX(220%)" },
+        },
+        // Oscilação sutil de selos/carimbos
+        sway: {
+          "0%, 100%": { transform: "rotate(-2.5deg)" },
+          "50%": { transform: "rotate(2.5deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "slide-up": "slide-up 0.3s ease-out",
-        "fade-in": "fade-in 0.2s ease-out",
-        "scale-in": "scale-in 0.2s ease-out",
+        "slide-up": "slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1)",
+        "fade-in": "fade-in 0.25s ease-out",
+        "scale-in": "scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1)",
         "bounce-in": "bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        marquee: "marquee 38s linear infinite",
+        sheen: "sheen 2.4s ease-in-out infinite",
+        sway: "sway 5s ease-in-out infinite",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate, typography],
 } satisfies Config;

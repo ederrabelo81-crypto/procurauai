@@ -84,7 +84,7 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
       </div>
 
       {/* Desktop Mosaic Grid */}
-      <div className={cn('hidden md:block relative rounded-xl overflow-hidden', className)}>
+      <div className={cn('hidden md:block relative rounded-lg overflow-hidden', className)}>
         <div className="grid grid-cols-4 grid-rows-2 gap-2 aspect-[2.5/1]">
           {/* Large main image */}
           <button

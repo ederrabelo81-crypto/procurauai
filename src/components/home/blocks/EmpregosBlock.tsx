@@ -33,10 +33,10 @@ export function EmpregosBlock() {
             <Link
               key={job.id}
               to={`/empregos/${job.id}`}
-              className="flex bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all p-4"
+              className="flex almanac-card overflow-hidden p-4"
             >
               {job.logo && (
-                <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 mr-3 bg-muted">
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 mr-3 bg-muted">
                   <img
                     src={job.logo}
                     alt={job.companyName}

@@ -11,86 +11,75 @@ interface BadgePillProps {
   className?: string;
 }
 
-const variantConfig: Record<BadgeVariant, { bg: string; text: string; defaultIcon?: LucideIcon }> = {
+/**
+ * Selo de sobreposição — lido como um carimbo, não como uma pílula genérica.
+ * Cantos levemente arredondados, tipografia mono em caixa alta, contorno visível.
+ */
+const variantConfig: Record<BadgeVariant, { classes: string; defaultIcon?: LucideIcon }> = {
   verified: {
-    bg: 'bg-primary/90 backdrop-blur-sm',
-    text: 'text-primary-foreground',
+    classes: 'bg-secondary text-secondary-foreground border-secondary',
     defaultIcon: CheckCircle2,
   },
   open: {
-    bg: 'bg-status-open/15',
-    text: 'text-status-open',
+    classes: 'bg-card/95 text-status-open border-status-open/40 backdrop-blur-sm',
     defaultIcon: Clock,
   },
   closed: {
-    bg: 'bg-status-closed/15',
-    text: 'text-status-closed',
+    classes: 'bg-card/95 text-muted-foreground border-border backdrop-blur-sm',
     defaultIcon: Clock,
   },
   rating: {
-    bg: 'bg-black/60 backdrop-blur-sm',
-    text: 'text-white',
+    classes: 'bg-foreground/85 text-background border-transparent backdrop-blur-sm',
     defaultIcon: Star,
   },
   default: {
-    bg: 'bg-black/60 backdrop-blur-sm',
-    text: 'text-white',
+    classes: 'bg-card/95 text-foreground border-border backdrop-blur-sm',
   },
   highlight: {
-    bg: 'bg-gradient-to-r from-amber-500 to-orange-500',
-    text: 'text-white',
+    classes: 'bg-accent text-accent-foreground border-accent-foreground/20',
   },
 };
 
-/**
- * Unified Badge Pill for overlay status indicators:
- * - Verified (top-right)
- * - Open/Closed (top-left) 
- * - Rating (with star)
- * - Generic highlight
- */
-export function BadgePill({ 
+export function BadgePill({
   variant = 'default',
   icon,
   children,
-  className 
+  className,
 }: BadgePillProps) {
   const config = variantConfig[variant];
   const Icon = icon ?? config.defaultIcon;
-  
-  // Special styling for rating star
-  const iconClass = variant === 'rating' && Icon === Star 
-    ? 'w-3.5 h-3.5 fill-yellow-400 text-yellow-400' 
-    : 'w-3.5 h-3.5';
 
-  // Pulse dot for open status
+  const iconClass =
+    variant === 'rating' && Icon === Star
+      ? 'w-3 h-3 fill-accent text-accent'
+      : 'w-3 h-3';
+
   const showPulseDot = variant === 'open';
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm',
-        config.bg,
-        config.text,
+        'stamp inline-flex items-center gap-1.5 px-2 py-[3px] text-[0.625rem] font-bold shadow-sm',
+        config.classes,
         className
       )}
     >
       {showPulseDot && (
-        <span className="w-1.5 h-1.5 rounded-full bg-status-open pulse-open" />
+        <span className="h-1.5 w-1.5 rounded-full bg-status-open pulse-open" />
       )}
-      {Icon && !showPulseDot && <Icon className={iconClass} strokeWidth={2} />}
+      {Icon && !showPulseDot && <Icon className={iconClass} strokeWidth={2.4} />}
       {children}
     </span>
   );
 }
 
-// Convenience exports for common badge types
+// Atalhos para os selos mais usados
 export function VerifiedBadge({ className }: { className?: string }) {
   return <BadgePill variant="verified" className={className}>Verificado</BadgePill>;
 }
 
 export function OpenBadge({ className }: { className?: string }) {
-  return <BadgePill variant="open" className={className}>Aberto agora</BadgePill>;
+  return <BadgePill variant="open" className={className}>Aberto</BadgePill>;
 }
 
 export function ClosedBadge({ className }: { className?: string }) {
@@ -100,9 +89,9 @@ export function ClosedBadge({ className }: { className?: string }) {
 export function RatingBadge({ rating, count, className }: { rating: number; count?: number; className?: string }) {
   return (
     <BadgePill variant="rating" className={className}>
-      {rating.toFixed(1)}
+      {rating.toFixed(1).replace('.', ',')}
       {typeof count === 'number' && count > 0 && (
-        <span className="opacity-80">({count})</span>
+        <span className="opacity-70">({count})</span>
       )}
     </BadgePill>
   );

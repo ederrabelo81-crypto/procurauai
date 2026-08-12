@@ -1,10 +1,12 @@
-import { ChevronRight, type LucideIcon } from 'lucide-react';
+import { ArrowRight, type LucideIcon } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { GlassIcon, type GlassIconVariant } from '@/components/ui/GlassIcon';
 
 interface SectionHeaderProps {
   title: string;
+  /** Linha de apoio em caixa alta acima do título. */
+  kicker?: string;
   icon?: LucideIcon;
   iconVariant?: GlassIconVariant;
   count?: number;
@@ -20,8 +22,13 @@ interface SectionHeaderProps {
   className?: string;
 }
 
+/**
+ * Cabeçalho de seção no padrão do almanaque: rótulo mono em caixa alta,
+ * título em Fraunces e um filete pontilhado costurando o espaço até a ação.
+ */
 export function SectionHeader({
   title,
+  kicker,
   icon,
   iconVariant = 'primary',
   count,
@@ -32,47 +39,55 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   const [searchParams] = useSearchParams();
 
-  // Constrói URL preservando q e filters
   const buildViewAllUrl = () => {
     if (!viewAllType) return '';
     const params = new URLSearchParams();
-    
+
     const q = searchParams.get('q');
     const filters = searchParams.get('filters');
-    
+
     params.set('type', viewAllType);
     if (q) params.set('q', q);
     if (filters) params.set('filters', filters);
-    
+
     return `/buscar?${params.toString()}`;
   };
 
   const showViewAll = viewAllType && count !== undefined && count > previewLimit;
-  const displayTitle = count !== undefined ? `${title} (${count})` : title;
-
-  // Se action customizada foi passada, usa ela
   const linkTo = action?.to ?? buildViewAllUrl();
-  const linkLabel = action?.label ?? `Ver todos (${count})`;
-
-  const showLink = action || showViewAll;
+  const linkLabel = action?.label ?? 'Ver todos';
+  const showLink = Boolean(action || showViewAll);
 
   return (
-    <div className={cn('flex items-center justify-between mb-3', className)}>
-      <div className="flex items-center gap-2">
-        {icon && (
-          <GlassIcon icon={icon} size="xs" variant={iconVariant} />
-        )}
-        <h2 className="text-lg font-bold text-foreground">{displayTitle}</h2>
-      </div>
-      {showLink && (
-        <Link
-          to={linkTo}
-          className="flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors touch-target"
-        >
-          {linkLabel}
-          <ChevronRight className="w-4 h-4 ml-0.5" />
-        </Link>
+    <div className={cn('mb-4', className)}>
+      {kicker && (
+        <p className="eyebrow mb-1.5 text-primary">{kicker}</p>
       )}
+
+      <div className="flex items-center gap-3">
+        {icon && <GlassIcon icon={icon} size="xs" variant={iconVariant} />}
+
+        <h2 className="font-display text-xl font-bold leading-none text-foreground">
+          {title}
+          {count !== undefined && (
+            <span className="ml-2 font-mono text-sm font-medium text-muted-foreground">
+              {count}
+            </span>
+          )}
+        </h2>
+
+        <span className="rule-line" />
+
+        {showLink && (
+          <Link
+            to={linkTo}
+            className="group inline-flex flex-shrink-0 items-center gap-1 text-xs font-bold uppercase tracking-wider text-primary transition-colors hover:text-foreground"
+          >
+            {linkLabel}
+            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

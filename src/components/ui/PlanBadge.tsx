@@ -18,7 +18,7 @@ export function PlanBadge({ plan, className, showIcon = true }: PlanBadgeProps) 
       className={cn(
         'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold shadow',
         plan === 'destaque'
-          ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+          ? 'bg-gradient-to-r from-accent to-primary text-white'
           : 'bg-primary/90 text-primary-foreground',
         className
       )}

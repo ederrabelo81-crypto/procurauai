@@ -10,65 +10,65 @@ interface GlassCategoryIconProps {
 }
 
 const sizeConfig: Record<GlassCategorySize, { container: string; icon: string; strokeWidth: number }> = {
-  xs: { container: 'w-8 h-8 rounded-xl', icon: 'w-4 h-4', strokeWidth: 2 },
-  sm: { container: 'w-10 h-10 rounded-xl', icon: 'w-5 h-5', strokeWidth: 2 },
-  md: { container: 'w-12 h-12 rounded-2xl', icon: 'w-6 h-6', strokeWidth: 2 },
-  lg: { container: 'w-14 h-14 rounded-2xl', icon: 'w-7 h-7', strokeWidth: 2 },
+  xs: { container: 'w-8 h-8 rounded-lg', icon: 'w-4 h-4', strokeWidth: 2 },
+  sm: { container: 'w-10 h-10 rounded-lg', icon: 'w-5 h-5', strokeWidth: 2 },
+  md: { container: 'w-12 h-12 rounded-lg', icon: 'w-6 h-6', strokeWidth: 2 },
+  lg: { container: 'w-14 h-14 rounded-lg', icon: 'w-7 h-7', strokeWidth: 2 },
 };
 
 // Category color mapping for glassmorphism effect
 const categoryColors: Record<string, { bg: string; border: string; text: string }> = {
   // Comer Agora - Orange
-  'food': { bg: 'bg-orange-500/12', border: 'border-orange-500/20', text: 'text-orange-600' },
-  'comer-agora': { bg: 'bg-orange-500/12', border: 'border-orange-500/20', text: 'text-orange-600' },
+  'food': { bg: 'bg-category-food/12', border: 'border-category-food/30', text: 'text-category-food' },
+  'comer-agora': { bg: 'bg-category-food/12', border: 'border-category-food/30', text: 'text-category-food' },
   
   // Negócios - Blue
-  'store': { bg: 'bg-blue-500/12', border: 'border-blue-500/20', text: 'text-blue-600' },
-  'negocios': { bg: 'bg-blue-500/12', border: 'border-blue-500/20', text: 'text-blue-600' },
+  'store': { bg: 'bg-primary/12', border: 'border-primary/30', text: 'text-primary' },
+  'negocios': { bg: 'bg-primary/12', border: 'border-primary/30', text: 'text-primary' },
   
   // Serviços - Purple
-  'services': { bg: 'bg-purple-500/12', border: 'border-purple-500/20', text: 'text-purple-600' },
-  'servicos': { bg: 'bg-purple-500/12', border: 'border-purple-500/20', text: 'text-purple-600' },
+  'services': { bg: 'bg-category-services/12', border: 'border-category-services/30', text: 'text-category-services' },
+  'servicos': { bg: 'bg-category-services/12', border: 'border-category-services/30', text: 'text-category-services' },
   
   // Classificados - Emerald
-  'classifieds': { bg: 'bg-emerald-500/12', border: 'border-emerald-500/20', text: 'text-emerald-600' },
-  'classificados': { bg: 'bg-emerald-500/12', border: 'border-emerald-500/20', text: 'text-emerald-600' },
+  'classifieds': { bg: 'bg-category-classifieds/12', border: 'border-category-classifieds/30', text: 'text-category-classifieds' },
+  'classificados': { bg: 'bg-category-classifieds/12', border: 'border-category-classifieds/30', text: 'text-category-classifieds' },
   
   // Ofertas - Yellow
-  'deals': { bg: 'bg-yellow-500/12', border: 'border-yellow-500/20', text: 'text-yellow-600' },
-  'ofertas': { bg: 'bg-yellow-500/12', border: 'border-yellow-500/20', text: 'text-yellow-600' },
+  'deals': { bg: 'bg-category-deals/12', border: 'border-category-deals/30', text: 'text-category-deals' },
+  'ofertas': { bg: 'bg-category-deals/12', border: 'border-category-deals/30', text: 'text-category-deals' },
   
   // Agenda/Events - Pink
-  'events': { bg: 'bg-pink-500/12', border: 'border-pink-500/20', text: 'text-pink-600' },
-  'agenda': { bg: 'bg-pink-500/12', border: 'border-pink-500/20', text: 'text-pink-600' },
+  'events': { bg: 'bg-category-events/12', border: 'border-category-events/30', text: 'text-category-events' },
+  'agenda': { bg: 'bg-category-events/12', border: 'border-category-events/30', text: 'text-category-events' },
   
   // Notícias - Sky
-  'news': { bg: 'bg-sky-500/12', border: 'border-sky-500/20', text: 'text-sky-600' },
-  'noticias': { bg: 'bg-sky-500/12', border: 'border-sky-500/20', text: 'text-sky-600' },
+  'news': { bg: 'bg-category-news/12', border: 'border-category-news/30', text: 'text-category-news' },
+  'noticias': { bg: 'bg-category-news/12', border: 'border-category-news/30', text: 'text-category-news' },
   
   // Falecimentos - Slate
-  'obituary': { bg: 'bg-slate-500/12', border: 'border-slate-500/20', text: 'text-slate-600' },
-  'falecimentos': { bg: 'bg-slate-500/12', border: 'border-slate-500/20', text: 'text-slate-600' },
+  'obituary': { bg: 'bg-category-obituary/12', border: 'border-category-obituary/30', text: 'text-category-obituary' },
+  'falecimentos': { bg: 'bg-category-obituary/12', border: 'border-category-obituary/30', text: 'text-category-obituary' },
   
   // Lugares - Teal
-  'places': { bg: 'bg-teal-500/12', border: 'border-teal-500/20', text: 'text-teal-600' },
-  'lugares': { bg: 'bg-teal-500/12', border: 'border-teal-500/20', text: 'text-teal-600' },
+  'places': { bg: 'bg-secondary/12', border: 'border-secondary/30', text: 'text-secondary' },
+  'lugares': { bg: 'bg-secondary/12', border: 'border-secondary/30', text: 'text-secondary' },
   
   // Carros - Red
-  'cars': { bg: 'bg-red-500/12', border: 'border-red-500/20', text: 'text-red-600' },
-  'carros': { bg: 'bg-red-500/12', border: 'border-red-500/20', text: 'text-red-600' },
+  'cars': { bg: 'bg-destructive/12', border: 'border-destructive/30', text: 'text-destructive' },
+  'carros': { bg: 'bg-destructive/12', border: 'border-destructive/30', text: 'text-destructive' },
   
   // Empregos - Indigo
-  'jobs': { bg: 'bg-indigo-500/12', border: 'border-indigo-500/20', text: 'text-indigo-600' },
-  'empregos': { bg: 'bg-indigo-500/12', border: 'border-indigo-500/20', text: 'text-indigo-600' },
+  'jobs': { bg: 'bg-category-classifieds/12', border: 'border-category-classifieds/30', text: 'text-category-classifieds' },
+  'empregos': { bg: 'bg-category-classifieds/12', border: 'border-category-classifieds/30', text: 'text-category-classifieds' },
   
   // Imóveis - Amber
-  'realestate': { bg: 'bg-amber-500/12', border: 'border-amber-500/20', text: 'text-amber-600' },
-  'imoveis': { bg: 'bg-amber-500/12', border: 'border-amber-500/20', text: 'text-amber-600' },
+  'realestate': { bg: 'bg-category-deals/12', border: 'border-category-deals/30', text: 'text-category-deals' },
+  'imoveis': { bg: 'bg-category-deals/12', border: 'border-category-deals/30', text: 'text-category-deals' },
 };
 
 // Fallback colors for unmapped categories
-const defaultColors = { bg: 'bg-primary/12', border: 'border-primary/20', text: 'text-primary' };
+const defaultColors = { bg: 'bg-primary/12', border: 'border-primary/30', text: 'text-primary' };
 
 /**
  * Premium Glassmorphism category icon using Lucide icons.

@@ -82,7 +82,7 @@ export default function ObituaryDetail() {
 
       {/* Conteúdo */}
       <div className="px-4 py-6">
-        <div className="bg-card rounded-2xl p-6 card-shadow border-l-4 border-muted-foreground/30">
+        <div className="bg-card rounded-lg p-6 card-shadow border-l-4 border-muted-foreground/30">
           {/* Nome e idade */}
           <div className="text-center mb-6 pb-6 border-b border-border">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
@@ -96,7 +96,7 @@ export default function ObituaryDetail() {
 
           {/* Informações */}
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/30">
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
               <Calendar className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs text-muted-foreground">Falecimento</p>
@@ -106,7 +106,7 @@ export default function ObituaryDetail() {
             
             <button
               onClick={() => handleDirections(obituary.wakeLocation)}
-              className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors w-full text-left"
+              className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors w-full text-left"
             >
               <MapPin className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
@@ -118,7 +118,7 @@ export default function ObituaryDetail() {
             
             <button
               onClick={() => handleDirections(obituary.burialLocation)}
-              className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors w-full text-left"
+              className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors w-full text-left"
             >
               <Clock className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
@@ -141,7 +141,7 @@ export default function ObituaryDetail() {
 
           {/* Status pendente */}
           {obituary.status === 'pending' && (
-            <div className="mt-6 p-3 bg-status-pending/10 rounded-xl text-center">
+            <div className="mt-6 p-3 bg-status-pending/10 rounded-lg text-center">
               <p className="text-sm text-status-pending font-medium">
                 ⏳ Pendente de verificação
               </p>
@@ -152,7 +152,7 @@ export default function ObituaryDetail() {
         {/* Botão compartilhar */}
         <button
           onClick={handleShare}
-          className="w-full mt-4 py-4 bg-muted text-foreground font-medium rounded-xl hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-4 py-4 bg-muted text-foreground font-medium rounded-lg hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
         >
           <Share2 className="w-5 h-5" />
           Compartilhar nota

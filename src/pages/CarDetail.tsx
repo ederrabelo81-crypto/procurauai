@@ -77,7 +77,7 @@ export default function CarDetail() {
       content: (
         <div className="space-y-6 px-4">
           {/* Preço destacado */}
-          <div className="bg-primary/5 rounded-2xl p-4 border border-primary/20">
+          <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
             <p className="text-2xl font-bold text-primary">{formatPrice(car.price)}</p>
             <p className="text-sm text-muted-foreground mt-1">
               {formatTag(car.condition)} • {car.year} • {formatTag(car.sellerType)}
@@ -88,39 +88,39 @@ export default function CarDetail() {
           <div>
             <h3 className="font-semibold text-foreground mb-3">Especificações</h3>
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-muted/50 rounded-xl p-3">
+              <div className="bg-muted/50 rounded-lg p-3">
                 <div className="text-muted-foreground text-xs mb-1">Quilometragem</div>
                 <div className="font-medium flex items-center gap-1.5">
                   <Gauge className="w-4 h-4 text-primary" />
                   {(car.mileageKm / 1000).toFixed(0)} mil km
                 </div>
               </div>
-              <div className="bg-muted/50 rounded-xl p-3">
+              <div className="bg-muted/50 rounded-lg p-3">
                 <div className="text-muted-foreground text-xs mb-1">Combustível</div>
                 <div className="font-medium flex items-center gap-1.5">
                   <Fuel className="w-4 h-4 text-primary" />
                   {formatTag(car.fuel)}
                 </div>
               </div>
-              <div className="bg-muted/50 rounded-xl p-3">
+              <div className="bg-muted/50 rounded-lg p-3">
                 <div className="text-muted-foreground text-xs mb-1">Câmbio</div>
                 <div className="font-medium flex items-center gap-1.5">
                   <Settings className="w-4 h-4 text-primary" />
                   {formatTag(car.transmission)}
                 </div>
               </div>
-              <div className="bg-muted/50 rounded-xl p-3">
+              <div className="bg-muted/50 rounded-lg p-3">
                 <div className="text-muted-foreground text-xs mb-1">Portas</div>
                 <div className="font-medium flex items-center gap-1.5">
                   <Car className="w-4 h-4 text-primary" />
                   {car.doors} portas
                 </div>
               </div>
-              <div className="bg-muted/50 rounded-xl p-3">
+              <div className="bg-muted/50 rounded-lg p-3">
                 <div className="text-muted-foreground text-xs mb-1">Cor</div>
                 <div className="font-medium">{car.color}</div>
               </div>
-              <div className="bg-muted/50 rounded-xl p-3">
+              <div className="bg-muted/50 rounded-lg p-3">
                 <div className="text-muted-foreground text-xs mb-1">Localização</div>
                 <div className="font-medium flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-primary" />
@@ -164,7 +164,7 @@ export default function CarDetail() {
         <div className="px-4">
           <div className="grid grid-cols-2 gap-2">
             {car.features?.map((feature) => (
-              <div key={feature} className="bg-muted/50 rounded-xl p-3 text-sm flex items-center gap-2">
+              <div key={feature} className="bg-muted/50 rounded-lg p-3 text-sm flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-primary" />
                 {feature}
               </div>
@@ -225,7 +225,7 @@ export default function CarDetail() {
           {car.whatsapp && (
             <button
               onClick={handleWhatsApp}
-              className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
+              className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
             >
               <MessageCircle className="w-5 h-5" />
               <span>WhatsApp</span>
@@ -236,7 +236,7 @@ export default function CarDetail() {
           {car.phone && (
             <button
               onClick={handleCall}
-              className="h-12 px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+              className="h-12 px-4 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center gap-2 text-foreground transition-colors"
             >
               <Phone className="w-5 h-5" />
               <span className="hidden sm:inline text-sm font-medium">Ligar</span>
@@ -246,7 +246,7 @@ export default function CarDetail() {
           {/* Favoritar */}
           <button
             onClick={() => toggleFavorite('car', car.id)}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           >
             <Heart className={isLiked ? 'w-5 h-5 fill-destructive text-destructive' : 'w-5 h-5'} />
@@ -255,7 +255,7 @@ export default function CarDetail() {
           {/* Compartilhar */}
           <button
             onClick={handleShare}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label="Compartilhar"
           >
             <Share2 className="w-5 h-5" />

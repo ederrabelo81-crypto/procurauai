@@ -44,7 +44,7 @@ export function ImoveisBlock() {
         action={{ label: 'Ver todos', to: '/imoveis' }}
       />
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
         {featuredRealEstate.map((property) => {
           const price = property.transactionType === 'alugar' 
             ? property.rentPrice 
@@ -54,7 +54,7 @@ export function ImoveisBlock() {
             <Link
               key={property.id}
               to={`/imoveis/${property.id}`}
-              className="flex-shrink-0 w-[220px] bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+              className="flex-shrink-0 w-[220px] almanac-card overflow-hidden"
             >
               <div className="aspect-[16/10] relative">
                 <img

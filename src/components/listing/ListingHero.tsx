@@ -48,7 +48,7 @@ export function ListingHero({
 
   const openStatus = hours ? isOpenNow(hours) : null;
   const statusText = openStatus === true ? 'ABERTO' : openStatus === false ? 'FECHADO' : null;
-  const statusColor = openStatus === true ? 'bg-green-500' : 'bg-red-500';
+  const statusColor = openStatus === true ? 'bg-status-open' : 'bg-red-500';
 
   const handleBack = () => {
     if (onBack) {
@@ -112,7 +112,7 @@ export function ListingHero({
           )}
           {rating && (
             <span className="px-2.5 py-1 bg-card/90 backdrop-blur-sm rounded-full text-xs font-medium text-foreground shadow flex items-center gap-1">
-              <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+              <Star className="w-3.5 h-3.5 fill-yellow-400 text-accent" />
               {rating.toFixed(1)}
               {reviewCount && <span className="text-muted-foreground">({reviewCount})</span>}
             </span>
@@ -135,7 +135,7 @@ export function ListingHero({
           )}
           {/* Badge de plano DESTAQUE */}
           {plan === 'destaque' && (
-            <span className="px-2.5 py-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full text-xs font-bold text-white shadow flex items-center gap-1">
+            <span className="px-2.5 py-1 bg-gradient-to-r from-accent to-primary rounded-full text-xs font-bold text-white shadow flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" />
               {PLAN_INFO.destaque.label}
             </span>
@@ -146,11 +146,11 @@ export function ListingHero({
 
       {/* Card de informações sobreposto */}
       <div className="px-4 -mt-12 relative z-10">
-        <div className="bg-card rounded-2xl p-4 shadow-lg border border-border">
+        <div className="bg-card rounded-lg p-4 shadow-lg border border-border">
           <div className="flex items-start gap-4">
             {/* Avatar/Logo */}
             {avatar && (
-              <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex-shrink-0 border-2 border-background shadow-md -mt-10">
+              <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0 border-2 border-background shadow-md -mt-10">
                 <img src={avatar} alt={title} className="w-full h-full object-cover" />
               </div>
             )}

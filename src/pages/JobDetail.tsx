@@ -81,7 +81,7 @@ export default function JobDetail() {
               {formatTag(job.workModel)}
             </span>
             {job.salaryRange && (
-              <span className="px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+              <span className="px-3 py-1.5 bg-status-open/15 text-status-open rounded-full text-sm font-medium">
                 {job.salaryRange}
               </span>
             )}
@@ -149,7 +149,7 @@ export default function JobDetail() {
               <ul className="space-y-2">
                 {job.differentials.map((diff, i) => (
                   <li key={i} className="flex items-start gap-2 text-muted-foreground">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-status-open mt-2 flex-shrink-0" />
                     {diff}
                   </li>
                 ))}
@@ -169,7 +169,7 @@ export default function JobDetail() {
         <div className="px-4">
           <div className="grid grid-cols-2 gap-2">
             {job.benefits?.map((benefit) => (
-              <div key={benefit} className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-700 flex items-center gap-2">
+              <div key={benefit} className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-status-open flex items-center gap-2">
                 <Gift className="w-4 h-4 flex-shrink-0" />
                 {benefit}
               </div>
@@ -185,7 +185,7 @@ export default function JobDetail() {
       content: (
         <div className="px-4 space-y-4">
           {job.howToApply && (
-            <div className="bg-primary/5 rounded-2xl p-4 border border-primary/20">
+            <div className="bg-primary/5 rounded-lg p-4 border border-primary/20">
               <h3 className="font-semibold text-foreground mb-2">Como se candidatar</h3>
               <p className="text-muted-foreground">{job.howToApply}</p>
             </div>
@@ -195,7 +195,7 @@ export default function JobDetail() {
             {job.whatsapp && (
               <button
                 onClick={handleWhatsApp}
-                className="w-full h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors"
+                className="w-full h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors"
               >
                 <MessageCircle className="w-5 h-5" />
                 Candidatar via WhatsApp
@@ -204,7 +204,7 @@ export default function JobDetail() {
             {job.email && (
               <button
                 onClick={handleEmail}
-                className="w-full h-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors"
+                className="w-full h-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors"
               >
                 <Mail className="w-5 h-5" />
                 Enviar e-mail
@@ -237,7 +237,7 @@ export default function JobDetail() {
               {formatTag(job.workModel)}
             </span>
             {job.salaryRange && (
-              <span className="px-2.5 py-1 bg-green-500 text-white rounded-full text-xs font-medium shadow">
+              <span className="px-2.5 py-1 bg-status-open text-white rounded-full text-xs font-medium shadow">
                 {job.salaryRange}
               </span>
             )}
@@ -255,7 +255,7 @@ export default function JobDetail() {
           {job.whatsapp ? (
             <button
               onClick={handleWhatsApp}
-              className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
+              className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
             >
               <Send className="w-5 h-5" />
               <span>Candidatar-se</span>
@@ -263,13 +263,13 @@ export default function JobDetail() {
           ) : job.email ? (
             <button
               onClick={handleEmail}
-              className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
+              className="flex-1 h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
             >
               <Mail className="w-5 h-5" />
               <span>Candidatar-se</span>
             </button>
           ) : (
-            <div className="flex-1 h-12 bg-muted rounded-xl flex items-center justify-center gap-2 text-muted-foreground">
+            <div className="flex-1 h-12 bg-muted rounded-lg flex items-center justify-center gap-2 text-muted-foreground">
               <Send className="w-5 h-5" />
               <span>Sem contato disponível</span>
             </div>
@@ -278,7 +278,7 @@ export default function JobDetail() {
           {/* Favoritar */}
           <button
             onClick={() => toggleFavorite('job', job.id)}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           >
             <Heart className={isLiked ? 'w-5 h-5 fill-destructive text-destructive' : 'w-5 h-5'} />
@@ -287,7 +287,7 @@ export default function JobDetail() {
           {/* Compartilhar */}
           <button
             onClick={handleShare}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label="Compartilhar"
           >
             <Share2 className="w-5 h-5" />

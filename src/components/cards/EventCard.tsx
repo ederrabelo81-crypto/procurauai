@@ -30,7 +30,7 @@ export function EventCard({ event, variant = 'default', className }: EventCardPr
     <Link 
       to={`/evento/${event.id}`}
       className={cn(
-        "bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all block",
+        "almanac-card overflow-hidden block",
         isCompact ? "flex" : "",
         className
       )}

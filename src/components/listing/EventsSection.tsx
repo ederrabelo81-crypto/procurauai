@@ -57,7 +57,7 @@ export function EventsSection({
       {visibleItems.map((item, idx) => (
         <div
           key={idx}
-          className="p-4 border border-border rounded-xl bg-card hover:bg-muted/50 transition-colors"
+          className="p-4 border border-border rounded-lg bg-card hover:bg-muted/50 transition-colors"
         >
           <div className="flex items-center gap-3">
             {'image' in item && item.image && (
@@ -83,7 +83,7 @@ export function EventsSection({
 
       {/* Mensagem informativa se há mais eventos */}
       {allItems.length > visibleItems.length && (
-        <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-xl">
+        <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
           <Info className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           <p className="text-xs text-muted-foreground">
             +{allItems.length - visibleItems.length} {allItems.length - visibleItems.length === 1 ? 'evento não exibido' : 'eventos não exibidos'} neste anúncio

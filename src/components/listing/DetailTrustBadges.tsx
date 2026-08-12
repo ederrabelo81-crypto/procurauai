@@ -58,7 +58,7 @@ export function DetailTrustBadges({
 
       {/* Badge de plano PRO */}
       {plan === 'pro' && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-600 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-secondary/10 text-secondary rounded-full text-sm font-medium">
           <BadgeCheck className="w-4 h-4" />
           {PLAN_INFO.pro.label}
         </span>
@@ -66,7 +66,7 @@ export function DetailTrustBadges({
 
       {/* Badge de plano DESTAQUE */}
       {plan === 'destaque' && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-accent/20 to-primary/20 text-amber-600 rounded-full text-sm font-medium">
           <Sparkles className="w-4 h-4" />
           {PLAN_INFO.destaque.label}
         </span>
@@ -74,7 +74,7 @@ export function DetailTrustBadges({
 
       {/* Avaliação */}
       {rating && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-700 rounded-full text-sm font-medium">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-category-deals rounded-full text-sm font-medium">
           <Star className="w-4 h-4 fill-current" />
           {rating.toFixed(1)}
           {reviewCount && <span className="text-muted-foreground">({reviewCount})</span>}

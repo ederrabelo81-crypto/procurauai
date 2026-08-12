@@ -29,7 +29,7 @@ export function ObituaryCard({ obituary, className }: ObituaryCardProps) {
     <Link 
       to={`/falecimento/${obituary.id}`}
       className={cn(
-        "bg-card rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all block border-l-4 border-muted-foreground/30",
+        "bg-card rounded-lg p-4 card-shadow hover:card-shadow-hover transition-all block border-l-4 border-muted-foreground/30",
         className
       )}
     >

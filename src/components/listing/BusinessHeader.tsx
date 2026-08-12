@@ -59,7 +59,7 @@ export function BusinessHeader({
         
         {/* Destaque badge */}
         {plan === 'destaque' && (
-          <span className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold rounded-full">
+          <span className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-accent to-primary text-white text-xs font-bold rounded-full">
             <Sparkles className="w-3 h-3" />
             {PLAN_INFO.destaque.label}
           </span>

@@ -79,7 +79,7 @@ export function NowSection() {
             <Link
               key={place.id}
               to={`/lugares/${place.slug}`}
-              className="flex bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+              className="flex almanac-card overflow-hidden"
             >
               <div className="w-28 h-24 flex-shrink-0">
                 <img
@@ -94,7 +94,7 @@ export function NowSection() {
                 <p className="text-xs text-muted-foreground mb-1.5 line-clamp-1">{place.shortDescription}</p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                    <Star className="w-3 h-3 text-accent fill-yellow-500" />
                     {place.rating}
                   </span>
                   <span className="flex items-center gap-1">

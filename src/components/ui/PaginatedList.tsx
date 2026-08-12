@@ -69,7 +69,7 @@ export function PaginatedList<T>({
         {/* Skeletons durante loading */}
         {isLoading &&
           Array.from({ length: pageSize }).map((_, i) => (
-            <Skeleton key={`skeleton-${i}`} className="h-24 w-full rounded-xl" />
+            <Skeleton key={`skeleton-${i}`} className="h-24 w-full rounded-lg" />
           ))}
       </div>
 
@@ -78,7 +78,7 @@ export function PaginatedList<T>({
         <div className="flex justify-center pt-2">
           <button
             onClick={onLoadMore}
-            className="px-6 py-3 bg-muted hover:bg-muted/80 text-foreground rounded-xl text-sm font-medium transition-colors touch-target"
+            className="px-6 py-3 bg-muted hover:bg-muted/80 text-foreground rounded-lg text-sm font-medium transition-colors touch-target"
           >
             Carregar mais ({totalCount - displayedCount} restantes)
           </button>

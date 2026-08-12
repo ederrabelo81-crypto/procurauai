@@ -32,7 +32,7 @@ export function NewsCard({ news, variant = 'default', className }: NewsCardProps
     <Link 
       to={`/noticia/${news.id}`}
       className={cn(
-        "bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all block",
+        "almanac-card overflow-hidden block",
         isCompact ? "flex gap-3 p-3" : "",
         className
       )}
@@ -40,7 +40,7 @@ export function NewsCard({ news, variant = 'default', className }: NewsCardProps
       {news.image && (
         <div className={cn(
           "relative overflow-hidden",
-          isCompact ? "w-20 h-20 rounded-xl flex-shrink-0" : "h-36"
+          isCompact ? "w-20 h-20 rounded-lg flex-shrink-0" : "h-36"
         )}>
           <img 
             src={news.image} 
