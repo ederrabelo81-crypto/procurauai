@@ -34,7 +34,7 @@ export function DetailEssentials({ items, className }: DetailEssentialsProps) {
             key={index}
             onClick={item.action}
             className={cn(
-              'flex items-start gap-3 w-full text-left p-3 rounded-xl transition-colors',
+              'flex items-start gap-3 w-full text-left p-3 rounded-lg transition-colors',
               item.action 
                 ? 'bg-muted/50 hover:bg-muted cursor-pointer' 
                 : 'bg-muted/30',

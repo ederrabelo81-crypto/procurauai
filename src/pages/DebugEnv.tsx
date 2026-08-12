@@ -53,7 +53,7 @@ const DebugEnv = () => {
             A VITE_SUPABASE_ANON_KEY está ausente. O Supabase não funcionará corretamente.
           </p>
         ) : (
-          <p className="font-semibold text-emerald-500">
+          <p className="font-semibold text-status-open">
             Variáveis do Supabase configuradas corretamente!
           </p>
         )}

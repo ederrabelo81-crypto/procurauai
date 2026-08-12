@@ -1,95 +1,138 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROCURA UAI — Design System "Almanaque"
+
+   Referência visual: almanaque impresso de cidade do interior de Minas.
+   Papel encorpado, tinta marrom-escura, telhado de barro (terracota),
+   azulejo de igreja (verde-água) e mostarda de letreiro pintado à mão.
+
+   Regra de ouro: terracota domina, azulejo e mostarda são acentos pontuais.
+   Nada de cinza neutro puro — todo cinza aqui tem temperatura.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    /* Procura UAI - Design System Premium */
-    --background: 228 33% 97%; /* #F5F6FA */
-    --foreground: 220 17% 17%; /* #1F2937 */
+    /* — Papel e tinta — */
+    --background: 41 42% 93%;      /* #F4EFE4 papel */
+    --foreground: 27 16% 11%;      /* #211C18 tinta */
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 17% 17%;
+    --card: 40 60% 96%;            /* #FBF7EF papel de gramatura alta */
+    --card-foreground: 27 16% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 17% 17%;
+    --popover: 40 60% 96%;
+    --popover-foreground: 27 16% 11%;
 
-    /* Horizon Blue - Procura UAI */
-    --primary: 201 100% 36%; /* #0077B6 */
-    --primary-foreground: 0 0% 100%;
+    /* — Terracota: a cor dominante — */
+    --primary: 11 63% 47%;         /* #C4472C telha */
+    --primary-foreground: 40 60% 96%;
 
-    /* Gold - Procura UAI */
-    --secondary: 46 65% 52%; /* #D4AF37 */
-    --secondary-foreground: 220 17% 17%;
+    /* — Azulejo: acento frio — */
+    --secondary: 175 57% 28%;      /* #1E6F68 verde-água */
+    --secondary-foreground: 40 60% 96%;
 
-    /* Verde WhatsApp - Conversão */
-    --whatsapp: 142 69% 49%; /* #25D366 */
+    /* — Mostarda: destaque de letreiro — */
+    --accent: 40 74% 49%;          /* #D99A20 */
+    --accent-foreground: 27 16% 11%;
+
+    --whatsapp: 142 69% 40%;
     --whatsapp-foreground: 0 0% 100%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 40 34% 86%;           /* #E8E0D0 */
+    --muted-foreground: 33 11% 39%;/* #6F6559 */
 
-    --accent: 222 100% 96%;
-    --accent-foreground: 222 100% 40%;
+    --destructive: 3 71% 41%;      /* #B3261E carimbo vermelho */
+    --destructive-foreground: 40 60% 96%;
 
-    --destructive: 357 71% 49%; /* #D22630 - Red Procura UAI */
-    --destructive-foreground: 0 0% 100%;
+    --border: 39 29% 81%;          /* #DCD2BF */
+    --input: 39 29% 81%;
+    --ring: 11 63% 47%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 222 100% 56%;
+    --radius: 0.5rem;
 
-    --radius: 1rem;
+    /* — Sombras: luz baixa de fim de tarde, sempre quente — */
+    --shadow-card: 0 1px 0 0 hsl(39 29% 76%), 0 6px 18px -10px hsl(27 30% 25% / 0.35);
+    --shadow-card-hover: 0 2px 0 0 hsl(11 63% 47% / 0.35), 0 18px 34px -16px hsl(27 40% 20% / 0.45);
+    --shadow-button: 0 2px 0 0 hsl(11 63% 30%), 0 10px 20px -12px hsl(11 63% 30% / 0.7);
+    --shadow-inset: inset 0 1px 0 0 hsl(40 60% 99% / 0.7);
 
-    /* Custom tokens - Premium shadows */
-    --shadow-card: 0 2px 8px -2px rgba(30, 94, 255, 0.06), 0 4px 20px -4px rgba(0, 0, 0, 0.05);
-    --shadow-card-hover: 0 8px 24px -4px rgba(30, 94, 255, 0.12), 0 12px 32px -8px rgba(0, 0, 0, 0.08);
-    --shadow-button: 0 4px 12px -2px rgba(30, 94, 255, 0.35);
+    /* — Status — */
+    --open: 152 55% 32%;
+    --closed: 3 71% 41%;
+    --pending: 40 74% 49%;
 
-    /* Status colors */
-    --open: 142 69% 49%;
-    --closed: 0 84% 60%;
-    --pending: 42 100% 50%;
+    /* — Famílias de categoria (mesma temperatura, matizes distintos) — */
+    --food: 18 72% 48%;
+    --classifieds: 205 55% 34%;
+    --deals: 40 74% 45%;
+    --services: 175 57% 28%;
+    --events: 340 52% 45%;
+    --obituary: 30 8% 40%;
+    --news: 205 55% 34%;
 
-    /* Category colors */
-    --food: 25 95% 53%;
-    --classifieds: 262 83% 58%;
-    --deals: 142 69% 49%;
-    --services: 199 89% 48%;
-    --events: 330 81% 60%;
-    --obituary: 220 9% 46%;
-    --news: 222 100% 56%;
+    /* — Atmosfera do fundo — */
+    --grain-opacity: 0.35;
+    --halo-a: 11 63% 47% / 0.10;
+    --halo-b: 175 57% 28% / 0.09;
+    --halo-c: 40 74% 49% / 0.10;
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 222 100% 65%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 42 100% 55%;
-    --secondary-foreground: 220 17% 17%;
-    --whatsapp: 142 69% 52%;
-    --whatsapp-foreground: 0 0% 100%;
-    --muted: 217 33% 15%;
-    --muted-foreground: 215 20% 60%;
-    --accent: 217 33% 15%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 70% 45%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 222 100% 65%;
+    /* Noite mineira: preto-terra, nunca azul-acinzentado */
+    --background: 24 14% 7%;       /* #14110F */
+    --foreground: 38 46% 91%;      /* #F2EADC */
 
-    /* Dark mode shadows */
-    --shadow-card: 0 2px 8px -2px rgba(0, 0, 0, 0.3), 0 4px 20px -4px rgba(0, 0, 0, 0.4);
-    --shadow-card-hover: 0 8px 24px -4px rgba(30, 94, 255, 0.2), 0 12px 32px -8px rgba(0, 0, 0, 0.5);
-    --shadow-button: 0 4px 12px -2px rgba(30, 94, 255, 0.4);
+    --card: 26 13% 10%;            /* #1E1A17 */
+    --card-foreground: 38 46% 91%;
+
+    --popover: 26 13% 10%;
+    --popover-foreground: 38 46% 91%;
+
+    --primary: 14 78% 59%;         /* #E86A45 brasa */
+    --primary-foreground: 24 14% 7%;
+
+    --secondary: 174 45% 45%;      /* #3FA79C */
+    --secondary-foreground: 24 14% 7%;
+
+    --accent: 41 85% 60%;          /* #F0B841 */
+    --accent-foreground: 24 14% 7%;
+
+    --whatsapp: 142 60% 45%;
+    --whatsapp-foreground: 24 14% 7%;
+
+    --muted: 27 12% 15%;
+    --muted-foreground: 36 13% 60%;
+
+    --destructive: 6 68% 52%;
+    --destructive-foreground: 38 46% 91%;
+
+    --border: 30 14% 17%;
+    --input: 30 14% 17%;
+    --ring: 14 78% 59%;
+
+    --shadow-card: 0 1px 0 0 hsl(30 14% 20%), 0 8px 22px -12px hsl(0 0% 0% / 0.8);
+    --shadow-card-hover: 0 2px 0 0 hsl(14 78% 59% / 0.4), 0 20px 38px -18px hsl(0 0% 0% / 0.9);
+    --shadow-button: 0 2px 0 0 hsl(14 60% 32%), 0 12px 22px -14px hsl(14 78% 59% / 0.8);
+    --shadow-inset: inset 0 1px 0 0 hsl(38 46% 91% / 0.06);
+
+    --open: 152 45% 45%;
+    --closed: 6 68% 52%;
+    --pending: 41 85% 60%;
+
+    --food: 18 80% 58%;
+    --classifieds: 205 60% 58%;
+    --deals: 41 85% 60%;
+    --services: 174 45% 45%;
+    --events: 340 60% 62%;
+    --obituary: 30 8% 55%;
+    --news: 205 60% 58%;
+
+    --grain-opacity: 0.5;
+    --halo-a: 14 78% 59% / 0.14;
+    --halo-b: 174 45% 45% / 0.10;
+    --halo-c: 41 85% 60% / 0.10;
   }
 }
 
@@ -99,13 +142,153 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: theme('fontFamily.sans');
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* Camada 1 — halos de cor: dá profundidade sem virar "gradiente de IA" */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 40rem at 12% -8%, hsl(var(--halo-a)), transparent 60%),
+      radial-gradient(48rem 36rem at 96% 4%, hsl(var(--halo-b)), transparent 62%),
+      radial-gradient(52rem 44rem at 50% 108%, hsl(var(--halo-c)), transparent 60%);
+  }
+
+  /* Camada 2 — grão de papel + linhas de pauta finíssimas */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--grain-opacity);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        hsl(var(--foreground) / 0.028) 0px,
+        hsl(var(--foreground) / 0.028) 1px,
+        transparent 1px,
+        transparent 6px
+      ),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    background-size: auto, 160px 160px;
+    mix-blend-mode: multiply;
+  }
+
+  .dark body::after {
+    mix-blend-mode: screen;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: theme('fontFamily.display');
+    font-variation-settings: 'SOFT' 18, 'WONK' 1;
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: hsl(var(--accent) / 0.35);
+    color: hsl(var(--foreground));
+  }
+
+  /* Foco visível e coerente com a marca */
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Barra de rolagem discreta e quente */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.5);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--foreground) / 0.2);
+    border-radius: 99px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.6);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* ── Rótulo tipográfico: caixa alta, mono, tracking largo ───────────────── */
+  .eyebrow {
+    font-family: theme('fontFamily.mono');
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* ── Cartão base do almanaque: borda desenhada + "quina" de tinta ──────── */
+  .almanac-card {
+    position: relative;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card), var(--shadow-inset);
+    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 220ms ease;
+  }
+
+  .almanac-card:hover {
+    transform: translateY(-3px);
+    border-color: hsl(var(--primary) / 0.45);
+    box-shadow: var(--shadow-card-hover), var(--shadow-inset);
+  }
+
+  /* ── Régua de seção: título com filete que atravessa a linha ───────────── */
+  .rule-line {
+    flex: 1;
+    height: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      hsl(var(--border)) 0 6px,
+      transparent 6px 10px
+    );
+  }
+
+  /* ── Marca ──────────────────────────────────────────────────────────────
+     O logo é um SVG de tinta escura. No tema noturno, invertê-lo e girar a
+     matiz em 180° devolve a luminosidade sem trocar as cores da marca. */
+  .logo-mark {
+    @apply object-contain;
+  }
+
+  .dark .logo-mark {
+    filter: invert(1) hue-rotate(180deg) saturate(1.1) brightness(1.05);
+  }
+
+  /* ── Selo/carimbo: usado em badges de destaque ─────────────────────────── */
+  .stamp {
+    font-family: theme('fontFamily.mono');
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1px solid currentColor;
+    border-radius: 3px;
   }
 }
 
@@ -139,7 +322,17 @@
     text-wrap: balance;
   }
 
-  /* Hide scrollbar but keep functionality */
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Fraunces com eixos exagerados para títulos de impacto */
+  .display-wonky {
+    font-family: theme('fontFamily.display');
+    font-variation-settings: 'SOFT' 45, 'WONK' 1, 'opsz' 120;
+    letter-spacing: -0.03em;
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -149,23 +342,87 @@
     display: none;
   }
 
-  /* Skeleton animation */
-  @keyframes skeleton-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+  /* Máscara de esmaecimento nas laterais de carrosséis horizontais */
+  .fade-edges {
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #000 18px,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #000 18px,
+      #000 calc(100% - 24px),
+      transparent 100%
+    );
+  }
+
+  /* ── Motion ─────────────────────────────────────────────────────────────
+     Um carregamento de página bem orquestrado vale mais que dez
+     micro-interações espalhadas: use .reveal-stagger no container. */
+
+  .reveal {
+    animation: reveal 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .reveal-stagger > * {
+    animation: reveal 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .reveal-stagger > *:nth-child(1)  { animation-delay: 40ms; }
+  .reveal-stagger > *:nth-child(2)  { animation-delay: 100ms; }
+  .reveal-stagger > *:nth-child(3)  { animation-delay: 160ms; }
+  .reveal-stagger > *:nth-child(4)  { animation-delay: 220ms; }
+  .reveal-stagger > *:nth-child(5)  { animation-delay: 280ms; }
+  .reveal-stagger > *:nth-child(6)  { animation-delay: 340ms; }
+  .reveal-stagger > *:nth-child(7)  { animation-delay: 400ms; }
+  .reveal-stagger > *:nth-child(8)  { animation-delay: 460ms; }
+  .reveal-stagger > *:nth-child(9)  { animation-delay: 520ms; }
+  .reveal-stagger > *:nth-child(n + 10) { animation-delay: 580ms; }
+
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
   }
 
   .skeleton-pulse {
-    animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: skeleton-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  /* Status badge animations */
-  @keyframes pulse-open {
+  @keyframes skeleton-pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    50% { opacity: 0.45; }
   }
 
   .pulse-open {
     animation: pulse-open 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-open {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.86); }
+  }
+
+  /* Respeita quem pediu menos movimento */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

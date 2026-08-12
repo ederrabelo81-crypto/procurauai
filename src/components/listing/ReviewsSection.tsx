@@ -49,7 +49,7 @@ export function ReviewsSection({
       <div className={cn('space-y-4', className)}>
         {/* Rating geral sempre visível */}
         {averageRating && (
-          <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
+          <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
             <div className="text-center">
               <div className="text-3xl font-bold text-foreground">{averageRating.toFixed(1)}</div>
               <div className="flex gap-0.5 mt-1">
@@ -58,7 +58,7 @@ export function ReviewsSection({
                     key={star}
                     className={cn(
                       'w-4 h-4',
-                      star <= averageRating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+                      star <= averageRating ? 'fill-yellow-400 text-accent' : 'text-muted-foreground'
                     )}
                   />
                 ))}
@@ -69,7 +69,7 @@ export function ReviewsSection({
         )}
 
         {/* Mensagem informativa - sem CTA */}
-        <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl">
+        <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
           <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
           <p className="text-sm text-muted-foreground">
             As avaliações detalhadas não estão disponíveis para este anúncio.
@@ -83,7 +83,7 @@ export function ReviewsSection({
     <div className={cn('space-y-4', className)}>
       {/* Rating geral */}
       {averageRating && (
-        <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
+        <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
           <div className="text-center">
             <div className="text-3xl font-bold text-foreground">{averageRating.toFixed(1)}</div>
             <div className="flex gap-0.5 mt-1">
@@ -92,7 +92,7 @@ export function ReviewsSection({
                   key={star}
                   className={cn(
                     'w-4 h-4',
-                    star <= averageRating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+                    star <= averageRating ? 'fill-yellow-400 text-accent' : 'text-muted-foreground'
                   )}
                 />
               ))}
@@ -104,7 +104,7 @@ export function ReviewsSection({
 
       {/* Lista de reviews */}
       {reviews.map((review) => (
-        <div key={review.id} className="p-4 border border-border rounded-xl">
+        <div key={review.id} className="p-4 border border-border rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
               <span className="text-sm font-semibold text-primary">
@@ -119,7 +119,7 @@ export function ReviewsSection({
                     key={star}
                     className={cn(
                       'w-3 h-3',
-                      star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+                      star <= review.rating ? 'fill-yellow-400 text-accent' : 'text-muted-foreground'
                     )}
                   />
                 ))}

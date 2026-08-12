@@ -12,7 +12,8 @@ import {
   Car, 
   Briefcase, 
   Home,
-  Package
+  Package,
+  type LucideIcon,
 } from 'lucide-react';
 
 interface CategoryIconProps {
@@ -21,7 +22,7 @@ interface CategoryIconProps {
   className?: string;
 }
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   food: Utensils,
   classifieds: ShoppingBag,
   deals: Tag,
@@ -36,24 +37,28 @@ const iconMap: Record<string, any> = {
   realestate: Home,
 };
 
+/**
+ * Cada família de categoria puxa o seu token do design system — nada de cores
+ * cruas do Tailwind, para o conjunto continuar lendo como uma paleta só.
+ */
 const colorMap: Record<string, string> = {
-  food: 'text-orange-500 bg-orange-500/12 border-orange-500/20',
-  classifieds: 'text-purple-500 bg-purple-500/12 border-purple-500/20',
-  deals: 'text-green-500 bg-green-500/12 border-green-500/20',
-  services: 'text-sky-500 bg-sky-500/12 border-sky-500/20',
-  events: 'text-pink-500 bg-pink-500/12 border-pink-500/20',
-  obituary: 'text-slate-500 bg-slate-500/12 border-slate-500/20',
-  news: 'text-blue-500 bg-blue-500/12 border-blue-500/20',
-  store: 'text-indigo-500 bg-indigo-500/12 border-indigo-500/20',
-  places: 'text-emerald-500 bg-emerald-500/12 border-emerald-500/20',
-  cars: 'text-red-500 bg-red-500/12 border-red-500/20',
-  jobs: 'text-amber-500 bg-amber-500/12 border-amber-500/20',
-  realestate: 'text-cyan-500 bg-cyan-500/12 border-cyan-500/20',
+  food: 'text-category-food bg-category-food/12 border-category-food/30',
+  classifieds: 'text-category-classifieds bg-category-classifieds/12 border-category-classifieds/30',
+  deals: 'text-category-deals bg-category-deals/14 border-category-deals/30',
+  services: 'text-category-services bg-category-services/12 border-category-services/30',
+  events: 'text-category-events bg-category-events/12 border-category-events/30',
+  obituary: 'text-category-obituary bg-category-obituary/12 border-category-obituary/30',
+  news: 'text-category-news bg-category-news/12 border-category-news/30',
+  store: 'text-primary bg-primary/12 border-primary/30',
+  places: 'text-secondary bg-secondary/12 border-secondary/30',
+  cars: 'text-destructive bg-destructive/12 border-destructive/30',
+  jobs: 'text-category-deals bg-category-deals/14 border-category-deals/30',
+  realestate: 'text-category-services bg-category-services/12 border-category-services/30',
 };
 
 const sizeClasses = {
-  sm: 'h-10 w-10 rounded-xl',
-  md: 'h-14 w-14 rounded-2xl',
+  sm: 'h-10 w-10 rounded-lg',
+  md: 'h-14 w-14 rounded-lg',
   lg: 'h-20 w-20 rounded-3xl',
 };
 
@@ -69,7 +74,7 @@ export function CategoryIcon({ categoryId, size = 'md', className }: CategoryIco
   
   return (
     <div className={cn(
-      "flex items-center justify-center border backdrop-blur-md transition-all duration-300",
+      "flex items-center justify-center border transition-all duration-300",
       sizeClasses[size],
       colorClasses,
       className
@@ -77,7 +82,7 @@ export function CategoryIcon({ categoryId, size = 'md', className }: CategoryIco
       <IconComponent 
         size={iconSizes[size]} 
         strokeWidth={2.2}
-        className="drop-shadow-sm"
+        
       />
     </div>
   );

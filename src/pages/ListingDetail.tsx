@@ -93,7 +93,7 @@ export default function ListingDetail() {
           <DetailEssentials items={essentialItems} />
 
           {/* Aviso de segurança */}
-          <div className="p-3 bg-secondary/20 rounded-xl flex items-start gap-3">
+          <div className="p-3 bg-secondary/20 rounded-lg flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-secondary-foreground flex-shrink-0 mt-0.5" />
             <div className="text-sm text-muted-foreground">
               <p className="font-medium text-foreground mb-1">Dica de segurança</p>

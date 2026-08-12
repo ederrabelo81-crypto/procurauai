@@ -6,6 +6,7 @@ import { reportError } from "@/lib/errors/errorHandler";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BottomNav } from "@/components/ui/BottomNav";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { MapsProvider } from "@/components/maps";
 
 import Index from "./pages/Index";
 import Search from "./pages/Search";
@@ -19,7 +20,7 @@ import ObituaryDetail from "./pages/ObituaryDetail";
 import Publish from "./pages/Publish";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import GoogleMaps from "./components/GoogleMaps";
+import MapPage from "./pages/MapPage";
 
 
 // List pages (novos tipos)
@@ -51,45 +52,46 @@ const queryClient = new QueryClient({
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="min-h-screen bg-background">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/buscar" element={<Search />} />
-              <Route path="/categoria/:categoryId" element={<Category />} />
-              <Route path="/comercio/:categorySlug/:id" element={<BusinessDetail />} />
-              <Route path="/comercio/:id" element={<BusinessDetail />} />
-              <Route path="/anuncio/:id" element={<ListingDetail />} />
-              <Route path="/oferta/:id" element={<DealDetail />} />
-              <Route path="/evento/:id" element={<EventDetail />} />
-              <Route path="/noticia/:id" element={<NewsDetail />} />
-              <Route path="/falecimento/:id" element={<ObituaryDetail />} />
-              <Route path="/publicar" element={<Publish />} />
-              <Route path="/perfil" element={<Profile />} />
-              <Route path="/mapa" element={<GoogleMaps />} />
+      <MapsProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className="min-h-screen bg-background">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/buscar" element={<Search />} />
+                <Route path="/categoria/:categoryId" element={<Category />} />
+                <Route path="/comercio/:categorySlug/:id" element={<BusinessDetail />} />
+                <Route path="/comercio/:id" element={<BusinessDetail />} />
+                <Route path="/anuncio/:id" element={<ListingDetail />} />
+                <Route path="/oferta/:id" element={<DealDetail />} />
+                <Route path="/evento/:id" element={<EventDetail />} />
+                <Route path="/noticia/:id" element={<NewsDetail />} />
+                <Route path="/falecimento/:id" element={<ObituaryDetail />} />
+                <Route path="/publicar" element={<Publish />} />
+                <Route path="/perfil" element={<Profile />} />
+                <Route path="/mapa" element={<MapPage />} />
 
-              {/* Novos tipos - LISTA */}
-              <Route path="/lugares" element={<PlacesList />} />
-              <Route path="/carros" element={<CarsList />} />
-              <Route path="/empregos" element={<JobsList />} />
-              <Route path="/imoveis" element={<RealEstateList />} />
+                {/* Novos tipos - LISTA */}
+                <Route path="/lugares" element={<PlacesList />} />
+                <Route path="/carros" element={<CarsList />} />
+                <Route path="/empregos" element={<JobsList />} />
+                <Route path="/imoveis" element={<RealEstateList />} />
 
-              {/* Novos tipos - DETALHE (isso resolve o 404) */}
-              <Route path="/lugares/:slug" element={<PlaceDetail />} />
-              <Route path="/carros/:id" element={<CarDetail />} />
-              <Route path="/empregos/:id" element={<JobDetail />} />
-              <Route path="/imoveis/:id" element={<RealEstateDetail />} />
-              <Route path="/debug-env" element={<DebugEnv />} />
-
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <BottomNav />
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
+                {/* Novos tipos - DETALHE (isso resolve o 404) */}
+                <Route path="/lugares/:slug" element={<PlaceDetail />} />
+                <Route path="/carros/:id" element={<CarDetail />} />
+                <Route path="/empregos/:id" element={<JobDetail />} />
+                <Route path="/imoveis/:id" element={<RealEstateDetail />} />
+                <Route path="/debug-env" element={<DebugEnv />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <BottomNav />
+            </div>
+          </BrowserRouter>
+        </TooltipProvider>
+      </MapsProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

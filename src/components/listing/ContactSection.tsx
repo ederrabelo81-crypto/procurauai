@@ -1,6 +1,8 @@
 import { MapPin, Clock, Phone, Globe, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isOpenNow } from '@/lib/tagUtils';
+import { MapEmbed } from '@/components/maps';
+import { buildPlaceQuery } from '@/lib/maps';
 
 interface ContactSectionProps {
   address?: string;
@@ -36,7 +38,7 @@ export function ContactSection({
       {(address || neighborhood) && (
         <button
           onClick={handleMaps}
-          className="flex items-start gap-3 w-full text-left p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+          className="flex items-start gap-3 w-full text-left p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
         >
           <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
           <div>
@@ -48,12 +50,12 @@ export function ContactSection({
 
       {/* Horário */}
       {hours && (
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+        <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
           <Clock className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
           <div>
             <p className="font-medium text-foreground">{hours}</p>
             {openStatus !== null && (
-              <p className={cn('text-sm font-medium', openStatus ? 'text-green-600' : 'text-red-500')}>
+              <p className={cn('text-sm font-medium', openStatus ? 'text-status-open' : 'text-destructive')}>
                 {openStatus ? 'Aberto agora' : 'Fechado agora'}
               </p>
             )}
@@ -65,7 +67,7 @@ export function ContactSection({
       {phone && (
         <a
           href={`tel:${phone}`}
-          className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+          className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
         >
           <Phone className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           <span className="font-medium text-foreground">{phone}</span>
@@ -76,7 +78,7 @@ export function ContactSection({
       {email && (
         <a
           href={`mailto:${email}`}
-          className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+          className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
         >
           <Mail className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           <span className="font-medium text-foreground">{email}</span>
@@ -89,28 +91,20 @@ export function ContactSection({
           href={website.startsWith('http') ? website : `https://${website}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+          className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
         >
           <Globe className="w-5 h-5 text-muted-foreground flex-shrink-0" />
           <span className="font-medium text-primary">{website}</span>
         </a>
       )}
 
-      {/* Mapa embed placeholder */}
+      {/* Mapa embed */}
       {(address || neighborhood) && (
-        <div className="aspect-video rounded-xl overflow-hidden bg-muted">
-          <iframe
-            title="Mapa"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
-              `${businessName || ''} ${address || neighborhood || ''}`
-            )}`}
-          />
-        </div>
+        <MapEmbed
+          target={buildPlaceQuery(businessName, address || neighborhood)}
+          title={businessName}
+          className="aspect-video rounded-lg border border-border"
+        />
       )}
     </section>
   );

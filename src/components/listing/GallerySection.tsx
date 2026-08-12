@@ -81,7 +81,7 @@ export function GallerySection({
           <button
             key={idx}
             onClick={() => openLightbox(idx)}
-            className="aspect-square rounded-2xl overflow-hidden bg-muted relative group"
+            className="aspect-square rounded-lg overflow-hidden bg-muted relative group"
           >
             <img
               src={img}
@@ -99,7 +99,7 @@ export function GallerySection({
 
         {/* Placeholder para plano básico */}
         {!hasAccess && hiddenCount > 0 && (
-          <div className="aspect-square rounded-2xl bg-muted/50 flex flex-col items-center justify-center text-center p-2 col-span-2">
+          <div className="aspect-square rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center p-2 col-span-2">
             <Info className="w-5 h-5 text-muted-foreground mb-1" />
             <p className="text-xs text-muted-foreground">
               +{hiddenCount} {hiddenCount === 1 ? 'foto não disponível' : 'fotos não disponíveis'} neste anúncio

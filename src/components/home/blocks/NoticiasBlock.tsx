@@ -38,7 +38,7 @@ export function NoticiasBlock() {
               <Link
                 key={item.id}
                 to={`/noticia/${item.id}`}
-                className="flex bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+                className="flex almanac-card overflow-hidden"
               >
                 {item.image && (
                   <div className="w-24 h-20 flex-shrink-0">
@@ -86,7 +86,7 @@ export function NoticiasBlock() {
                 <Link
                   key={obituary.id}
                   to={`/falecimento/${obituary.id}`}
-                  className="block bg-muted/50 rounded-xl p-3 hover:bg-muted transition-colors"
+                  className="block bg-muted/50 rounded-lg p-3 hover:bg-muted transition-colors"
                 >
                   <p className="font-medium text-foreground text-sm">
                     {obituary.name}

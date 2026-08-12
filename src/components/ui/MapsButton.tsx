@@ -37,7 +37,7 @@ export function MapsButton({
     <button
       onClick={handleClick}
       className={cn(
-        "inline-flex items-center justify-center font-semibold rounded-xl transition-all active:scale-95 touch-target",
+        "inline-flex items-center justify-center font-semibold rounded-lg transition-all active:scale-95 touch-target",
         variant === 'default'
           ? "bg-primary text-primary-foreground hover:bg-primary/90 button-shadow"
           : "border-2 border-primary text-primary hover:bg-primary/10",

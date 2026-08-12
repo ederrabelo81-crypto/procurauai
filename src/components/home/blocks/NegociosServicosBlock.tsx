@@ -9,7 +9,7 @@ export function NegociosServicosBlock() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           to="/categoria/negocios"
-          className="flex items-center gap-3 bg-card/90 backdrop-blur-sm rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-border/50 active:scale-[0.98]"
+          className="flex items-center gap-3 almanac-card p-4 active:scale-[0.98]"
         >
           <CategoryIcon categoryId="store" size="sm" />
           <div>
@@ -20,7 +20,7 @@ export function NegociosServicosBlock() {
 
         <Link
           to="/categoria/servicos"
-          className="flex items-center gap-3 bg-card/90 backdrop-blur-sm rounded-2xl p-4 card-shadow hover:card-shadow-hover transition-all border border-border/50 active:scale-[0.98]"
+          className="flex items-center gap-3 almanac-card p-4 active:scale-[0.98]"
         >
           <CategoryIcon categoryId="services" size="sm" />
           <div>

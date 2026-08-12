@@ -110,7 +110,7 @@ export function ListingActionsBar({
           <button
             onClick={primaryAction.onClick}
             className={cn(
-              'flex-1 h-12 rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg',
+              'flex-1 h-12 rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg',
               getPrimaryColor(primaryAction.color)
             )}
           >
@@ -120,7 +120,7 @@ export function ListingActionsBar({
         ) : whatsapp ? (
           <button
             onClick={handleWhatsApp}
-            className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
+            className="flex-1 h-12 bg-[#25D366] hover:bg-[#22c55e] text-white rounded-lg flex items-center justify-center gap-2 font-semibold transition-colors shadow-lg"
             aria-label="Chamar no WhatsApp"
           >
             <MessageCircle className="w-5 h-5" />
@@ -132,7 +132,7 @@ export function ListingActionsBar({
         {hasAddress && (
           <button
             onClick={handleMaps}
-            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center gap-2 text-foreground transition-colors"
             aria-label="Ver no mapa"
           >
             <Navigation className="w-5 h-5" />
@@ -144,7 +144,7 @@ export function ListingActionsBar({
         {hasPhone && (
           <button
             onClick={handleCall}
-            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center gap-2 text-foreground transition-colors"
+            className="h-12 w-12 sm:w-auto sm:px-4 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center gap-2 text-foreground transition-colors"
             aria-label="Ligar"
           >
             <Phone className="w-5 h-5" />
@@ -156,7 +156,7 @@ export function ListingActionsBar({
         {hasWebsiteAction && (
           <button
             onClick={handleWebsite}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label="Abrir site"
           >
             <Globe className="w-5 h-5" />
@@ -167,7 +167,7 @@ export function ListingActionsBar({
         {hasSchedule && (
           <button
             onClick={onSchedule}
-            className="h-12 w-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 rounded-xl flex items-center justify-center transition-colors"
+            className="h-12 w-12 bg-gradient-to-r from-accent to-primary text-white hover:from-accent hover:to-primary rounded-lg flex items-center justify-center transition-colors"
             aria-label="Agendar"
           >
             <Calendar className="w-5 h-5" />
@@ -178,7 +178,7 @@ export function ListingActionsBar({
         {onFavorite && (
           <button
             onClick={onFavorite}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           >
             <Heart className={cn('w-5 h-5', isFavorite && 'fill-destructive text-destructive')} />
@@ -189,7 +189,7 @@ export function ListingActionsBar({
         {onShare && (
           <button
             onClick={onShare}
-            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-xl flex items-center justify-center text-foreground transition-colors"
+            className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
             aria-label="Compartilhar"
           >
             <Share2 className="w-5 h-5" />

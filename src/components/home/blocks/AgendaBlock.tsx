@@ -42,7 +42,7 @@ export function AgendaBlock() {
             <Link
               key={event.id}
               to={`/evento/${event.id}`}
-              className="flex bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+              className="flex almanac-card overflow-hidden"
             >
               {/* Data destacada */}
               <div className="w-16 bg-primary/10 flex flex-col items-center justify-center py-3 flex-shrink-0">

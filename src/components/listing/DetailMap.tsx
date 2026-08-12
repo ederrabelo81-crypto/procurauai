@@ -1,5 +1,7 @@
-import { Navigation } from 'lucide-react';
+import { Navigation, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MapEmbed } from '@/components/maps';
+import { buildPlaceQuery, mapsDirectionsUrl, toLatLng } from '@/lib/maps';
 
 interface DetailMapProps {
   address?: string;
@@ -11,8 +13,8 @@ interface DetailMapProps {
 }
 
 /**
- * Bloco de mapa com embed compacto e CTA para abrir no Maps
- * Padrão MyListing: visualização contextual + ação clara
+ * Bloco de localização: mapa contextual + rota em um toque.
+ * Prefere coordenadas; cai para busca textual quando não houver.
  */
 export function DetailMap({
   address,
@@ -22,44 +24,42 @@ export function DetailMap({
   lng,
   className,
 }: DetailMapProps) {
-  if (!address && !neighborhood && !lat) return null;
+  const position = toLatLng(lat, lng);
+  const query = buildPlaceQuery(businessName, address || neighborhood);
 
-  const query = encodeURIComponent(`${businessName || ''} ${address || neighborhood || ''}`);
-  
-  const directionsUrl = lat && lng
-    ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
-    : `https://www.google.com/maps/dir/?api=1&destination=${query}`;
+  if (!position && !query) return null;
 
-  const embedUrl = lat && lng
-    ? `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${lat},${lng}&zoom=15`
-    : `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${query}`;
+  const target = position ?? query;
+  const displayAddress = address || neighborhood;
 
   return (
     <section className={cn('space-y-3', className)}>
-      <h3 className="font-semibold text-foreground">Localização</h3>
-      
-      {/* Mapa embed */}
-      <div className="aspect-video rounded-xl overflow-hidden bg-muted">
-        <iframe
-          title="Mapa"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          src={embedUrl}
-        />
+      <div className="flex items-center gap-3">
+        <h3 className="font-display text-lg font-bold text-foreground">Localização</h3>
+        <span className="rule-line" />
       </div>
 
-      {/* CTA para abrir no Maps */}
+      <MapEmbed
+        target={target}
+        title={businessName}
+        className="aspect-video overflow-hidden rounded-lg border border-border card-shadow"
+      />
+
+      {displayAddress && (
+        <p className="flex items-start gap-2 text-sm text-muted-foreground">
+          <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+          <span>{displayAddress}</span>
+        </p>
+      )}
+
       <a
-        href={directionsUrl}
+        href={mapsDirectionsUrl(target)}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 w-full py-3 bg-muted hover:bg-muted/80 text-foreground rounded-xl font-medium transition-colors"
+        className="group flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card py-3 font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:text-primary card-shadow"
       >
-        <Navigation className="w-5 h-5" />
-        Abrir no Google Maps
+        <Navigation className="h-5 w-5 transition-transform group-hover:-rotate-12" />
+        Traçar rota no Google Maps
       </a>
     </section>
   );

@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Plus, MapPin } from 'lucide-react';
 
 /**
  * Links para TODOS os Listing Types do sistema.
  * Garante que nenhum tipo fique inacessível.
- * 
+ *
  * IMPORTANTE: Ao adicionar novo Listing Type, incluir aqui também.
  */
 const listingTypeLinks = [
@@ -33,49 +33,73 @@ const institutionalLinks = [
 
 export function HomeFooter() {
   return (
-    <footer className="bg-card border-t border-border mt-8 pb-24">
-      <div className="px-4 py-6">
-        <img src="/logo.svg" alt="Procura UAI" className="h-12 w-auto object-contain mb-6" />
-        {/* CTA destacado */}
-        <Link
-          to="/publicar"
-          className="flex items-center justify-center gap-2 w-full py-4 bg-primary text-primary-foreground rounded-2xl font-semibold button-shadow hover:opacity-90 transition-opacity mb-6"
-        >
-          <Plus className="w-5 h-5" />
-          Anunciar na Cidade
-        </Link>
+    <footer className="relative mt-12 overflow-hidden border-t-2 border-foreground/15 bg-card pb-24">
+      <span aria-hidden className="pointer-events-none absolute inset-0 bg-hatch opacity-30" />
 
-        {/* Links por Listing Type - TODOS os 12 tipos */}
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-foreground mb-3">Explorar</h3>
-          <div className="flex flex-wrap gap-2">
+      <div className="relative px-4 py-8">
+        {/* Chamada para anunciar */}
+        <div className="mb-8 rounded-lg border border-primary/25 bg-primary/8 p-5">
+          <p className="eyebrow mb-2 text-primary">Para comerciantes</p>
+          <h2 className="font-display text-2xl font-bold leading-tight text-foreground">
+            Sua loja no bolso de toda a cidade.
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Cadastre seu comércio, publique ofertas e apareça para quem está
+            procurando agora.
+          </p>
+          <Link
+            to="/publicar"
+            className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground button-shadow transition-all hover:brightness-110 active:translate-y-0.5 active:shadow-none"
+          >
+            <Plus className="h-5 w-5" />
+            Anunciar na cidade
+          </Link>
+        </div>
+
+        {/* Índice do almanaque */}
+        <div className="mb-8">
+          <p className="eyebrow mb-3 text-muted-foreground">Índice</p>
+          <div className="grid grid-cols-2 gap-x-4 sm:grid-cols-3">
             {listingTypeLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className="px-3 py-1.5 bg-muted text-muted-foreground text-sm rounded-full hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="group flex items-baseline gap-2 border-b border-dashed border-border py-2.5 text-sm text-foreground transition-colors hover:text-primary"
               >
-                {link.label}
+                <span className="font-medium">{link.label}</span>
+                <span className="rule-line" />
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Links institucionais */}
-        <div className="border-t border-border pt-4">
-          <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+        {/* Rodapé institucional */}
+        <div className="border-t border-border pt-5">
+          <img
+            src="/logo.svg"
+            alt="Procura UAI"
+            className="logo-mark mb-3 h-9 w-auto object-contain object-left"
+          />
+
+          <p className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 text-primary" />
+            Monte Santo de Minas e região — Sul de Minas, MG
+          </p>
+
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
             {institutionalLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className="hover:text-foreground transition-colors"
+                className="transition-colors hover:text-primary"
               >
                 {link.label}
               </Link>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground mt-4">
-            © {new Date().getFullYear()} Procura UAI. Todos os direitos reservados.
+
+          <p className="mt-5 font-mono text-2xs uppercase tracking-widest text-muted-foreground">
+            © {new Date().getFullYear()} Procura UAI
           </p>
         </div>
       </div>

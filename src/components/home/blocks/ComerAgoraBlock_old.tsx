@@ -28,12 +28,12 @@ export function ComerAgoraBlock() {
         action={{ label: 'Ver todos', to: '/categoria/comer-agora' }}
       />
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
         {openFoodPlaces.map((place) => (
           <Link
             key={place.id}
             to={`/comercio/${place.id}`}
-            className="flex-shrink-0 w-[200px] bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+            className="flex-shrink-0 w-[200px] almanac-card overflow-hidden"
           >
             <div className="aspect-[4/3] relative">
               <img
@@ -42,7 +42,7 @@ export function ComerAgoraBlock() {
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
-              <div className="absolute top-2 left-2 flex items-center gap-1 bg-green-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+              <div className="absolute top-2 left-2 flex items-center gap-1 bg-status-open text-white text-xs font-medium px-2 py-0.5 rounded-full">
                 <Clock className="w-3 h-3" />
                 Aberto
               </div>

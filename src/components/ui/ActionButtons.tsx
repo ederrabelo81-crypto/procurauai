@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 const sizeConfig: Record<ButtonSize, { button: string; icon: string }> = {
-  sm: { button: 'h-10 px-3 text-sm gap-1.5 rounded-xl', icon: 'w-4 h-4' },
-  md: { button: 'h-11 px-4 text-base gap-2 rounded-xl', icon: 'w-5 h-5' },
-  lg: { button: 'h-12 px-5 text-base gap-2 rounded-xl', icon: 'w-5 h-5' },
+  sm: { button: 'h-10 px-3 text-sm gap-1.5 rounded-lg', icon: 'w-4 h-4' },
+  md: { button: 'h-11 px-4 text-base gap-2 rounded-lg', icon: 'w-5 h-5' },
+  lg: { button: 'h-12 px-5 text-base gap-2 rounded-lg', icon: 'w-5 h-5' },
 };
 
 const baseButton = 'inline-flex items-center justify-center font-semibold transition-all active:scale-95 touch-target';

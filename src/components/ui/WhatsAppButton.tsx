@@ -39,7 +39,7 @@ export function WhatsAppButton({
     <button
       onClick={handleClick}
       className={cn(
-        "inline-flex items-center justify-center font-semibold rounded-xl transition-all active:scale-95 touch-target",
+        "inline-flex items-center justify-center font-semibold rounded-lg transition-all active:scale-95 touch-target",
         variant === 'default' 
           ? "bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp/90 button-shadow" 
           : "border-2 border-whatsapp text-whatsapp hover:bg-whatsapp/10",

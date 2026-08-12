@@ -29,7 +29,7 @@ export function CategoryCard({ id, name, iconKey, className, size = 'md', onClic
       to={getRoute()}
       onClick={onClickOverride}
       className={cn(
-        "flex flex-col items-center justify-center bg-card/90 backdrop-blur-sm rounded-2xl card-shadow hover:card-shadow-hover transition-all active:scale-95 touch-target border border-border/50",
+        "almanac-card flex flex-col items-center justify-center active:scale-95 touch-target",
         size === 'md' && "p-4 min-h-[120px]",
         size === 'sm' && "p-3 min-h-[100px]",
         className

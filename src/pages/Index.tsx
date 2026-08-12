@@ -1,7 +1,16 @@
-import { useNavigate } from 'react-router-dom';
-import { SearchBar } from '@/components/ui/SearchBar';
+import { Link } from 'react-router-dom';
+import {
+  Briefcase,
+  CalendarDays,
+  Home as HomeIcon,
+  Store,
+  Tag,
+  Utensils,
+} from 'lucide-react';
+
+import { CityMasthead } from '@/components/home/CityMasthead';
+import { CityTicker } from '@/components/home/CityTicker';
 import { HomeFooter } from '@/components/home/HomeFooter';
-import { LocationSelector } from '@/components/ui/LocationSelector';
 
 // Blocos da Home - cada um renderiza condicionalmente se tiver dados
 import {
@@ -16,57 +25,52 @@ import {
   NoticiasBlock,
 } from '@/components/home/blocks';
 
+/** Atalhos fixos logo abaixo do letreiro — os seis destinos mais buscados. */
+const SHORTCUTS = [
+  { to: '/categoria/comer-agora', label: 'Comer', icon: Utensils },
+  { to: '/categoria/ofertas', label: 'Ofertas', icon: Tag },
+  { to: '/categoria/servicos', label: 'Serviços', icon: Store },
+  { to: '/categoria/agenda', label: 'Agenda', icon: CalendarDays },
+  { to: '/imoveis', label: 'Imóveis', icon: HomeIcon },
+  { to: '/empregos', label: 'Vagas', icon: Briefcase },
+];
+
 export default function Index() {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header fixo com busca global */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-        <div className="px-4 py-2">
-          <div className="flex flex-col gap-1 mb-3">
-            <img src="/logo.svg" alt="Procura UAI" className="h-14 w-auto object-contain object-left" />
-            <LocationSelector />
-          </div>
-          {/* Busca global - sempre visível */}
-          <SearchBar 
-            size="large"
-            onFocus={() => navigate('/buscar')}
-          />
-        </div>
-      </header>
+    <div className="min-h-screen">
+      <CityMasthead />
+      <CityTicker />
 
-      {/* Conteúdo principal - 9 blocos de descoberta */}
-      <main className="px-4 py-4 space-y-6">
-        {/* Bloco 1 - Comer Agora (apenas abertos) */}
+      {/* Atalhos */}
+      <nav
+        aria-label="Atalhos"
+        className="flex gap-2 overflow-x-auto px-4 py-4 scrollbar-hide fade-edges"
+      >
+        {SHORTCUTS.map(({ to, label, icon: Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            className="group flex flex-shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 transition-all hover:-translate-y-0.5 hover:border-primary/50 card-shadow"
+          >
+            <Icon className="h-4 w-4 text-primary transition-transform group-hover:scale-110" strokeWidth={2.2} />
+            <span className="text-sm font-semibold text-foreground">{label}</span>
+          </Link>
+        ))}
+      </nav>
+
+      {/* Conteúdo principal — 9 blocos de descoberta, revelados em cascata */}
+      <main className="reveal-stagger space-y-10 px-4 pb-4">
         <ComerAgoraBlock />
-
-        {/* Bloco 2 - Ofertas Ativas (com validade) */}
         <OfertasBlock />
-
-        {/* Bloco 3 - Negócios & Serviços (grid de acesso rápido) */}
         <NegociosServicosBlock />
-
-        {/* Bloco 4 - Agenda da Cidade (eventos futuros) */}
         <AgendaBlock />
-
-        {/* Bloco 5 - Lugares para Conhecer (inspiracional) */}
         <LugaresBlock />
-
-        {/* Bloco 6 - Imóveis em Destaque */}
         <ImoveisBlock />
-
-        {/* Bloco 7 - Empregos Recentes */}
         <EmpregosBlock />
-
-        {/* Bloco 8 - Classificados & Doações */}
         <ClassificadosBlock />
-
-        {/* Bloco 9 - Notícias & Falecimentos */}
         <NoticiasBlock />
       </main>
 
-      {/* Rodapé Mobile */}
       <HomeFooter />
     </div>
   );

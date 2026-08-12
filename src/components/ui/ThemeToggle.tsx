@@ -15,8 +15,8 @@ export function ThemeToggle({ className, variant = 'compact' }: ThemeToggleProps
       <button
         onClick={() => setTheme(isDark ? 'light' : 'dark')}
         className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-          "bg-muted hover:bg-accent text-foreground",
+          "flex h-10 w-10 items-center justify-center rounded-md border border-border bg-card transition-colors",
+          "text-foreground hover:border-primary/50 hover:text-primary",
           className
         )}
         aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
@@ -27,7 +27,7 @@ export function ThemeToggle({ className, variant = 'compact' }: ThemeToggleProps
   }
 
   return (
-    <div className={cn("bg-card rounded-2xl card-shadow p-4", className)}>
+    <div className={cn("almanac-card p-4", className)}>
       <h3 className="text-sm font-semibold text-foreground mb-3">Aparência</h3>
       <div className="flex gap-2">
         {[
@@ -39,7 +39,7 @@ export function ThemeToggle({ className, variant = 'compact' }: ThemeToggleProps
             key={id}
             onClick={() => setTheme(id)}
             className={cn(
-              "flex-1 flex flex-col items-center gap-2 p-3 rounded-xl transition-all",
+              "flex-1 flex flex-col items-center gap-2 p-3 rounded-lg transition-all",
               theme === id
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"

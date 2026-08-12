@@ -25,7 +25,7 @@ interface ListingTypeHeaderProps {
  * - Linha 4: Chips de filtro (via children)
  * 
  * ESTILOS FIXOS:
- * - Ícone: h-8 w-8 rounded-xl bg-primary/10
+ * - Ícone: h-8 w-8 rounded-lg bg-primary/10
  * - Título: text-lg font-semibold
  * - Subtítulo: text-sm text-muted-foreground
  * 
@@ -78,7 +78,7 @@ export function ListingTypeHeader({
           <div className="flex items-center gap-2.5">
             {/* Ícone - container fixo h-8 w-8 */}
             {Icon && (
-              <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <Icon className="h-4 w-4 text-primary" strokeWidth={2} />
               </div>
             )}

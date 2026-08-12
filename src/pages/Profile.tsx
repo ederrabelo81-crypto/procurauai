@@ -122,9 +122,9 @@ export default function Profile() {
             {!isInstalled && (
               <button 
                 onClick={promptInstall}
-                className="w-full flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-2xl text-left hover:bg-primary/10 transition-colors"
+                className="w-full flex items-center gap-4 p-4 bg-primary/5 border border-primary/20 rounded-lg text-left hover:bg-primary/10 transition-colors"
               >
-                <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                   {isInstallable ? (
                     <Download className="w-6 h-6 text-primary" />
                   ) : (
@@ -144,8 +144,8 @@ export default function Profile() {
             )}
 
             {isInstalled && (
-              <div className="flex items-center gap-4 p-4 bg-status-open/5 border border-status-open/20 rounded-2xl">
-                <div className="w-12 h-12 bg-status-open/10 rounded-xl flex items-center justify-center">
+              <div className="flex items-center gap-4 p-4 bg-status-open/5 border border-status-open/20 rounded-lg">
+                <div className="w-12 h-12 bg-status-open/10 rounded-lg flex items-center justify-center">
                   <Smartphone className="w-6 h-6 text-status-open" />
                 </div>
                 <div className="flex-1">
@@ -156,7 +156,7 @@ export default function Profile() {
             )}
 
             {/* Menu items */}
-            <div className="bg-card rounded-2xl card-shadow overflow-hidden">
+            <div className="almanac-card overflow-hidden">
               {menuItems.map((item, index) => (
                 <button
                   key={item.label}

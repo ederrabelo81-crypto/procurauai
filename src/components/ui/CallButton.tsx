@@ -29,8 +29,8 @@ export function CallButton({
 
   const sizeClasses =
     size === "sm"
-      ? "h-10 px-4 text-sm rounded-xl"
-      : "h-12 px-5 text-base rounded-2xl";
+      ? "h-10 px-4 text-sm rounded-lg"
+      : "h-12 px-5 text-base rounded-lg";
 
   return (
     <a

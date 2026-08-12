@@ -1,34 +1,43 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Search, Plus, User } from 'lucide-react';
+import { Home, Search, Plus, Map, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Início' },
   { to: '/buscar', icon: Search, label: 'Buscar' },
   { to: '/publicar', icon: Plus, label: 'Publicar', isAction: true },
+  { to: '/mapa', icon: Map, label: 'Mapa' },
   { to: '/perfil', icon: User, label: 'Perfil' },
 ];
 
+/**
+ * Barra inferior no formato de fita impressa: filete hachurado no topo,
+ * item ativo marcado com bloco de tinta e um traço sob o rótulo.
+ */
 export function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-t border-border/50 safe-bottom">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/92 backdrop-blur-lg safe-bottom">
+      {/* Filete hachurado — assinatura do design system */}
+      <span aria-hidden className="absolute inset-x-0 -top-[3px] h-[3px] bg-hatch" />
+
+      <div className="mx-auto flex h-16 max-w-lg items-center justify-around px-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.to;
           const Icon = item.icon;
-          
+
           if (item.isAction) {
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
-                className="flex flex-col items-center justify-center -mt-4"
+                aria-label={item.label}
+                className="group -mt-6 flex flex-col items-center justify-center"
               >
-                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center button-shadow transform transition-transform active:scale-95">
-                  <Icon className="w-7 h-7 text-primary-foreground" strokeWidth={2.5} />
-                </div>
+                <span className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground button-shadow transition-transform duration-200 group-active:translate-y-1 group-active:shadow-none">
+                  <Icon className="h-7 w-7" strokeWidth={2.6} />
+                </span>
               </NavLink>
             );
           }
@@ -38,29 +47,27 @@ export function BottomNav() {
               key={item.to}
               to={item.to}
               className={cn(
-                "flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all touch-target",
-                isActive 
-                  ? "text-primary" 
-                  : "text-muted-foreground hover:text-foreground"
+                'flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-md transition-colors touch-target',
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              {/* Glassmorphic active state */}
-              <div className={cn(
-                "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200",
-                isActive && "bg-primary/12 backdrop-blur-sm border border-primary/20"
-              )}>
-                <Icon 
-                  className={cn(
-                    "w-5 h-5 transition-transform",
-                    isActive && "scale-105"
-                  )} 
-                  strokeWidth={isActive ? 2.2 : 1.8}
-                />
-              </div>
-              <span className={cn(
-                "text-2xs font-medium mt-0.5",
-                isActive && "font-semibold"
-              )}>
+              <span
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-md border transition-all duration-200',
+                  isActive
+                    ? 'border-primary/30 bg-primary/12'
+                    : 'border-transparent'
+                )}
+              >
+                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.4 : 1.9} />
+              </span>
+
+              <span
+                className={cn(
+                  'text-2xs leading-none transition-all',
+                  isActive ? 'font-bold' : 'font-medium'
+                )}
+              >
                 {item.label}
               </span>
             </NavLink>

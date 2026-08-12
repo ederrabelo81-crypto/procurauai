@@ -104,7 +104,7 @@ export default function NewsDetail() {
 
       {/* Conteúdo */}
       <div className={`px-4 ${article.image ? '-mt-6 relative z-10' : 'pt-4'}`}>
-        <article className="bg-card rounded-2xl p-5 card-shadow">
+        <article className="bg-card rounded-lg p-5 card-shadow">
           {/* Meta info */}
           <div className="flex items-center gap-2 mb-3">
             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${tagColors[article.tag] || 'bg-muted text-muted-foreground'}`}>
@@ -149,7 +149,7 @@ export default function NewsDetail() {
                 <button
                   key={n.id}
                   onClick={() => navigate(`/noticia/${n.id}`)}
-                  className="w-full text-left p-3 bg-card rounded-xl border border-border hover:bg-muted/50 transition-colors"
+                  className="w-full text-left p-3 bg-card rounded-lg border border-border hover:bg-muted/50 transition-colors"
                 >
                   <p className="font-medium text-foreground line-clamp-2">{n.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">{formatDate(n.date)}</p>
@@ -162,7 +162,7 @@ export default function NewsDetail() {
         {/* Botão compartilhar */}
         <button
           onClick={handleShare}
-          className="w-full mt-6 py-3 bg-muted text-foreground font-medium rounded-xl hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-6 py-3 bg-muted text-foreground font-medium rounded-lg hover:bg-muted/80 transition-colors flex items-center justify-center gap-2"
         >
           <Share2 className="w-5 h-5" />
           Compartilhar notícia

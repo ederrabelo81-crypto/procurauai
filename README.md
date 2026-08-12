@@ -18,97 +18,148 @@ O Procurauai é um guia comercial completo e moderno para a cidade de Monte Sant
 ### 🛠️ Tecnologias Utilizadas
 
 -   **Frontend:**
-    -   [React](https://react.dev/)
-    -   [Vite](https://vitejs.dev/)
+    -   [React 18](https://react.dev/) + [Vite 5](https://vitejs.dev/)
     -   [TypeScript](https://www.typescriptlang.org/)
-    -   [Tailwind CSS](https://tailwindcss.com/)
-    -   [Shadcn UI](https://ui.shadcn.com/)
+    -   [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) (Radix)
+    -   [TanStack Query](https://tanstack.com/query) e [React Router 6](https://reactrouter.com/)
 -   **Backend & Infraestrutura:**
-    -   [Firebase](https://firebase.google.com/) (Firestore, Authentication, Storage)
-    -   [Vercel](https://vercel.com/) (Hospedagem e Deploy)
+    -   [Supabase](https://supabase.com/) (Postgres + Auth + Storage)
+    -   [Vercel](https://vercel.com/) (hospedagem e deploy)
 -   **APIs Externas:**
-    -   [Google Maps API](https://developers.google.com/maps)
+    -   [Google Maps Platform](https://developers.google.com/maps) — Maps JavaScript, Embed e Static API
+-   **Qualidade:**
+    -   [Vitest](https://vitest.dev/) + Testing Library, [Playwright](https://playwright.dev/), ESLint, Husky + lint-staged
 
 ---
 
-## 💻 Para Desenvolvedores
+## 💻 Rodando o projeto na sua máquina
 
 ### 📋 Pré-requisitos
 
--   [Node.js](https://nodejs.org/) (versão 18 ou superior)
--   [npm](https://www.npmjs.com/) (geralmente vem com o Node.js)
--   Conta no [Firebase](https://firebase.google.com/) e um projeto criado.
--   Conta na [Vercel](https://vercel.com/) para deploy.
--   Chave de API do [Google Maps](https://developers.google.com/maps/gmp-get-started).
+| Ferramenta | Versão | Como conferir |
+| --- | --- | --- |
+| [Node.js](https://nodejs.org/) | 18 ou superior (recomendado: 20 LTS) | `node -v` |
+| npm | vem junto com o Node | `npm -v` |
+| [Git](https://git-scm.com/) | qualquer versão recente | `git --version` |
 
-### ⚙️ Instalação e Configuração
+Você também vai precisar de:
 
-1.  **Clone o repositório:**
+-   Acesso ao projeto no [Supabase](https://supabase.com/) (URL + chave `anon`).
+-   Uma chave da [Google Maps Platform](https://console.cloud.google.com/google/maps-apis) — **opcional**: sem ela o app roda normalmente e os mapas mostram um substituto desenhado em CSS. Veja [`docs/google-maps.md`](docs/google-maps.md).
 
-    ```bash
-    git clone https://github.com/ederrabelo81-crypto/procurauai.git
-    cd procurauai
-    ```
+### ⚙️ Passo a passo
 
-2.  **Instale as dependências:**
+**1. Clone o repositório**
 
-    ```bash
-    npm install
-    ```
+```bash
+git clone https://github.com/ederrabelo81-crypto/procurauai.git
+cd procurauai
+```
 
-3.  **Configuração das Variáveis de Ambiente:**
+**2. Instale as dependências**
 
-    -   Crie um arquivo `.env.local` na raiz do projeto.
-    -   Adicione as seguintes variáveis com as suas respectivas chaves obtidas nos serviços (Firebase, Google Maps):
+```bash
+npm install
+```
 
-        ```
-        # Configuração do Firebase
-        VITE_API_KEY=sua_api_key_do_firebase
-        VITE_AUTH_DOMAIN=seu_auth_domain_do_firebase
-        VITE_PROJECT_ID=seu_project_id_do_firebase
-        VITE_STORAGE_BUCKET=seu_storage_bucket_do_firebase
-        VITE_MESSAGING_SENDER_ID=seu_messaging_sender_id_do_firebase
-        VITE_APP_ID=seu_app_id_do_firebase
+> O projeto tem `package-lock.json` e `bun.lockb`. Escolha **um** gerenciador e mantenha o padrão: se usar npm, ignore o `bun.lockb`.
 
-        # Chave da API do Google Maps (opcional, para funcionalidades de mapa)
-        VITE_GOOGLE_MAPS_API_KEY=sua_api_key_do_google_maps
-        ```
+**3. Crie o arquivo `.env.local`**
 
-4.  **Execute o servidor de desenvolvimento:**
+Copie o modelo e preencha os valores:
 
-    ```bash
-    npm run dev
-    ```
+```bash
+cp .env.example .env.local
+```
 
-    O servidor estará disponível em `http://localhost:5173`.
+```dotenv
+# Supabase → Project Settings → API
+VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_chave_anon
+
+# Ambiente: development | staging | production
+VITE_ENVIRONMENT=development
+
+# Opcionais
+VITE_SENTRY_DSN=
+VITE_GOOGLE_MAPS_API_KEY=
+VITE_GOOGLE_MAPS_MAP_ID=
+```
+
+`VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` são **obrigatórias**: o app valida as
+variáveis com Zod em `src/config/env.ts` e falha logo no start se faltarem.
+
+> ⚠️ `.env.local` nunca vai para o Git. Só a chave `anon` (pública) pode ficar no
+> front-end — a `service_role` jamais.
+
+**4. Suba o servidor de desenvolvimento**
+
+```bash
+npm run dev
+```
+
+Abra <http://localhost:5173>. O Vite recarrega sozinho a cada alteração.
+
+**5. Confira se está tudo certo**
+
+```bash
+npm test          # testes unitários (Vitest)
+npm run lint      # ESLint
+npm run build     # build de produção em dist/
+npm run preview   # serve o build para conferência local
+```
+
+Se algo falhar em `npm install`, apague `node_modules` e o lockfile local e
+reinstale: `rm -rf node_modules && npm install`.
+
+### 🧭 Rotas úteis em desenvolvimento
+
+| Rota | O que mostra |
+| --- | --- |
+| `/` | Home com os 9 blocos de descoberta |
+| `/buscar` | Busca global e categorias |
+| `/mapa` | Mapa da cidade (precisa da chave do Google Maps) |
+| `/debug-env` | Diagnóstico das variáveis de ambiente carregadas |
 
 ### 📦 Build para Produção
-
-Para criar uma versão otimizada do projeto para produção, execute:
 
 ```bash
 npm run build
 ```
 
-A saída será gerada na pasta `dist/`.
+A saída vai para `dist/`.
 
 ### 🚀 Deploy
 
-O deploy é feito automaticamente pela Vercel a cada `push` na branch `main`.
+O deploy é feito pela Vercel a cada `push` na branch `main`.
 
-1.  **Configure as Variáveis de Ambiente na Vercel:**
+1.  No painel da Vercel, vá em `Settings` → `Environment Variables`.
+2.  Cadastre as mesmas variáveis do `.env.local` (`VITE_SUPABASE_URL`,
+    `VITE_SUPABASE_ANON_KEY`, `VITE_GOOGLE_MAPS_API_KEY`, `VITE_GOOGLE_MAPS_MAP_ID`,
+    `VITE_ENVIRONMENT=production`).
+3.  Faça o push — a Vercel builda e publica automaticamente.
 
-    -   Acesse o painel do seu projeto na Vercel.
-    -   Vá para `Settings` -> `Environment Variables`.
-    -   Adicione as mesmas variáveis do seu arquivo `.env.local` (ex: `VITE_API_KEY`, `VITE_GOOGLE_MAPS_API_KEY`, etc.) com os seus respectivos valores.
+> Ao publicar, lembre de adicionar o domínio de produção nas restrições da chave
+> do Google Maps, senão os mapas param de carregar em produção.
 
-2.  **Faça o push do seu código:**
+---
 
-    ```bash
-    git push origin main
-    ```
+## 🎨 Design System
 
-    A Vercel irá iniciar um novo build e deploy automaticamente.
+A interface segue o design system **"Almanaque"** — papel quente, tinta marrom,
+terracota dominante, azulejo e mostarda como acentos. Tipografia: **Fraunces**
+(títulos), **Archivo** (interface) e **Azeret Mono** (rótulos e números).
+
+Tokens em `src/index.css`, escalas em `tailwind.config.ts`.
+Guia completo: [`docs/design-system.md`](docs/design-system.md).
+
+---
+
+## 🗺️ Google Maps
+
+Toda a integração passa por `src/lib/maps.ts` e pelos componentes em
+`src/components/maps/`. **Nunca** escreva uma chave de API direto no componente.
+Guia de configuração: [`docs/google-maps.md`](docs/google-maps.md).
 
 ---
 
@@ -149,10 +200,15 @@ Distribuído sob a Licença MIT. Veja `LICENSE` para mais informações.
     ├── assets         # Imagens, fontes, etc.
     ├── components     # Componentes React reutilizáveis
     │   ├── ui         # Componentes de UI genéricos (botões, cards)
+    │   ├── cards      # Cards de listagem por tipo de conteúdo
+    │   ├── home       # Cabeçalho, letreiro e blocos da home
+    │   ├── listing    # Seções das páginas de detalhe
+    │   ├── maps       # Provider e componentes do Google Maps
     │   └── common     # Componentes de domínio específico
     ├── data           # Mock data, dados estáticos
     ├── hooks          # React Hooks customizados
-    ├── lib            # Funções utilitárias, configs
+    ├── config         # Validação das variáveis de ambiente (Zod)
+    ├── lib            # Funções utilitárias, configs (inclui maps.ts)
     ├── pages          # Componentes de página (rotas)
     ├── services       # Lógica de negócio, chamadas de API
     ├── styles         # Estilos globais
@@ -191,7 +247,7 @@ Eder Rabelo (@ederrabelo81-crypto)
 
 ### 🙏 Agradecimentos
 
-Comunidades de desenvolvedores Vue.js e TypeScript<br>
+Comunidades de desenvolvedores React e TypeScript<br>
 Contributors e early adopters<br>
 Associações comerciais locais parceiras<br>
 

@@ -1,6 +1,8 @@
 import { Clock, MapPin, Phone, Globe, Instagram, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isOpenNow } from '@/lib/tagUtils';
+import { MapEmbed } from '@/components/maps';
+import { buildPlaceQuery, mapsSearchUrl } from '@/lib/maps';
 
 interface LocationSectionProps {
   address?: string;
@@ -29,9 +31,10 @@ export function LocationSection({
   const openStatus = hours ? isOpenNow(hours) : null;
   const fullAddress = address || neighborhood;
 
+  const placeQuery = buildPlaceQuery(businessName, fullAddress);
+
   const handleMaps = () => {
-    const query = encodeURIComponent(`${businessName || ''} ${fullAddress || ''}`);
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    window.open(mapsSearchUrl(placeQuery), '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -40,19 +43,11 @@ export function LocationSection({
       
       {/* Map */}
       {fullAddress && (
-        <div className="aspect-[2/1] md:aspect-[3/1] rounded-xl overflow-hidden bg-muted">
-          <iframe
-            title="Localização"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(
-              `${businessName || ''} ${fullAddress || ''}`
-            )}`}
-          />
-        </div>
+        <MapEmbed
+          target={placeQuery}
+          title={businessName}
+          className="aspect-[2/1] overflow-hidden rounded-lg border border-border md:aspect-[3/1]"
+        />
       )}
       
       {/* Address */}
@@ -70,14 +65,14 @@ export function LocationSection({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
         {/* Hours */}
         {hours && (
-          <div className="flex items-start gap-3 p-4 rounded-xl border border-border">
+          <div className="flex items-start gap-3 p-4 rounded-lg border border-border">
             <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-foreground">{hours}</p>
               {openStatus !== null && (
                 <p className={cn(
                   'text-sm font-medium mt-1',
-                  openStatus ? 'text-green-600' : 'text-red-500'
+                  openStatus ? 'text-status-open' : 'text-destructive'
                 )}>
                   {openStatus ? 'Aberto agora' : 'Fechado agora'}
                 </p>
@@ -90,7 +85,7 @@ export function LocationSection({
         {phone && (
           <a
             href={`tel:${phone}`}
-            className="flex items-center gap-3 p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors"
+            className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
           >
             <Phone className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             <span className="font-medium text-foreground">{phone}</span>
@@ -103,7 +98,7 @@ export function LocationSection({
             href={website.startsWith('http') ? website : `https://${website}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors"
+            className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
           >
             <Globe className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             <span className="font-medium text-foreground truncate">{website}</span>
@@ -116,7 +111,7 @@ export function LocationSection({
             href={instagram.startsWith('http') ? instagram : `https://instagram.com/${instagram.replace('@', '')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors"
+            className="flex items-center gap-3 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
           >
             <Instagram className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             <span className="font-medium text-foreground">{instagram}</span>

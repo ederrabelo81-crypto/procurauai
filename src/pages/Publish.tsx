@@ -219,7 +219,7 @@ export default function Publish() {
           </p>
           <button
             onClick={() => navigate('/')}
-            className="px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-2xl button-shadow active:scale-95 transition-transform"
+            className="px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg button-shadow active:scale-95 transition-transform"
           >
             Voltar ao início
           </button>
@@ -266,7 +266,7 @@ export default function Publish() {
         {step === 1 && (
           <div className="space-y-6 animate-fade-in">
             {/* Prompt vendedor */}
-            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
               <h2 className="text-lg font-bold text-foreground mb-2">
                 Publique seu anúncio e comece a receber clientes agora
               </h2>
@@ -286,7 +286,7 @@ export default function Publish() {
                   key={type.id}
                   onClick={() => updateField('type', type.id)}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 p-3 bg-card rounded-2xl card-shadow text-center transition-all active:scale-95",
+                    "flex flex-col items-center justify-center gap-2 p-3 almanac-card text-center transition-all active:scale-95",
                     formData.type === type.id && "ring-2 ring-primary bg-primary/5"
                   )}
                 >
@@ -317,7 +317,7 @@ export default function Publish() {
                 onBlur={() => handleBlur('title')}
                 placeholder="Ex: iPhone 12 seminovo"
                 className={cn(
-                  "w-full h-12 px-4 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                  "w-full h-12 px-4 bg-card border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
                   errors.title && touched.title 
                     ? "border-destructive focus:border-destructive" 
                     : "border-border focus:border-primary"
@@ -344,7 +344,7 @@ export default function Publish() {
                 placeholder="Descreva em poucas palavras..."
                 rows={3}
                 className={cn(
-                  "w-full px-4 py-3 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none transition-all",
+                  "w-full px-4 py-3 bg-card border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none transition-all",
                   errors.description && touched.description 
                     ? "border-destructive" 
                     : "border-border focus:border-primary"
@@ -432,7 +432,7 @@ export default function Publish() {
                         : "R$ 0,00"
                   }
                   className={cn(
-                    "w-full h-12 px-4 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                    "w-full h-12 px-4 bg-card border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
                     errors.price && touched.price 
                       ? "border-destructive" 
                       : "border-border focus:border-primary"
@@ -459,7 +459,7 @@ export default function Publish() {
               {[...Array(6)].map((_, i) => (
                 <button
                   key={i}
-                  className="aspect-square bg-card border-2 border-dashed border-border rounded-2xl flex items-center justify-center hover:bg-muted/50 hover:border-primary/50 transition-all active:scale-95"
+                  className="aspect-square bg-card border-2 border-dashed border-border rounded-lg flex items-center justify-center hover:bg-muted/50 hover:border-primary/50 transition-all active:scale-95"
                 >
                   <Camera className="w-8 h-8 text-muted-foreground" />
                 </button>
@@ -488,7 +488,7 @@ export default function Publish() {
                 onBlur={() => handleBlur('whatsapp')}
                 placeholder="31999999999"
                 className={cn(
-                  "w-full h-12 px-4 bg-card border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
+                  "w-full h-12 px-4 bg-card border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all",
                   errors.whatsapp && touched.whatsapp 
                     ? "border-destructive" 
                     : "border-border focus:border-primary"
@@ -512,7 +512,7 @@ export default function Publish() {
                 onChange={(e) => updateField('phone', e.target.value.replace(/\D/g, ''))}
                 onBlur={() => handleBlur('phone')}
                 placeholder="3199999999"
-                className="w-full h-12 px-4 bg-card border border-border rounded-2xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                className="w-full h-12 px-4 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>
           </div>
@@ -525,7 +525,7 @@ export default function Publish() {
           onClick={handleNext}
           disabled={!canProceed() || isSubmitting}
           className={cn(
-            "w-full h-14 rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 transition-all",
+            "w-full h-14 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-all",
             canProceed() && !isSubmitting
               ? "bg-primary text-primary-foreground button-shadow active:scale-98"
               : "bg-muted text-muted-foreground cursor-not-allowed"

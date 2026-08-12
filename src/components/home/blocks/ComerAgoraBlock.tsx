@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Clock, MapPin, Utensils } from "lucide-react";
-import { getBusinessesByCategorySlug, UiBusiness } from "@/services/businesses";
+import type { UiBusiness } from "@/services/businesses";
+import { getBusinessesByCategorySlug } from "@/services/businesses";
 import { businesses as mockBusinesses } from "@/data/mockData";
 
 // Keywords para identificar estabelecimentos de comida
@@ -92,9 +93,9 @@ export function ComerAgoraBlock() {
           icon={Utensils}
           iconVariant="warning"
         />
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+        <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex-shrink-0 w-[200px] bg-card rounded-2xl overflow-hidden animate-pulse">
+            <div key={i} className="w-[13rem] flex-shrink-0 overflow-hidden rounded-lg border border-border bg-card skeleton-pulse">
               <div className="aspect-[4/3] bg-muted" />
               <div className="p-3 space-y-2">
                 <div className="h-4 bg-muted rounded w-3/4" />
@@ -113,55 +114,56 @@ export function ComerAgoraBlock() {
   return (
     <section>
       <SectionHeader
+        kicker="Fome agora"
         title="Comer Agora"
         icon={Utensils}
         iconVariant="warning"
         action={{ label: "Ver todos", to: "/categoria/comer-agora" }}
       />
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
         {items.map((place) => (
           <Link
             key={place.id}
             to={`/comercio/${place.id}`}
-            className="flex-shrink-0 w-[200px] bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+            className="almanac-card group w-[13rem] flex-shrink-0 overflow-hidden"
           >
-            <div className="aspect-[4/3] relative">
+            <div className="relative aspect-[4/3] overflow-hidden">
               <img
                 src={place.coverImages?.[0] || "/placeholder.svg"}
                 alt={place.name}
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.07]"
                 loading="lazy"
               />
 
               {place.isOpenNow && (
-                <div className="absolute top-2 left-2 flex items-center gap-1 bg-emerald-500 text-emerald-50 text-xs font-medium px-2 py-0.5 rounded-full">
-                  <Clock className="w-3 h-3" />
+                <span className="stamp absolute left-2 top-2 inline-flex items-center gap-1 border-status-open/40 bg-card/95 px-2 py-[3px] text-[0.625rem] font-bold text-status-open backdrop-blur-sm">
+                  <Clock className="h-3 w-3" />
                   Aberto
-                </div>
+                </span>
               )}
             </div>
 
             <div className="p-3">
-              <h3 className="font-semibold text-foreground text-sm line-clamp-1 mb-0.5">
+              <h3 className="mb-1 line-clamp-1 font-display text-[0.95rem] font-bold leading-snug text-foreground">
                 {place.name}
               </h3>
 
-              <p className="text-xs text-muted-foreground mb-1.5 line-clamp-1">
+              <p className="eyebrow mb-2 line-clamp-1 text-muted-foreground">
                 {place.category}
               </p>
 
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="w-3 h-3" />
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3 flex-shrink-0 text-primary" />
                 {place.neighborhood}
-              </div>
+              </p>
 
               {place.tags?.length > 0 && (
-                <div className="flex gap-1 mt-2 flex-wrap">
+                <div className="mt-2.5 flex flex-wrap gap-1">
                   {place.tags.slice(0, 2).map((tag) => (
                     <span
                       key={tag}
-                      className="px-1.5 py-0.5 bg-muted text-muted-foreground text-[10px] rounded"
+                      className="rounded border border-border bg-muted/60 px-1.5 py-0.5 text-2xs font-medium text-muted-foreground"
                     >
                       {tag}
                     </span>

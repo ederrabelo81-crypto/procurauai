@@ -30,7 +30,7 @@ export function OfertasBlock() {
         action={{ label: 'Ver todas', to: '/categoria/ofertas' }}
       />
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
         {activeDeals.map((deal) => {
           const validDate = new Date(deal.validUntil);
           const daysLeft = Math.ceil((validDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -40,7 +40,7 @@ export function OfertasBlock() {
             <Link
               key={deal.id}
               to={`/oferta/${deal.id}`}
-              className="flex-shrink-0 w-[180px] bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all"
+              className="flex-shrink-0 w-[180px] almanac-card overflow-hidden"
             >
               <div className="aspect-[4/3] relative">
                 <img

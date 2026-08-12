@@ -21,7 +21,7 @@ export function DealCard({ deal, variant = 'default', className }: DealCardProps
 
   return (
     <div className={cn(
-      "bg-card rounded-2xl overflow-hidden card-shadow hover:card-shadow-hover transition-all",
+      "almanac-card overflow-hidden",
       isCompact ? "flex" : "",
       className
     )}>

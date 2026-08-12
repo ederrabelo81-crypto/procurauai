@@ -10,31 +10,49 @@ interface SearchBarProps {
   size?: 'default' | 'large';
 }
 
-export function SearchBar({ 
-  placeholder = "O que você procura agora?", 
+/**
+ * Campo de busca com peso de objeto físico: borda de 2px, sombra dura embaixo
+ * e a lupa dentro de um bloco de tinta terracota que "acende" no foco.
+ */
+export function SearchBar({
+  placeholder = 'Procure na sua cidade…',
   value,
   onChange,
   onFocus,
   className,
-  size = 'default'
+  size = 'default',
 }: SearchBarProps) {
+  const isLarge = size === 'large';
+
   return (
-    <div className={cn("relative w-full", className)}>
-      <Search 
+    <div
+      className={cn(
+        'group relative w-full',
+        className
+      )}
+    >
+      <span
         className={cn(
-          "absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none",
-          size === 'large' ? "w-5 h-5" : "w-4 h-4"
-        )} 
-      />
+          'pointer-events-none absolute left-2 top-1/2 z-10 flex -translate-y-1/2 items-center justify-center rounded-md bg-primary text-primary-foreground transition-transform duration-200 group-focus-within:scale-105',
+          isLarge ? 'h-10 w-10' : 'h-8 w-8'
+        )}
+      >
+        <Search className={isLarge ? 'h-5 w-5' : 'h-4 w-4'} strokeWidth={2.4} />
+      </span>
+
       <input
-        type="text"
+        type="search"
+        inputMode="search"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         onFocus={onFocus}
         className={cn(
-          "w-full bg-card border border-border rounded-2xl pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm",
-          size === 'large' ? "h-14 text-base" : "h-12 text-sm"
+          'w-full rounded-lg border-2 border-border bg-card font-medium text-foreground shadow-[0_2px_0_0_hsl(var(--border))] outline-none transition-all',
+          'placeholder:font-normal placeholder:text-muted-foreground',
+          'focus:border-primary focus:shadow-[0_2px_0_0_hsl(var(--primary))]',
+          '[&::-webkit-search-cancel-button]:appearance-none',
+          isLarge ? 'h-14 pl-14 pr-4 text-base' : 'h-12 pl-12 pr-3 text-sm'
         )}
       />
     </div>
