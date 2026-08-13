@@ -123,6 +123,15 @@ describe("describeSupabaseFailure", () => {
     expect(described.hint).toContain("schema.sql");
   });
 
+  it("distingue coluna ausente de tabela ausente", () => {
+    const described = describeSupabaseFailure({
+      message: "Could not find the 'lat' column of 'businesses' in the schema cache",
+    });
+    expect(described.title).toContain("'lat'");
+    expect(described.hint).toContain("latitude/longitude");
+    expect(described.hint).not.toContain("schema.sql");
+  });
+
   it("explica falha de rede", () => {
     expect(describeSupabaseFailure(new Error("fetch failed")).title).toContain("falar com o Supabase");
   });

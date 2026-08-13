@@ -23,6 +23,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
+import { adaptRowToColumns, fetchTableColumns, toBusinessRow } from "./lib/businessRow.mjs";
 import { formatEnvHelp, looksLikePublicSupabaseKey, readEnv } from "./lib/env.mjs";
 import { describeSupabaseFailure } from "./lib/supabase.mjs";
 
@@ -105,34 +106,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 
-const onlyDigits = (value) => String(value ?? "").replace(/\D/g, "");
-
-function toBusinessRow(record) {
-  const phoneDigits = onlyDigits(record.phone);
-  const whatsappDigits = onlyDigits(record.whatsapp) || phoneDigits;
-
-  return {
-    name: String(record.name ?? "").trim(),
-    category: String(record.category_hint ?? record.search_category ?? "").trim() || "Serviços",
-    // category_slug: definido pelo trigger set_business_category_slug
-    category_slug: "servicos",
-    neighborhood: String(record.neighborhood ?? "").trim() || "Centro",
-    hours: String(record.hours ?? "").trim() || "Consultar horários",
-    phone: phoneDigits || null,
-    whatsapp: whatsappDigits, // NOT NULL no schema; vazio = comerciante ainda sem WhatsApp confirmado
-    cover_images: [],
-    is_open_now: false,
-    is_verified: false,
-    description: null,
-    address: String(record.address ?? "").trim() || null,
-    plan: "free",
-    website: String(record.website ?? "").trim() || null,
-    google_place_id: String(record.google_place_id ?? "").trim() || null,
-    lat: record.lat === "" || record.lat == null ? null : Number(record.lat),
-    lng: record.lng === "" || record.lng == null ? null : Number(record.lng),
-  };
-}
-
 const run = async () => {
   const raw = await readFile(filePath, "utf8");
   const records = JSON.parse(raw.replace(/^﻿/, ""));
@@ -142,12 +115,33 @@ const run = async () => {
     return;
   }
 
-  const rows = records
+  // O schema real varia (lat/lng x latitude/longitude, com ou sem city):
+  // descobre as colunas antes de montar as linhas.
+  const columns = await fetchTableColumns(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, "businesses");
+  if (!columns) {
+    console.log(
+      "⚠ Não consegui ler as colunas de businesses; seguindo com os nomes padrão.",
+    );
+  }
+
+  const canonicalRows = records
     .slice(0, limit)
     .map(toBusinessRow)
     .filter((r) => r.name && r.google_place_id);
 
+  let droppedFields = [];
+  const rows = canonicalRows.map((row) => {
+    const { row: adapted, dropped } = adaptRowToColumns(row, columns);
+    if (dropped.length > droppedFields.length) droppedFields = dropped;
+    return adapted;
+  });
+
   console.log(`Lidos ${records.length} registros; válidos para importar: ${rows.length}.`);
+  if (droppedFields.length > 0) {
+    console.log(
+      `⚠ Campos ignorados por não existirem na tabela: ${droppedFields.join(", ")}.`,
+    );
+  }
 
   // Busca os google_place_id que já existem no banco
   const placeIds = rows.map((r) => r.google_place_id);
@@ -177,10 +171,12 @@ const run = async () => {
   }
 
   let inserted = 0;
+  let firstError = null;
   for (let i = 0; i < toInsert.length; i += CHUNK) {
     const chunk = toInsert.slice(i, i + CHUNK);
     const { error } = await supabase.from("businesses").insert(chunk);
     if (error) {
+      firstError ??= error;
       console.error(`Erro ao inserir lote ${i / CHUNK + 1}:`, error.message);
     } else {
       inserted += chunk.length;
@@ -196,23 +192,40 @@ const run = async () => {
       .update(fields)
       .eq("google_place_id", google_place_id);
     if (error) {
+      firstError ??= error;
       console.error(`Erro ao atualizar ${google_place_id}:`, error.message);
     } else {
       updated += 1;
     }
   }
 
+  // Nada gravado com erros pelo caminho não é "concluído": sinaliza a falha.
+  if (inserted === 0 && updated === 0 && firstError) {
+    console.error(`\n✖ Nenhum registro gravado. Primeiro erro: ${firstError.message}`);
+    const described = describeSupabaseFailure(firstError, { supabaseUrl: SUPABASE_URL });
+    if (described) console.error(`\n  ${described.hint}`);
+    return 1;
+  }
+
   console.log(`\nConcluído: ${inserted} inseridos, ${updated} atualizados.`);
+  if (firstError) {
+    console.log("⚠ Parte dos lotes falhou — reveja os erros acima e rode de novo (é idempotente).");
+  }
   console.log("Confira no app e no painel do Supabase (tabela businesses).");
+  return firstError ? 2 : 0;
 };
 
-run().catch((error) => {
-  const described = describeSupabaseFailure(error, { supabaseUrl: SUPABASE_URL });
-  if (described) {
-    console.error(`✖ ${described.title}`);
-    console.error(`\n  ${described.hint}`);
-  } else {
-    console.error("Falha no script:", error);
-  }
-  process.exit(1);
-});
+run()
+  .then((code) => {
+    process.exitCode = code ?? 0;
+  })
+  .catch((error) => {
+    const described = describeSupabaseFailure(error, { supabaseUrl: SUPABASE_URL });
+    if (described) {
+      console.error(`✖ ${described.title}`);
+      console.error(`\n  ${described.hint}`);
+    } else {
+      console.error("Falha no script:", error);
+    }
+    process.exit(1);
+  });

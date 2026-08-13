@@ -25,7 +25,16 @@ export function describeSupabaseFailure(error, { supabaseUrl = "" } = {}) {
       hint: "Isso costuma significar que a chave usada não é a service_role.",
     };
   }
-  if (/relation .* does not exist|schema cache|could not find the table/i.test(message)) {
+  const columnMatch = message.match(/could not find the '([^']+)' column/i);
+  if (columnMatch) {
+    return {
+      title: `A tabela não tem a coluna '${columnMatch[1]}': ${message}`,
+      hint:
+        "O schema do banco difere do esperado pelo script. Confira os nomes reais em\n" +
+        "  Supabase → Table Editor → businesses (ex.: latitude/longitude x lat/lng).",
+    };
+  }
+  if (/relation .* does not exist|could not find the table|schema cache/i.test(message)) {
     return {
       title: `Tabela ausente no banco: ${message}`,
       hint: "Aplique supabase/schema.sql no SQL Editor do Supabase antes de importar.",

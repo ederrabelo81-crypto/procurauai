@@ -110,6 +110,10 @@ Importe o CSV no Google Sheets e revise linha a linha:
    ```
    - O script deduplica por `google_place_id`: pode rodar de novo sem duplicar.
    - `--update` atualiza registros já existentes; `--limit=10` para testar com poucos.
+   - As colunas da tabela são descobertas antes da inserção: o script funciona tanto
+     no schema de `supabase/schema.sql` (`lat`/`lng`, sem `city`) quanto no de
+     `docs/database/schema.sql` (`latitude`/`longitude`, `city`), que é o que está
+     no projeto de produção. Campos sem coluna correspondente são ignorados com aviso.
 
 **Definindo as variáveis direto no terminal** (em vez do `.env.local`), atenção à
 sintaxe — a forma `VAR=valor node script.mjs` é do bash e **não funciona no PowerShell**:

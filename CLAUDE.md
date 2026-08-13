@@ -276,7 +276,17 @@ mostra o estado das variáveis carregadas.
 
 ## 11. Banco de dados (Supabase)
 
-- Schema de produção: [`supabase/schema.sql`](supabase/schema.sql) — enums
+⚠️ **O banco de produção não segue `supabase/schema.sql`.** O projeto real usa a
+proposta mais ampla de `docs/database/schema.sql` (PostGIS, `chips`,
+`mini_site_panels`): em `businesses` as coordenadas são `latitude`/`longitude`
+(não `lat`/`lng`), existem `city`/`state`/`hours_text` e `cover_images` é `jsonb`.
+Antes de escrever query nova, confira as colunas reais no painel — os dois
+arquivos de schema divergem e o front-end ainda referencia os dois nomes.
+`scripts/import-businesses.mjs` contorna isso descobrindo as colunas em runtime
+(`scripts/lib/businessRow.mjs`).
+
+- Schema de produção (desatualizado, ver aviso acima):
+  [`supabase/schema.sql`](supabase/schema.sql) — enums
   (`business_plan`, `listing_type`, `car_fuel_type`, …), tabelas
   (`businesses`, `listings`, `deals`, `events`, `news`, `obituaries`, …),
   helpers `slugify()`/`set_slug()` e o trigger `set_business_category_slug()`
