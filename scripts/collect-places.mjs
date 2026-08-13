@@ -25,10 +25,11 @@
  * limitada à "Places API (New)". Veja docs/coleta-de-dados.md.
  */
 
-import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+
+import { loadEnvFiles } from "./lib/env.mjs";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Configuração
@@ -131,13 +132,13 @@ Passo a passo completo: docs/coleta-de-dados.md
  * Lê a chave do ambiente; se não achar, carrega .env.local / .env e tenta de novo.
  * A variável já exportada no shell sempre tem precedência sobre o arquivo.
  */
-export function resolveApiKey(env = process.env, loadEnvFiles = defaultLoadEnvFiles) {
+export function resolveApiKey(env = process.env, loadFiles = loadEnvFiles) {
   const fromShell = env.GOOGLE_MAPS_API_KEY || env.VITE_GOOGLE_MAPS_API_KEY;
   if (fromShell) {
     return { key: fromShell, source: "ambiente", isFrontendKey: !env.GOOGLE_MAPS_API_KEY };
   }
 
-  loadEnvFiles();
+  loadFiles();
 
   const fromFile = env.GOOGLE_MAPS_API_KEY || env.VITE_GOOGLE_MAPS_API_KEY;
   if (fromFile) {
@@ -145,17 +146,6 @@ export function resolveApiKey(env = process.env, loadEnvFiles = defaultLoadEnvFi
   }
 
   return { key: "", source: "", isFrontendKey: false };
-}
-
-function defaultLoadEnvFiles() {
-  for (const file of [".env.local", ".env"]) {
-    if (!existsSync(file)) continue;
-    try {
-      process.loadEnvFile(file);
-    } catch {
-      // arquivo malformado não deve derrubar o script — a chave ainda pode vir do shell
-    }
-  }
 }
 
 /** Converte argv em opções, recusando flags desconhecidas (evita varrer a cidade errada por typo). */

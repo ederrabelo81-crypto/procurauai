@@ -80,25 +80,73 @@ Importe o CSV no Google Sheets e revise linha a linha:
 
 ### Etapa 3 — Importar para o Supabase (30 minutos)
 
-1. Pegue a **Service Role Key** no painel do Supabase (*Settings → API*). ⚠️ Essa chave é secreta: nunca no Git, nunca no front-end.
-2. (Uma vez só) Crie o índice de deduplicação no SQL Editor do Supabase:
+1. Pegue a **Service Role Key** no painel do Supabase (*Settings → API Keys → `service_role` (secret)*).
+   ⚠️ Essa chave é secreta e ignora RLS: nunca no Git, nunca no front-end.
+   Ela **não** é a `anon`/`publishable` que está no `.env.local` para o app — com a
+   `anon` a importação é barrada pelas policies e o erro fala em *row-level security*.
+
+2. Guarde as credenciais no `.env.local` (git-ignored; os scripts leem sozinhos):
+   ```bash
+   # .env.local — além das VITE_* que o app já usa
+   SUPABASE_URL=https://SEU-PROJETO.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=sua_service_role
+   ```
+   `SUPABASE_URL` é opcional se já houver `VITE_SUPABASE_URL` no arquivo — a URL não
+   é secreta e os scripts a reaproveitam.
+
+3. (Uma vez só) Crie o índice de deduplicação no SQL Editor do Supabase:
    ```sql
    create unique index if not exists businesses_google_place_id_key
      on public.businesses (google_place_id)
      where google_place_id is not null;
    ```
-3. Teste sem gravar, depois importe:
+
+4. Teste sem gravar, depois importe:
    ```bash
-   SUPABASE_URL=https://SEU-PROJETO.supabase.co \
-   SUPABASE_SERVICE_ROLE_KEY=sua_service_key \
-     node scripts/import-businesses.mjs --file=data/places/places-2026-07-22.json --dry-run
+   node scripts/import-businesses.mjs --file=data/places/places-2026-07-22.json --dry-run
 
    # se o exemplo mostrado estiver certo:
-   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
-     node scripts/import-businesses.mjs --file=data/places/places-2026-07-22.json
+   node scripts/import-businesses.mjs --file=data/places/places-2026-07-22.json
    ```
    - O script deduplica por `google_place_id`: pode rodar de novo sem duplicar.
    - `--update` atualiza registros já existentes; `--limit=10` para testar com poucos.
+   - As colunas da tabela são descobertas antes da inserção: o script funciona tanto
+     no schema de `supabase/schema.sql` (`lat`/`lng`, sem `city`) quanto no de
+     `docs/database/schema.sql` (`latitude`/`longitude`, `city`), que é o que está
+     no projeto de produção. Campos sem coluna correspondente são ignorados com aviso.
+
+**Comércios que já estavam cadastrados sem `google_place_id`.** Parte da base foi
+carregada à mão (com WhatsApp, sem coordenadas). Como a deduplicação principal é
+por `google_place_id`, esses registros não seriam reconhecidos e virariam
+duplicatas. O script casa também por **nome + cidade** (ignorando acento,
+caixa e pontuação) e, nesses casos, em vez de inserir de novo, **completa só os
+campos vazios** — coordenadas, endereço, site, horário e o próprio
+`google_place_id`.
+
+Nunca são tocados: `whatsapp`, `phone`, `is_verified` e qualquer campo já
+preenchido — isso é trabalho de campo e vale mais que o dado do Google. Textos de
+preenchimento automático ("Consultar horários", "Centro") também não são gravados
+em registro existente. Para desligar o casamento por nome, use
+`--allow-name-duplicates`.
+
+> Confira sempre no `--dry-run` a linha "Já cadastrados com o mesmo nome" antes
+> de rodar a importação de verdade.
+
+**Definindo as variáveis direto no terminal** (em vez do `.env.local`), atenção à
+sintaxe — a forma `VAR=valor node script.mjs` é do bash e **não funciona no PowerShell**:
+
+```powershell
+# PowerShell (Windows)
+$env:SUPABASE_URL="https://SEU-PROJETO.supabase.co"
+$env:SUPABASE_SERVICE_ROLE_KEY="sua_service_role"
+node scripts/import-businesses.mjs --file=data\places\places-2026-07-22.json --dry-run
+```
+
+```bash
+# bash/zsh (Linux/macOS)
+SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
+  node scripts/import-businesses.mjs --file=data/places/places-2026-07-22.json --dry-run
+```
 
 ### Etapa 4 — Enriquecimento em campo (contínuo; é também sua prospecção)
 

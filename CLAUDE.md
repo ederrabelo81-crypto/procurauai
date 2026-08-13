@@ -276,7 +276,17 @@ mostra o estado das variáveis carregadas.
 
 ## 11. Banco de dados (Supabase)
 
-- Schema de produção: [`supabase/schema.sql`](supabase/schema.sql) — enums
+⚠️ **O banco de produção não segue `supabase/schema.sql`.** O projeto real usa a
+proposta mais ampla de `docs/database/schema.sql` (PostGIS, `chips`,
+`mini_site_panels`): em `businesses` as coordenadas são `latitude`/`longitude`
+(não `lat`/`lng`), existem `city`/`state`/`hours_text` e `cover_images` é `jsonb`.
+Antes de escrever query nova, confira as colunas reais no painel — os dois
+arquivos de schema divergem e o front-end ainda referencia os dois nomes.
+`scripts/import-businesses.mjs` contorna isso descobrindo as colunas em runtime
+(`scripts/lib/businessRow.mjs`).
+
+- Schema de produção (desatualizado, ver aviso acima):
+  [`supabase/schema.sql`](supabase/schema.sql) — enums
   (`business_plan`, `listing_type`, `car_fuel_type`, …), tabelas
   (`businesses`, `listings`, `deals`, `events`, `news`, `obituaries`, …),
   helpers `slugify()`/`set_slug()` e o trigger `set_business_category_slug()`
@@ -335,12 +345,26 @@ Rodam com Node, **fora** do app, e usam `process.env` (não `import.meta.env`):
 | `check-database-content.ts` | inspeciona categorias/contagens no banco |
 
 Os três primeiros exigem `SUPABASE_SERVICE_ROLE_KEY` e/ou
-`GOOGLE_MAPS_API_KEY` / `DEEPL_API_KEY` no ambiente. Sempre ofereça
-`--dry-run` antes de escrever no banco. `collect-places.mjs` também lê a chave
-de `.env.local` (`process.loadEnvFile`) — a chave dos scripts precisa ser
-**separada** da `VITE_GOOGLE_MAPS_API_KEY` do front-end, que é restrita por
-referenciador HTTP e falha fora do navegador. Testes dos helpers puros do script
-ficam em `scripts/__tests__/` (incluídos no `vitest.config.ts`). Documentação:
+`GOOGLE_MAPS_API_KEY` / `DEEPL_API_KEY`. Sempre ofereça `--dry-run` antes de
+escrever no banco.
+
+**Credenciais dos scripts:** use `scripts/lib/env.mjs` (`readEnv`,
+`loadEnvFiles`, `formatEnvHelp`) em vez de ler `process.env` direto — ele carrega
+`.env.local`/`.env` via `process.loadEnvFile` e dá precedência ao que está
+exportado no shell. Dois detalhes que já causaram confusão:
+
+- a chave do Maps dos scripts precisa ser **separada** da
+  `VITE_GOOGLE_MAPS_API_KEY` do front-end, que é restrita por referenciador HTTP
+  e falha fora do navegador;
+- `SUPABASE_SERVICE_ROLE_KEY` não é a `anon`/`publishable`;
+  `looksLikePublicSupabaseKey()` detecta a troca antes de o erro virar um
+  *row-level security policy* incompreensível. A URL, por não ser secreta, aceita
+  `VITE_SUPABASE_URL` como fallback.
+
+Erros de conexão/permissão do Supabase passam por
+`describeSupabaseFailure()` (`scripts/lib/supabase.mjs`). Testes dos helpers
+puros ficam em `scripts/__tests__/` (incluídos no `vitest.config.ts`).
+Documentação:
 [`docs/coleta-de-dados.md`](docs/coleta-de-dados.md) e
 [`docs/supabase/translation-script.md`](docs/supabase/translation-script.md).
 
