@@ -7,7 +7,9 @@ import {
   FOOD_KEYWORDS,
   RETAIL_KEYWORDS,
   SERVICE_KEYWORDS,
+  guessBusinessCategorySlug,
   guessCategorySlug,
+  matchCategorySlug,
   normalizeForCategoryMatch,
 } from "@/lib/categoryHeuristics";
 
@@ -75,6 +77,86 @@ describe("guessCategorySlug", () => {
   });
 });
 
+describe("matchCategorySlug", () => {
+  it("devolve null quando nenhuma palavra-chave casa", () => {
+    expect(matchCategorySlug("Julio Cesar Prado")).toBeNull();
+    expect(matchCategorySlug("")).toBeNull();
+  });
+
+  it("devolve o slug quando casa", () => {
+    expect(matchCategorySlug("Bar do Zé")).toBe("comer-agora");
+    expect(matchCategorySlug("Barbearia do Alisson")).toBe("servicos");
+  });
+});
+
+describe("guessBusinessCategorySlug", () => {
+  // O caso dos 351 registros da carga antiga: `category` é "Serviços" para
+  // todos e o nome não tem palavra-chave; só a descrição sabe o que é o lugar.
+  it("usa a descrição quando nome e categoria não decidem", () => {
+    expect(
+      guessBusinessCategorySlug({
+        name: "Alforria",
+        category: "Serviços",
+        description: "Bar em Centro. Nota 4,2 (18 avaliações).",
+      }),
+    ).toBe("comer-agora");
+
+    expect(
+      guessBusinessCategorySlug({
+        name: "Casa da Sogra",
+        category: "Serviços",
+        description: "Loja de materiais de construção em Centro.",
+      }),
+    ).toBe("negocios");
+  });
+
+  it("não deixa a descrição atropelar nome ou categoria", () => {
+    expect(
+      guessBusinessCategorySlug({
+        name: "Barbearia do Alisson",
+        category: "Serviços",
+        description: "Loja em Centro. Nota 4,8 (32 avaliações).",
+      }),
+    ).toBe("servicos");
+
+    expect(
+      guessBusinessCategorySlug({
+        name: "Pizzaria Alforria",
+        category: "Serviços",
+        description: "Loja de conveniência em Centro.",
+      }),
+    ).toBe("comer-agora");
+  });
+
+  it("cai no fallback quando nem a descrição casa", () => {
+    expect(
+      guessBusinessCategorySlug({
+        name: "Julio Cesar Prado",
+        category: "Serviços",
+        description: "Escritório em Centro.",
+      }),
+    ).toBe("servicos");
+
+    expect(
+      guessBusinessCategorySlug(
+        { name: "Julio Cesar Prado", category: "Serviços" },
+        "negocios",
+      ),
+    ).toBe("negocios");
+  });
+
+  it("aceita campos ausentes ou nulos", () => {
+    expect(guessBusinessCategorySlug({})).toBe("servicos");
+    expect(
+      guessBusinessCategorySlug({
+        name: null,
+        category: null,
+        description: "Padaria em Centro.",
+      }),
+    ).toBe("comer-agora");
+  });
+});
+
 describe("normalizeForCategoryMatch", () => {
   it("remove acento e caixa", () => {
     expect(normalizeForCategoryMatch("Açaí da Praça")).toBe("acai da praca");
@@ -90,37 +172,66 @@ describe("paridade com o trigger set_business_category_slug()", () => {
     "utf8",
   );
 
-  const triggerBody = schemaSql.slice(
-    schemaSql.indexOf(
-      "create or replace function public.set_business_category_slug()",
-    ),
-  );
+  const sqlFunction = (name: string): string => {
+    const start = schemaSql.indexOf(
+      `create or replace function public.${name}(`,
+    );
+    expect(start, `função ${name}() não encontrada no schema`).toBeGreaterThan(
+      -1,
+    );
 
-  /** Extrai as palavras da regex que atribui `slug` no trigger. */
+    const end = schemaSql.indexOf("$$;", start);
+    expect(end, `fim de ${name}() não encontrado`).toBeGreaterThan(start);
+
+    return schemaSql.slice(start, end);
+  };
+
+  /** match_business_category_slug() é o equivalente SQL de matchCategorySlug(). */
+  const matchBody = sqlFunction("match_business_category_slug");
+  const triggerBody = sqlFunction("set_business_category_slug");
+
+  /** Extrai as palavras da regex que devolve `slug`. */
   const keywordsForSlug = (slug: string): string[] => {
-    const assignment = triggerBody.indexOf(`new.category_slug := '${slug}';`);
+    const assignment = matchBody.indexOf(`then '${slug}'`);
     expect(
       assignment,
-      `atribuição de '${slug}' não encontrada no trigger`,
+      `retorno de '${slug}' não encontrado em match_business_category_slug()`,
     ).toBeGreaterThan(-1);
 
-    const condition = triggerBody.slice(0, assignment);
-    const match = condition.match(/~ '\\y\(([^)]+)\)\\y'[^~]*$/);
+    const condition = matchBody.slice(0, assignment);
+    const match = condition.match(/~ '\\y\(([^)]+)\)\\y'\s*$/);
     expect(
       match,
-      `regex de '${slug}' não encontrada no trigger`,
+      `regex de '${slug}' não encontrada em match_business_category_slug()`,
     ).not.toBeNull();
 
     return match![1].split("|");
   };
 
   it("usa \\y (limite de palavra do Postgres) e não \\b", () => {
-    expect(triggerBody).not.toContain("\\\\b");
-    expect(triggerBody).toContain("\\y(");
+    expect(matchBody).not.toContain("\\\\b");
+    expect(matchBody).toContain("\\y(");
   });
 
   it("normaliza o texto com unaccent, como o front", () => {
-    expect(triggerBody).toContain("public.unaccent(");
+    expect(matchBody).toContain("public.unaccent(");
+  });
+
+  // Espelha guessBusinessCategorySlug(): nome + categoria primeiro, descrição
+  // como desempate, e só então o fallback.
+  it("consulta nome + categoria antes da descrição", () => {
+    const nameAndCategory = triggerBody.indexOf("coalesce(new.name, '')");
+    const description = triggerBody.indexOf("new.description");
+
+    expect(nameAndCategory, "nome + categoria fora do trigger").toBeGreaterThan(
+      -1,
+    );
+    expect(description, "descrição fora do trigger").toBeGreaterThan(-1);
+    expect(description).toBeGreaterThan(nameAndCategory);
+  });
+
+  it("mantém 'servicos' como último recurso", () => {
+    expect(triggerBody).toContain("'servicos'");
   });
 
   it.each([

@@ -1,4 +1,4 @@
-import { guessCategorySlug as guessSlugFromText } from "@/lib/categoryHeuristics";
+import { guessBusinessCategorySlug } from "@/lib/categoryHeuristics";
 
 export interface Review {
   id: string;
@@ -43,6 +43,9 @@ const GOOGLE_MAPS_TAG_BLACKLIST = new Set([
  * Tenta adivinhar a "lesma" da categoria (categorySlug) com base no nome, categoria e descrição.
  * Esta função é um fallback crucial para garantir que os negócios sejam exibidos nas seções corretas,
  * mesmo que o campo `categorySlug` não esteja explicitamente definido no banco de dados.
+ *
+ * A descrição só entra quando nome + categoria não decidem nada — ver
+ * `guessBusinessCategorySlug()`.
  */
 // As funções abaixo recebem a linha crua do Supabase/Google Maps, cujo formato
 // varia conforme a origem (colunas do banco, payload do Places, mock). Enquanto
@@ -50,13 +53,16 @@ const GOOGLE_MAPS_TAG_BLACKLIST = new Set([
 // — ver CLAUDE.md §7.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function guessCategorySlug(rawData: any): string {
-  const textToSearch = [rawData.name, rawData.category, rawData.description]
-    .filter(Boolean)
-    .join(" ");
-
   // Aqui o fallback é 'negocios': quem chega sem categorySlug por esta via
   // costuma ser comércio importado de fora, não prestador de serviço.
-  return guessSlugFromText(textToSearch, "negocios");
+  return guessBusinessCategorySlug(
+    {
+      name: rawData.name,
+      category: rawData.category,
+      description: rawData.description,
+    },
+    "negocios",
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

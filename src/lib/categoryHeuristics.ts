@@ -198,9 +198,26 @@ export const RETAIL_REGEX = buildKeywordRegex(RETAIL_KEYWORDS);
 export const SERVICE_REGEX = buildKeywordRegex(SERVICE_KEYWORDS);
 
 /**
+ * Classifica um texto ou devolve `null` quando nenhuma palavra-chave casa.
+ * A ordem importa: comida vence comércio, que vence serviço — "Padaria e
+ * Mercearia" é comer-agora, "Loja de Materiais" é negócio.
+ *
+ * Separado de `guessCategorySlug()` porque "não casou nada" e "casou serviço"
+ * são coisas diferentes: só o primeiro caso pode ser resolvido por outra fonte
+ * de texto (ver `guessBusinessCategorySlug`).
+ */
+export function matchCategorySlug(text: string): CategorySlug | null {
+  const normalized = normalizeForCategoryMatch(text);
+
+  if (FOOD_REGEX.test(normalized)) return "comer-agora";
+  if (RETAIL_REGEX.test(normalized)) return "negocios";
+  if (SERVICE_REGEX.test(normalized)) return "servicos";
+  return null;
+}
+
+/**
  * Classifica um comércio a partir de qualquer texto que o descreva (nome,
- * categoria, descrição). A ordem importa: comida vence comércio, que vence
- * serviço — "Padaria e Mercearia" é comer-agora, "Loja de Materiais" é negócio.
+ * categoria, descrição).
  *
  * @param text     nome + categoria (+ descrição) concatenados
  * @param fallback usado quando nada casa; cada chamador tem o seu padrão
@@ -209,10 +226,36 @@ export function guessCategorySlug(
   text: string,
   fallback: CategorySlug = "servicos",
 ): CategorySlug {
-  const normalized = normalizeForCategoryMatch(text);
+  return matchCategorySlug(text) ?? fallback;
+}
 
-  if (FOOD_REGEX.test(normalized)) return "comer-agora";
-  if (RETAIL_REGEX.test(normalized)) return "negocios";
-  if (SERVICE_REGEX.test(normalized)) return "servicos";
-  return fallback;
+export type BusinessCategoryInput = {
+  name?: string | null;
+  category?: string | null;
+  description?: string | null;
+};
+
+/**
+ * Classifica um comércio em duas etapas: primeiro **nome + categoria**, e só
+ * quando nada casa a **descrição** entra como desempate.
+ *
+ * A descrição é um sinal bom mas de segunda mão. A carga inicial gravou 351
+ * registros com `category` uniformemente "Serviços" — nome genérico ("Alforria",
+ * "Casa da Sogra") e nenhuma palavra-chave para casar, então todos caíram no
+ * fallback. A descrição desses registros carrega o tipo do Google já em pt-BR
+ * ("Bar em Centro. Nota 4,2 (18 avaliações).") e classifica bem.
+ *
+ * O que a etapa em duas fases evita é a descrição **atropelar** um nome
+ * confiante: "Barbearia do Alisson" continua serviço mesmo que a descrição
+ * mencione "Loja"; a descrição só decide quem não tinha decisão nenhuma.
+ */
+export function guessBusinessCategorySlug(
+  { name, category, description }: BusinessCategoryInput,
+  fallback: CategorySlug = "servicos",
+): CategorySlug {
+  return (
+    matchCategorySlug(`${name ?? ""} ${category ?? ""}`) ??
+    matchCategorySlug(description ?? "") ??
+    fallback
+  );
 }
