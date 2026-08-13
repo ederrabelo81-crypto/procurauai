@@ -187,6 +187,46 @@ export const ENRICHABLE_FIELDS = [
 ];
 
 /**
+ * Campos que `--update` NÃO pode escrever.
+ *
+ * O update montava a linha inteira a partir da coleta, e a coleta não traz
+ * foto, descrição nem curadoria: rodar `--update` zerava `cover_images` de
+ * todo comércio já cadastrado — a base perdia as fotos de uma vez. `plan` e
+ * `is_verified` voltariam para o padrão (grátis / não verificado), e
+ * `whatsapp`/`phone` são trabalho de campo.
+ */
+export const UPDATE_PROTECTED_FIELDS = [
+  "cover_images",
+  "description",
+  "is_verified",
+  "is_open_now",
+  "plan",
+  "whatsapp",
+  "phone",
+  "logo",
+  "logo_url",
+  "instagram",
+];
+
+/**
+ * Remove de uma linha os campos protegidos e os que só carregam preenchimento
+ * ("Consultar horários", "Centro", "Serviços"). Sobra o que a coleta realmente
+ * apurou e pode atualizar sem apagar curadoria.
+ */
+export function pickUpdatableFields(row, protectedFields = UPDATE_PROTECTED_FIELDS) {
+  const blocked = new Set(protectedFields);
+  const updatable = {};
+
+  for (const [key, value] of Object.entries(row)) {
+    if (blocked.has(key)) continue;
+    if (isEmpty(value) || isPlaceholder(value)) continue;
+    updatable[key] = value;
+  }
+
+  return updatable;
+}
+
+/**
  * Devolve só os campos que estão vazios no registro atual e preenchidos no novo.
  * Objeto vazio = não há o que atualizar.
  */

@@ -1,22 +1,22 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { useFavorites } from '@/hooks/useFavorites';
-import { businesses as mockBusinesses } from '@/data/mockData';
-import { normalizeBusinessData, type Business } from '@/lib/dataNormalization';
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useFavorites } from "@/hooks/useFavorites";
+import { businesses as mockBusinesses } from "@/data/mockData";
+import { normalizeBusinessData, type Business } from "@/lib/dataNormalization";
 
 // Airbnb-inspired components
-import { AirbnbGallery } from '@/components/listing/AirbnbGallery';
-import { BusinessHeader } from '@/components/listing/BusinessHeader';
-import { HostCard } from '@/components/listing/HostCard';
-import { AirbnbReviews } from '@/components/listing/AirbnbReviews';
-import { LocationSection } from '@/components/listing/LocationSection';
-import { ThingsToKnow } from '@/components/listing/ThingsToKnow';
-import { FloatingActions } from '@/components/listing/FloatingActions';
-import { StickyNav } from '@/components/listing/StickyNav';
-import { ListingActionsBar } from '@/components/listing/ListingActionsBar';
-import { RelatedCarousel } from '@/components/listing/RelatedCarousel';
-import { EventsSection } from '@/components/listing/EventsSection';
+import { AirbnbGallery } from "@/components/listing/AirbnbGallery";
+import { BusinessHeader } from "@/components/listing/BusinessHeader";
+import { HostCard } from "@/components/listing/HostCard";
+import { AirbnbReviews } from "@/components/listing/AirbnbReviews";
+import { LocationSection } from "@/components/listing/LocationSection";
+import { ThingsToKnow } from "@/components/listing/ThingsToKnow";
+import { FloatingActions } from "@/components/listing/FloatingActions";
+import { StickyNav } from "@/components/listing/StickyNav";
+import { ListingActionsBar } from "@/components/listing/ListingActionsBar";
+import { RelatedCarousel } from "@/components/listing/RelatedCarousel";
+import { EventsSection } from "@/components/listing/EventsSection";
 
 function normalizeSupabaseRow(row: Record<string, unknown>): Business {
   return normalizeBusinessData({
@@ -29,17 +29,21 @@ function normalizeSupabaseRow(row: Record<string, unknown>): Business {
     hours: row.hours as string,
     phone: row.phone as string,
     whatsapp: row.whatsapp as string,
-    coverImages: row.cover_images as string[],
+    coverImages: row.cover_images,
     isOpenNow: row.is_open_now as boolean,
     isVerified: row.is_verified as boolean,
     description: row.description as string,
     address: row.address as string,
     averageRating: row.average_rating as number,
     reviewCount: row.review_count as number,
-    plan: row.plan as 'free' | 'pro' | 'destaque',
+    plan: row.plan as "free" | "pro" | "destaque",
     website: row.website as string,
     instagram: row.instagram as string,
-    logo: row.logo as string,
+    logo: (row.logo ?? row.logo_url) as string,
+    // Coordenadas alimentam o mapa da página e o Street View de quem ainda não
+    // tem foto própria. Os dois schemas em circulação divergem no nome.
+    latitude: (row.latitude ?? row.lat) as number,
+    longitude: (row.longitude ?? row.lng) as number,
   });
 }
 
@@ -65,8 +69,8 @@ export default function BusinessDetail() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -74,9 +78,13 @@ export default function BusinessDetail() {
       if (!id) return;
       setLoading(true);
 
-      const fallbackBusinesses = mockBusinesses.map((b) => normalizeBusinessData(b));
+      const fallbackBusinesses = mockBusinesses.map((b) =>
+        normalizeBusinessData(b),
+      );
       const loadFallbackData = () => {
-        const fallbackBusiness = fallbackBusinesses.find((item) => item.id === id);
+        const fallbackBusiness = fallbackBusinesses.find(
+          (item) => item.id === id,
+        );
         if (!fallbackBusiness) {
           setBusiness(null);
           setRelatedBusinesses([]);
@@ -87,8 +95,12 @@ export default function BusinessDetail() {
         setBusiness(fallbackBusiness);
         setRelatedBusinesses(
           fallbackBusinesses
-            .filter((item) => item.categorySlug === fallbackBusiness.categorySlug && item.id !== id)
-            .slice(0, 6)
+            .filter(
+              (item) =>
+                item.categorySlug === fallbackBusiness.categorySlug &&
+                item.id !== id,
+            )
+            .slice(0, 6),
         );
         setBusinessDeals([]);
         setBusinessEvents([]);
@@ -96,13 +108,16 @@ export default function BusinessDetail() {
 
       try {
         const { data: businessData, error: businessError } = await supabase
-          .from('businesses')
-          .select('*')
-          .eq('id', id)
+          .from("businesses")
+          .select("*")
+          .eq("id", id)
           .maybeSingle();
 
         if (businessError || !businessData) {
-          console.warn('Negócio não encontrado no Supabase, usando fallback:', businessError);
+          console.warn(
+            "Negócio não encontrado no Supabase, usando fallback:",
+            businessError,
+          );
           loadFallbackData();
           setLoading(false);
           return;
@@ -113,13 +128,13 @@ export default function BusinessDetail() {
 
         const [relatedResult, dealsResult, eventsResult] = await Promise.all([
           supabase
-            .from('businesses')
-            .select('*')
-            .eq('category_slug', businessData.category_slug)
-            .neq('id', id)
+            .from("businesses")
+            .select("*")
+            .eq("category_slug", businessData.category_slug)
+            .neq("id", id)
             .limit(6),
-          supabase.from('deals').select('*').eq('business_id', id),
-          supabase.from('events').select('*').eq('business_id', id),
+          supabase.from("deals").select("*").eq("business_id", id),
+          supabase.from("events").select("*").eq("business_id", id),
         ]);
 
         if (relatedResult.data) {
@@ -132,7 +147,7 @@ export default function BusinessDetail() {
           setBusinessEvents(eventsResult.data);
         }
       } catch (error) {
-        console.error('Erro ao buscar dados do negócio:', error);
+        console.error("Erro ao buscar dados do negócio:", error);
         loadFallbackData();
       } finally {
         setLoading(false);
@@ -162,29 +177,38 @@ export default function BusinessDetail() {
     );
   }
 
-  const isLiked = isFavorite('business', business.id);
+  const isLiked = isFavorite("business", business.id);
   const rating = business.averageRating;
   const reviewCount = business.reviewCount;
   const reviews = business.reviews ?? [];
 
-  const websiteMatch = business.description?.match(/Site:\s*(https?:\/\/[^\s]+|[^\s]+\.[a-z]{2,}[^\s]*)/i);
-  const website = business.website || (websiteMatch ? websiteMatch[1] : undefined);
+  const websiteMatch = business.description?.match(
+    /Site:\s*(https?:\/\/[^\s]+|[^\s]+\.[a-z]{2,}[^\s]*)/i,
+  );
+  const website =
+    business.website || (websiteMatch ? websiteMatch[1] : undefined);
 
   const handleShare = async () => {
     const url = window.location.href;
     const text = `Veja ${business.name} no Procura UAI!`;
     if (navigator.share) {
-      await navigator.share({ title: business.name, text, url }).catch(() => {});
+      await navigator
+        .share({ title: business.name, text, url })
+        .catch(() => {});
     } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, '_blank');
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,
+        "_blank",
+      );
     }
   };
 
-  const handleTagClick = (tag: string) => navigate(`/buscar?filters=${encodeURIComponent(tag)}`);
+  const handleTagClick = (tag: string) =>
+    navigate(`/buscar?filters=${encodeURIComponent(tag)}`);
 
   const relatedItemsForCarousel = relatedBusinesses.map((b) => ({
     id: b.id,
-    type: 'business' as const,
+    type: "business" as const,
     title: b.name,
     subtitle: b.neighborhood,
     image: b.coverImages[0],
@@ -197,7 +221,7 @@ export default function BusinessDetail() {
         title={business.name}
         isVisible={showStickyNav}
         isFavorite={isLiked}
-        onFavoriteToggle={() => toggleFavorite('business', business.id)}
+        onFavoriteToggle={() => toggleFavorite("business", business.id)}
         onShare={handleShare}
       />
 
@@ -205,13 +229,10 @@ export default function BusinessDetail() {
       <div className="relative">
         <FloatingActions
           isFavorite={isLiked}
-          onFavoriteToggle={() => toggleFavorite('business', business.id)}
+          onFavoriteToggle={() => toggleFavorite("business", business.id)}
           onShare={handleShare}
         />
-        <AirbnbGallery 
-          images={business.coverImages} 
-          title={business.name} 
-        />
+        <AirbnbGallery images={business.coverImages} title={business.name} />
       </div>
 
       {/* Main content container */}
@@ -243,7 +264,9 @@ export default function BusinessDetail() {
         {/* About section */}
         {business.description && (
           <div className="py-6 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Sobre</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Sobre
+            </h2>
             <p className="text-foreground leading-relaxed whitespace-pre-line">
               {business.description}
             </p>
@@ -253,10 +276,12 @@ export default function BusinessDetail() {
         {/* Events & Deals */}
         {(businessDeals.length > 0 || businessEvents.length > 0) && (
           <div className="py-6 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Eventos e Promoções</h2>
-            <EventsSection 
-              events={businessEvents as never[]} 
-              deals={businessDeals as never[]} 
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Eventos e Promoções
+            </h2>
+            <EventsSection
+              events={businessEvents as never[]}
+              deals={businessDeals as never[]}
               plan={business.plan}
             />
           </div>
@@ -287,19 +312,16 @@ export default function BusinessDetail() {
         {/* Things to know / Tags */}
         {business.tags && business.tags.length > 0 && (
           <div className="border-b border-border">
-            <ThingsToKnow 
-              tags={business.tags} 
-              onTagClick={handleTagClick} 
-            />
+            <ThingsToKnow tags={business.tags} onTagClick={handleTagClick} />
           </div>
         )}
 
         {/* Related businesses */}
         {relatedItemsForCarousel.length > 0 && (
           <div className="py-8">
-            <RelatedCarousel 
-              title="Similares na região" 
-              items={relatedItemsForCarousel} 
+            <RelatedCarousel
+              title="Similares na região"
+              items={relatedItemsForCarousel}
             />
           </div>
         )}

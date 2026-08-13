@@ -5,29 +5,56 @@ import { Clock, MapPin, Utensils } from "lucide-react";
 import type { UiBusiness } from "@/services/businesses";
 import { getBusinessesByCategorySlug } from "@/services/businesses";
 import { businesses as mockBusinesses } from "@/data/mockData";
+import { SmartImage } from "@/components/ui/SmartImage";
+import { resolveBusinessPhotos } from "@/lib/businessPhotos";
+import { reportError } from "@/lib/errors/errorHandler";
 
 // Keywords para identificar estabelecimentos de comida
 const FOOD_KEYWORDS = [
-  "restaurante", "lanchonete", "pizzaria", "hamburguer", "hamburgueria",
-  "bar", "cafe", "café", "padaria", "panificadora", "confeitaria",
-  "gastro", "sorveteria", "açaí", "acai", "sushi", "japonês", "japones",
-  "churrasco", "churrascaria", "espetinho", "marmita", "marmitex",
-  "pastelaria", "pastel", "food", "delivery", "fast food", "comida"
+  "restaurante",
+  "lanchonete",
+  "pizzaria",
+  "hamburguer",
+  "hamburgueria",
+  "bar",
+  "cafe",
+  "café",
+  "padaria",
+  "panificadora",
+  "confeitaria",
+  "gastro",
+  "sorveteria",
+  "açaí",
+  "acai",
+  "sushi",
+  "japonês",
+  "japones",
+  "churrasco",
+  "churrascaria",
+  "espetinho",
+  "marmita",
+  "marmitex",
+  "pastelaria",
+  "pastel",
+  "food",
+  "delivery",
+  "fast food",
+  "comida",
 ];
 
 function isFoodBusiness(name: string, category: string): boolean {
   const text = `${name} ${category}`.toLowerCase();
-  return FOOD_KEYWORDS.some(keyword => text.includes(keyword));
+  return FOOD_KEYWORDS.some((keyword) => text.includes(keyword));
 }
 
 function getMockFoodBusinesses(): UiBusiness[] {
   return mockBusinesses
-    .filter(b => 
-      b.categorySlug === "comer-agora" || 
-      isFoodBusiness(b.name, b.category)
+    .filter(
+      (b) =>
+        b.categorySlug === "comer-agora" || isFoodBusiness(b.name, b.category),
     )
     .slice(0, 8)
-    .map(b => ({
+    .map((b) => ({
       id: b.id,
       name: b.name,
       category: b.category,
@@ -50,32 +77,34 @@ export function ComerAgoraBlock() {
     async function load() {
       try {
         setLoading(true);
-        
+
         // 1. Tenta buscar pela categoria "comer-agora"
         let data = await getBusinessesByCategorySlug("comer-agora", 8);
-        
+
         // 2. Se poucos resultados, busca em "servicos" e filtra por keywords de comida
         if (data.length < 4) {
-          const fallbackData = await getBusinessesByCategorySlug("servicos", 30);
-          const foodPlaces = fallbackData.filter(place => 
-            isFoodBusiness(place.name, place.category)
+          const fallbackData = await getBusinessesByCategorySlug(
+            "servicos",
+            30,
           );
-          
+          const foodPlaces = fallbackData.filter((place) =>
+            isFoodBusiness(place.name, place.category),
+          );
+
           // Merge sem duplicatas
-          const existingIds = new Set(data.map(d => d.id));
-          const newItems = foodPlaces.filter(p => !existingIds.has(p.id));
+          const existingIds = new Set(data.map((d) => d.id));
+          const newItems = foodPlaces.filter((p) => !existingIds.has(p.id));
           data = [...data, ...newItems].slice(0, 8);
         }
 
         // 3. Fallback final: usa mockData se ainda não tiver dados suficientes
         if (data.length < 2) {
-          console.log("ComerAgoraBlock: Usando mockData como fallback");
           data = getMockFoodBusinesses();
         }
 
         setItems(data);
       } catch (e) {
-        console.error("Erro ao carregar dados para Comer Agora:", e);
+        reportError(e, { scope: "ComerAgoraBlock" });
         // Em caso de erro, usa mockData
         setItems(getMockFoodBusinesses());
       } finally {
@@ -95,7 +124,10 @@ export function ComerAgoraBlock() {
         />
         <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="w-[13rem] flex-shrink-0 overflow-hidden rounded-lg border border-border bg-card skeleton-pulse">
+            <div
+              key={i}
+              className="w-[13rem] flex-shrink-0 overflow-hidden rounded-lg border border-border bg-card skeleton-pulse"
+            >
               <div className="aspect-[4/3] bg-muted" />
               <div className="p-3 space-y-2">
                 <div className="h-4 bg-muted rounded w-3/4" />
@@ -129,8 +161,8 @@ export function ComerAgoraBlock() {
             className="almanac-card group w-[13rem] flex-shrink-0 overflow-hidden"
           >
             <div className="relative aspect-[4/3] overflow-hidden">
-              <img
-                src={place.coverImages?.[0] || "/placeholder.svg"}
+              <SmartImage
+                sources={resolveBusinessPhotos(place)}
                 alt={place.name}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.07]"
                 loading="lazy"

@@ -7,6 +7,7 @@ import {
   guessBusinessCategorySlug,
 } from "@/lib/categoryHeuristics";
 import type { CategorySlug } from "@/lib/categoryHeuristics";
+import { resolveBusinessPhotos } from "@/lib/businessPhotos";
 
 function buildSlugCandidates(slug: string): string[] {
   const candidates = [slug, slug.replace(/-/g, "_"), slug.replace(/-/g, " ")];
@@ -30,7 +31,27 @@ export type UiBusiness = {
   tags: string[];
   plan?: "free" | "pro" | "destaque";
   isVerified?: boolean;
+  /** Coordenadas seguem até o card: alimentam mapa e Street View. */
+  latitude?: number | null;
+  longitude?: number | null;
 };
+
+/**
+ * Colunas lidas em toda busca de comércio.
+ *
+ * `logo_url`, `latitude` e `longitude` entram porque a foto depende delas:
+ * sem logo e sem coordenada, um comércio sem `cover_images` não tem como
+ * render nada além do placeholder. Os dois schemas em circulação divergem nos
+ * nomes (CLAUDE.md §11), por isso o select tem uma variante enxuta de reserva.
+ */
+const BUSINESS_SELECT =
+  "id, name, neighborhood, cover_images, logo_url, latitude, longitude, " +
+  "is_open_now, plan, is_verified, category, category_slug, hours, description";
+
+/** Sem as colunas que só existem em um dos schemas. */
+const BUSINESS_SELECT_MINIMAL =
+  "id, name, neighborhood, cover_images, is_open_now, plan, is_verified, " +
+  "category, category_slug, hours, description";
 
 function deriveCategorySlug(
   name?: string,
@@ -65,6 +86,12 @@ function buildFallbackFilters(
     .join(",");
 }
 
+const toNumberOrNull = (value: unknown): number | null => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toUiBusiness(row: any, fallbackSlug: string): UiBusiness {
   const categoryName = row.category ?? row.categories?.name ?? "";
@@ -77,7 +104,12 @@ function toUiBusiness(row: any, fallbackSlug: string): UiBusiness {
     id: row.id,
     name: row.name,
     neighborhood: row.neighborhood || "",
-    coverImages: Array.isArray(row.cover_images) ? row.cover_images : [],
+    // `cover_images` é jsonb e nem toda linha guarda um array de strings —
+    // `resolveBusinessPhotos` normaliza as formas e completa com logo, acervo
+    // curado ou Street View quando a linha vier sem foto.
+    coverImages: resolveBusinessPhotos(row, { fallbackToPlaceholder: false }),
+    latitude: toNumberOrNull(row.latitude ?? row.lat),
+    longitude: toNumberOrNull(row.longitude ?? row.lng),
     isOpenNow: !!row.is_open_now,
     hours: row.hours || "", // Adicionando o campo hours do banco
     plan: row.plan ?? "free",
@@ -105,13 +137,24 @@ export async function getBusinessesByCategorySlug(
   );
 
   // Simplified query: try with category_slug first
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from("businesses")
-    .select(
-      "id, name, neighborhood, cover_images, is_open_now, plan, is_verified, category, category_slug, hours, description",
-    )
+    .select(BUSINESS_SELECT)
     .in("category_slug", slugCandidates)
     .limit(limit);
+
+  // `logo_url`/`latitude`/`longitude` não existem em todo schema em circulação;
+  // quando o PostgREST recusa a coluna, repete sem elas em vez de devolver
+  // vazio (o erro é 42703 / "column ... does not exist").
+  if (error) {
+    const retry = await supabase
+      .from("businesses")
+      .select(BUSINESS_SELECT_MINIMAL)
+      .in("category_slug", slugCandidates)
+      .limit(limit);
+
+    if (!retry.error) ({ data, error } = retry);
+  }
 
   if (error) {
     reportError(error, { scope: "getBusinessesByCategorySlug" });
@@ -121,9 +164,7 @@ export async function getBusinessesByCategorySlug(
     if (fallbackFilters) {
       const fallbackResponse = await supabase
         .from("businesses")
-        .select(
-          "id, name, neighborhood, cover_images, is_open_now, plan, is_verified, hours, description",
-        )
+        .select(BUSINESS_SELECT_MINIMAL)
         .or(fallbackFilters)
         .limit(limit);
 
