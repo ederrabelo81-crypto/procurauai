@@ -2,7 +2,10 @@ import { supabase } from "@/lib/supabaseClient";
 import { reportError } from "@/lib/errors/errorHandler";
 import { resolveListingTypeId } from "@/lib/taxonomy";
 import { cache, BUSINESS_CACHE_KEYS } from "@/lib/cache";
-import { FOOD_KEYWORDS, guessCategorySlug } from "@/lib/categoryHeuristics";
+import {
+  FOOD_KEYWORDS,
+  guessBusinessCategorySlug,
+} from "@/lib/categoryHeuristics";
 import type { CategorySlug } from "@/lib/categoryHeuristics";
 
 function buildSlugCandidates(slug: string): string[] {
@@ -32,9 +35,10 @@ export type UiBusiness = {
 function deriveCategorySlug(
   name?: string,
   category?: string,
+  description?: string,
   fallback: CategorySlug = "servicos",
 ): CategorySlug {
-  return guessCategorySlug(`${name ?? ""} ${category ?? ""}`, fallback);
+  return guessBusinessCategorySlug({ name, category, description }, fallback);
 }
 
 function buildFallbackFilters(
@@ -67,7 +71,7 @@ function toUiBusiness(row: any, fallbackSlug: string): UiBusiness {
   const categorySlug =
     row.category_slug ??
     row.categories?.slug ??
-    deriveCategorySlug(row.name, categoryName, fallbackSlug);
+    deriveCategorySlug(row.name, categoryName, row.description, fallbackSlug);
 
   return {
     id: row.id,
@@ -104,7 +108,7 @@ export async function getBusinessesByCategorySlug(
   const { data, error } = await supabase
     .from("businesses")
     .select(
-      "id, name, neighborhood, cover_images, is_open_now, plan, is_verified, category, category_slug, hours",
+      "id, name, neighborhood, cover_images, is_open_now, plan, is_verified, category, category_slug, hours, description",
     )
     .in("category_slug", slugCandidates)
     .limit(limit);
@@ -118,7 +122,7 @@ export async function getBusinessesByCategorySlug(
       const fallbackResponse = await supabase
         .from("businesses")
         .select(
-          "id, name, neighborhood, cover_images, is_open_now, plan, is_verified, hours",
+          "id, name, neighborhood, cover_images, is_open_now, plan, is_verified, hours, description",
         )
         .or(fallbackFilters)
         .limit(limit);

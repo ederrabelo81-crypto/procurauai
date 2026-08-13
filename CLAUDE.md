@@ -142,9 +142,28 @@ sendo uma cópia, mas `src/lib/__tests__/categoryHeuristics.test.ts` lê o SQL e
 quebra se os dois lados divergirem. Ao acrescentar uma palavra, acrescente nos
 dois — o teste cobra.
 
+A classificação acontece em **duas etapas** (`guessBusinessCategorySlug()` no
+front, `set_business_category_slug()` no banco):
+
+1. **nome + categoria** — o sinal forte;
+2. **descrição** — só quando a etapa 1 não casou nada.
+
+A ordem não é detalhe. A carga inicial gravou 351 comércios com `category`
+uniformemente "Serviços" e nome sem palavra-chave ("Alforria", "Casa da Sogra"),
+que por isso caíam no fallback; a descrição desses registros carrega o tipo do
+Google em pt-BR ("Bar em Centro. Nota 4,2 (18 avaliações).") e resolve o caso.
+Concatenar tudo numa etapa só faria a descrição atropelar nomes confiantes —
+"Barbearia do Alisson" com descrição "Loja em Centro" viraria `negocios`.
+`matchCategorySlug()` devolve `null` em vez de fallback justamente para as duas
+etapas conseguirem distinguir "não casou" de "casou serviço".
+
 Detalhe que já custou caro: o limite de palavra no Postgres é `\y`, não o `\b`
 do PCRE. A versão anterior do trigger usava `bar\\b`, que nunca casava, e todo
 bar da base foi classificado como `servicos`.
+
+Mudança no trigger não chega sozinha ao banco: `supabase/schema.sql` é o estado
+desejado, e o SQL para aplicar em produção (mais o backfill dos registros já
+gravados) fica em `supabase/migrations/`.
 
 ### Planos
 
@@ -300,6 +319,10 @@ arquivos de schema divergem e o front-end ainda referencia os dois nomes.
   que preenche `category_slug` por regex.
 - Proposta mais ampla (PostGIS, chips, painéis de mini-site):
   [`docs/database/README.md`](docs/database/README.md) + `docs/database/schema.sql`.
+- Scripts pontuais aplicados em produção pelo SQL Editor:
+  [`supabase/migrations/`](supabase/migrations/) — um arquivo por mudança,
+  idempotente, com prévia (`select`) antes de qualquer `update`/`drop`. Não é
+  um sistema de migração de verdade: ninguém roda isso automaticamente.
 - Problemas conhecidos e receitas de correção:
   [`docs/supabase/troubleshooting.md`](docs/supabase/troubleshooting.md)
   (ex.: `record "new" has no field "slug"`).
