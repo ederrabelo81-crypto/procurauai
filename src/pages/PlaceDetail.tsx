@@ -1,12 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, Star, Clock, Info, Images, Navigation, Heart, Share2 } from "lucide-react";
+import {
+  MapPin,
+  Star,
+  Clock,
+  Info,
+  Images,
+  Navigation,
+  Heart,
+  Share2,
+} from "lucide-react";
 import { ListingHero } from "@/components/listing/ListingHero";
-import { ListingTabs, TabItem } from "@/components/listing/ListingTabs";
+import type { TabItem } from "@/components/listing/ListingTabs";
+import { ListingTabs } from "@/components/listing/ListingTabs";
 import { ListingActionsBar } from "@/components/listing/ListingActionsBar";
 import { GallerySection } from "@/components/listing/GallerySection";
 import { Chip } from "@/components/ui/Chip";
 import { places } from "@/data/mockData";
 import { formatTag } from "@/lib/tags";
+import { formatRating, formatReviewCount } from "@/lib/formatters";
 import { useFavorites } from "@/hooks/useFavorites";
 
 export default function PlaceDetail() {
@@ -21,8 +32,8 @@ export default function PlaceDetail() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Lugar não encontrado.</p>
-          <button 
-            onClick={() => navigate('/lugares')} 
+          <button
+            onClick={() => navigate("/lugares")}
             className="text-primary underline"
           >
             Voltar para Lugares
@@ -32,11 +43,12 @@ export default function PlaceDetail() {
     );
   }
 
-  const isLiked = isFavorite('place', place.id);
+  const isLiked = isFavorite("place", place.id);
 
-  const mapsUrl = place.lat && place.lng 
-    ? `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + ' ' + place.city)}`;
+  const mapsUrl =
+    place.lat && place.lng
+      ? `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + " " + place.city)}`;
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -49,7 +61,10 @@ export default function PlaceDetail() {
         // usuário cancelou
       }
     } else {
-      window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, '_blank');
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`,
+        "_blank",
+      );
     }
   };
 
@@ -60,22 +75,28 @@ export default function PlaceDetail() {
   // Tabs do mini-site
   const tabs: TabItem[] = [
     {
-      id: 'sobre',
-      label: 'Sobre',
+      id: "sobre",
+      label: "Sobre",
       icon: <Info className="w-4 h-4" />,
       content: (
         <div className="space-y-6 px-4">
           {/* Descrição */}
           <div>
-            <h3 className="font-semibold text-foreground mb-2">Sobre o local</h3>
-            <p className="text-muted-foreground leading-relaxed">{place.shortDescription}</p>
+            <h3 className="font-semibold text-foreground mb-2">
+              Sobre o local
+            </h3>
+            <p className="text-muted-foreground leading-relaxed">
+              {place.shortDescription}
+            </p>
           </div>
 
           {/* Info Grid */}
           <div className="grid grid-cols-2 gap-3">
             {place.openingHours && (
               <div className="bg-muted/50 rounded-lg p-3">
-                <div className="text-muted-foreground text-xs mb-1">Horário</div>
+                <div className="text-muted-foreground text-xs mb-1">
+                  Horário
+                </div>
                 <div className="font-medium flex items-center gap-1.5">
                   <Clock className="w-4 h-4 text-primary" />
                   {place.openingHours}
@@ -84,13 +105,17 @@ export default function PlaceDetail() {
             )}
             {place.durationSuggestion && (
               <div className="bg-muted/50 rounded-lg p-3">
-                <div className="text-muted-foreground text-xs mb-1">Duração sugerida</div>
+                <div className="text-muted-foreground text-xs mb-1">
+                  Duração sugerida
+                </div>
                 <div className="font-medium">{place.durationSuggestion}</div>
               </div>
             )}
             {place.bestTimeToGo && (
               <div className="bg-muted/50 rounded-lg p-3">
-                <div className="text-muted-foreground text-xs mb-1">Melhor horário</div>
+                <div className="text-muted-foreground text-xs mb-1">
+                  Melhor horário
+                </div>
                 <div className="font-medium">{place.bestTimeToGo}</div>
               </div>
             )}
@@ -106,7 +131,10 @@ export default function PlaceDetail() {
               <h3 className="font-semibold text-foreground mb-2">Destaques</h3>
               <div className="flex flex-wrap gap-2">
                 {place.highlights.map((h) => (
-                  <span key={h} className="px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                  <span
+                    key={h}
+                    className="px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium"
+                  >
                     {h}
                   </span>
                 ))}
@@ -117,10 +145,17 @@ export default function PlaceDetail() {
           {/* Tags clicáveis */}
           {place.tags && place.tags.length > 0 && (
             <div>
-              <h3 className="font-semibold text-foreground mb-2">Características</h3>
+              <h3 className="font-semibold text-foreground mb-2">
+                Características
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {place.tags.map((tag) => (
-                  <Chip key={tag} onClick={() => handleTagClick(tag)} size="sm" className="cursor-pointer">
+                  <Chip
+                    key={tag}
+                    onClick={() => handleTagClick(tag)}
+                    size="sm"
+                    className="cursor-pointer"
+                  >
                     {formatTag(tag)}
                   </Chip>
                 ))}
@@ -131,8 +166,8 @@ export default function PlaceDetail() {
       ),
     },
     {
-      id: 'galeria',
-      label: 'Fotos',
+      id: "galeria",
+      label: "Fotos",
       icon: <Images className="w-4 h-4" />,
       count: place.gallery?.length || 0,
       hideIfEmpty: !place.gallery || place.gallery.length === 0,
@@ -147,8 +182,8 @@ export default function PlaceDetail() {
       ),
     },
     {
-      id: 'avaliacoes',
-      label: 'Avaliações',
+      id: "avaliacoes",
+      label: "Avaliações",
       icon: <Star className="w-4 h-4" />,
       count: place.reviewsCount,
       content: (
@@ -156,9 +191,13 @@ export default function PlaceDetail() {
           <div className="bg-card rounded-lg p-6 text-center border border-border">
             <div className="flex items-center justify-center gap-2 mb-2">
               <Star className="w-8 h-8 text-accent fill-yellow-500" />
-              <span className="text-3xl font-bold text-foreground">{place.rating}</span>
+              <span className="text-3xl font-bold text-foreground">
+                {formatRating(place.rating)}
+              </span>
             </div>
-            <p className="text-muted-foreground">{place.reviewsCount} avaliações</p>
+            <p className="text-muted-foreground">
+              {formatReviewCount(place.reviewsCount)}
+            </p>
             <p className="text-sm text-muted-foreground mt-4">
               As avaliações detalhadas estarão disponíveis em breve.
             </p>
@@ -180,7 +219,7 @@ export default function PlaceDetail() {
         reviewCount={place.reviewsCount}
         priceRange={place.priceLevel}
         isFavorite={isLiked}
-        onFavoriteToggle={() => toggleFavorite('place', place.id)}
+        onFavoriteToggle={() => toggleFavorite("place", place.id)}
         onShare={handleShare}
         badges={
           <span className="px-2.5 py-1 bg-card/90 backdrop-blur-sm rounded-full text-xs font-medium text-foreground shadow flex items-center gap-1">
@@ -209,11 +248,19 @@ export default function PlaceDetail() {
 
           {/* Favoritar */}
           <button
-            onClick={() => toggleFavorite('place', place.id)}
+            onClick={() => toggleFavorite("place", place.id)}
             className="h-12 w-12 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center text-foreground transition-colors"
-            aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+            aria-label={
+              isLiked ? "Remover dos favoritos" : "Adicionar aos favoritos"
+            }
           >
-            <Heart className={isLiked ? 'w-5 h-5 fill-destructive text-destructive' : 'w-5 h-5'} />
+            <Heart
+              className={
+                isLiked
+                  ? "w-5 h-5 fill-destructive text-destructive"
+                  : "w-5 h-5"
+              }
+            />
           </button>
 
           {/* Compartilhar */}

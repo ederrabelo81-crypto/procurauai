@@ -4,6 +4,7 @@ import {
   adaptRowToColumns,
   buildNameIndex,
   columnsFromOpenApi,
+  dedupeIncoming,
   findExistingByName,
   normalizeForMatch,
   pickEnrichment,
@@ -238,6 +239,47 @@ describe("pickEnrichment", () => {
     const patch = pickEnrichment({ hours: null, latitude: null, longitude: null }, semHorario);
     expect(patch).not.toHaveProperty("hours"); // mas não para completar registro existente
     expect(patch).toMatchObject({ latitude: -21.19, longitude: -46.99 });
+  });
+});
+
+describe("dedupeIncoming", () => {
+  const row = (name, city, id) => ({ name, city, google_place_id: id });
+
+  it("mantém a primeira ocorrência e separa as repetidas", () => {
+    const { unique, duplicates } = dedupeIncoming([
+      row("Sorveteria Pingo de Mel", "Monte Santo de Minas", "place-1"),
+      row("Sorveteria Pingo de Mel", "Monte Santo de Minas", "place-2"),
+      row("Padaria Central", "Monte Santo de Minas", "place-3"),
+    ]);
+
+    expect(unique.map((r) => r.google_place_id)).toEqual(["place-1", "place-3"]);
+    expect(duplicates).toHaveLength(1);
+    expect(duplicates[0].kept.google_place_id).toBe("place-1");
+    expect(duplicates[0].dropped.google_place_id).toBe("place-2");
+  });
+
+  it("casa ignorando acento, caixa e pontuação", () => {
+    const { unique, duplicates } = dedupeIncoming([
+      row("Açougue São José", "Monte Santo de Minas", "place-1"),
+      row("ACOUGUE SAO JOSE!", "monte santo de minas", "place-2"),
+    ]);
+
+    expect(unique).toHaveLength(1);
+    expect(duplicates).toHaveLength(1);
+  });
+
+  it("não junta comércios de mesmo nome em cidades diferentes", () => {
+    const { unique, duplicates } = dedupeIncoming([
+      row("Drogaria Popular", "Monte Santo de Minas", "place-1"),
+      row("Drogaria Popular", "São Sebastião do Paraíso", "place-2"),
+    ]);
+
+    expect(unique).toHaveLength(2);
+    expect(duplicates).toHaveLength(0);
+  });
+
+  it("devolve lista vazia sem registros", () => {
+    expect(dedupeIncoming([])).toEqual({ unique: [], duplicates: [] });
   });
 });
 

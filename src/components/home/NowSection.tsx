@@ -1,25 +1,26 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Chip } from '@/components/ui/Chip';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { DealCard } from '@/components/cards/DealCard';
-import { EventCard } from '@/components/cards/EventCard';
-import { BusinessCard } from '@/components/cards/BusinessCard';
-import { deals, events, businesses } from '@/data/mockData';
-import { places } from '@/data/mockData';
-import { isOpenNow } from '@/lib/tagUtils';
-import { MapPin, Star } from 'lucide-react';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Chip } from "@/components/ui/Chip";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { DealCard } from "@/components/cards/DealCard";
+import { EventCard } from "@/components/cards/EventCard";
+import { BusinessCard } from "@/components/cards/BusinessCard";
+import { formatRating } from "@/lib/formatters";
+import { deals, events, businesses } from "@/data/mockData";
+import { places } from "@/data/mockData";
+import { isOpenNow } from "@/lib/tagUtils";
+import { MapPin, Star } from "lucide-react";
 
-type Tab = 'ofertas' | 'eventos' | 'abertos' | 'lugares';
+type Tab = "ofertas" | "eventos" | "abertos" | "lugares";
 
 export function NowSection() {
-  const [activeTab, setActiveTab] = useState<Tab>('ofertas');
+  const [activeTab, setActiveTab] = useState<Tab>("ofertas");
 
   const tabs = [
-    { id: 'ofertas' as Tab, label: 'Ofertas do dia' },
-    { id: 'eventos' as Tab, label: 'Próximos eventos' },
-    { id: 'abertos' as Tab, label: 'Aberto agora' },
-    { id: 'lugares' as Tab, label: 'Lugares' },
+    { id: "ofertas" as Tab, label: "Ofertas do dia" },
+    { id: "eventos" as Tab, label: "Próximos eventos" },
+    { id: "abertos" as Tab, label: "Aberto agora" },
+    { id: "lugares" as Tab, label: "Lugares" },
   ];
 
   // Mostra apenas os que estão realmente abertos agora pelo texto de hours
@@ -33,11 +34,16 @@ export function NowSection() {
 
   const getActionLink = () => {
     switch (activeTab) {
-      case 'ofertas': return '/categoria/ofertas';
-      case 'eventos': return '/categoria/agenda';
-      case 'abertos': return '/categoria/servicos';
-      case 'lugares': return '/lugares';
-      default: return '/buscar';
+      case "ofertas":
+        return "/categoria/ofertas";
+      case "eventos":
+        return "/categoria/agenda";
+      case "abertos":
+        return "/categoria/servicos";
+      case "lugares":
+        return "/lugares";
+      default:
+        return "/buscar";
     }
   };
 
@@ -46,7 +52,7 @@ export function NowSection() {
       <SectionHeader
         title="Agora na Cidade"
         action={{
-          label: 'Ver mais',
+          label: "Ver mais",
           to: getActionLink(),
         }}
       />
@@ -65,16 +71,22 @@ export function NowSection() {
       </div>
 
       <div className="space-y-3">
-        {activeTab === 'ofertas' &&
-          todayDeals.map((deal) => <DealCard key={deal.id} deal={deal} variant="compact" />)}
+        {activeTab === "ofertas" &&
+          todayDeals.map((deal) => (
+            <DealCard key={deal.id} deal={deal} variant="compact" />
+          ))}
 
-        {activeTab === 'eventos' &&
-          upcomingEvents.map((event) => <EventCard key={event.id} event={event} variant="compact" />)}
+        {activeTab === "eventos" &&
+          upcomingEvents.map((event) => (
+            <EventCard key={event.id} event={event} variant="compact" />
+          ))}
 
-        {activeTab === 'abertos' &&
-          openBusinesses.map((b) => <BusinessCard key={b.id} business={b} variant="compact" />)}
+        {activeTab === "abertos" &&
+          openBusinesses.map((b) => (
+            <BusinessCard key={b.id} business={b} variant="compact" />
+          ))}
 
-        {activeTab === 'lugares' &&
+        {activeTab === "lugares" &&
           featuredPlaces.map((place) => (
             <Link
               key={place.id}
@@ -90,18 +102,24 @@ export function NowSection() {
                 />
               </div>
               <div className="flex-1 p-3 min-w-0">
-                <h3 className="font-semibold text-foreground text-sm mb-0.5 line-clamp-1">{place.name}</h3>
-                <p className="text-xs text-muted-foreground mb-1.5 line-clamp-1">{place.shortDescription}</p>
+                <h3 className="font-semibold text-foreground text-sm mb-0.5 line-clamp-1">
+                  {place.name}
+                </h3>
+                <p className="text-xs text-muted-foreground mb-1.5 line-clamp-1">
+                  {place.shortDescription}
+                </p>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Star className="w-3 h-3 text-accent fill-yellow-500" />
-                    {place.rating}
+                    {formatRating(place.rating)}
                   </span>
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
                     {place.neighborhood}
                   </span>
-                  <span className="px-1.5 py-0.5 bg-muted rounded text-[10px]">{place.priceLevel}</span>
+                  <span className="px-1.5 py-0.5 bg-muted rounded text-[10px]">
+                    {place.priceLevel}
+                  </span>
                 </div>
               </div>
             </Link>

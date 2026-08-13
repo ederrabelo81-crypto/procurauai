@@ -43,6 +43,17 @@ begin
 end;
 $$;
 
+-- ⚠ As três listas de palavras-chave abaixo são cópia de
+-- src/lib/categoryHeuristics.ts, que é a fonte de verdade. O teste
+-- src/lib/__tests__/categoryHeuristics.test.ts lê este arquivo e quebra se os
+-- dois lados divergirem — ao acrescentar uma palavra, acrescente nos dois.
+--
+-- Dois detalhes que já custaram caro:
+--   • o limite de palavra do Postgres é \y, não o \b do PCRE. A versão anterior
+--     usava 'bar\\b', que dentro do $$ vira a sequência literal "bar\b" e nunca
+--     casava: todo bar da base foi parar em "servicos".
+--   • o texto é passado por unaccent() para casar com as palavras sem acento,
+--     igual ao normalizeForCategoryMatch() do front.
 create or replace function public.set_business_category_slug()
 returns trigger
 language plpgsql
@@ -50,12 +61,16 @@ as $$
 declare
   input_text text;
 begin
-  input_text := lower(coalesce(new.name, '') || ' ' || coalesce(new.category, ''));
+  input_text := public.unaccent(
+    lower(coalesce(new.name, '') || ' ' || coalesce(new.category, ''))
+  );
 
-  if input_text ~ 'restaurante|lanchonete|pizzaria|hamburguer|bar\\b|cafe|café|padaria|panificadora|confeitaria|gastro|sorveteria' then
+  if input_text ~ '\y(acai|bar|boteco|botequim|burger|cafe|cafeteria|choperia|chopperia|churrascaria|churrasco|confeitaria|creperia|doceria|esfiharia|espetinho|gastro|gastronomia|hamburgueria|hamburguer|lanchonete|lanches|marmita|marmitex|padaria|panificadora|pastelaria|petiscaria|pizza|pizzaria|pub|restaurante|rotisseria|sorveteria|sushi|temakeria)\y' then
     new.category_slug := 'comer-agora';
-  elsif input_text ~ 'madeireira|material de construcao|materiais de construção|construcao|construção|loja|mercado|farmacia|farmácia|autopecas|autopeças|pet shop|boutique' then
+  elsif input_text ~ '\y(acougue|adega|agropecuaria|armazem|atacadista|atacado|autopecas|auto pecas|bazar|boutique|calcados|confeccoes|deposito|distribuidora|drogaria|eletronicos|farmacia|ferragens|floricultura|hortifruti|joalheria|livraria|loja|madeireira|magazine|material de construcao|materiais de construcao|mercado|mercearia|minimercado|moveis|otica|papelaria|pet shop|petshop|presentes|quitanda|relojoaria|sapataria|supermercado|tabacaria|tintas|utilidades|variedades)\y' then
     new.category_slug := 'negocios';
+  elsif input_text ~ '\y(academia|advocacia|advogado|arquitetura|assistencia tecnica|autoescola|auto center|autocenter|barbearia|borracharia|cabeleireiro|cartorio|chaveiro|clinica|colegio|construtora|consultorio|contabilidade|contador|corretora|costureira|creche|dentista|despachante|eletricista|empreiteira|encanador|engenharia|escola|estetica|fisioterapia|funeraria|funilaria|grafica|guincho|hotel|imobiliaria|laboratorio|lava jato|lava rapido|lavanderia|manicure|marceneiro|mecanica|mecanico|medico|odontologia|oficina|pedreiro|posto de combustivel|posto de gasolina|pousada|provedor|psicologo|refrigeracao|salao|seguros|serralheria|terraplenagem|transportadora|veterinario|vidracaria)\y' then
+    new.category_slug := 'servicos';
   else
     new.category_slug := coalesce(new.category_slug, 'servicos');
   end if;

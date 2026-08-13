@@ -134,10 +134,17 @@ Inclui `LEGACY_SLUG_MAP` e `resolveListingTypeId()` para normalizar slugs
 antigos. Ao adicionar um tipo/categoria/tag, edite **este arquivo**; não
 espalhe listas de slugs por componentes.
 
-Há hoje três cópias da heurística "adivinha a categoria pelo nome":
-`services/businesses.ts`, `lib/dataNormalization.ts` e o trigger
-`set_business_category_slug()` em `supabase/schema.sql`. Se mudar uma, mude as
-três — ou consolide.
+A heurística "adivinha a categoria pelo nome" mora em
+`src/lib/categoryHeuristics.ts` — **fonte única** das palavras-chave, usada por
+`services/businesses.ts` e `lib/dataNormalization.ts`. O trigger
+`set_business_category_slug()` (`supabase/schema.sql`) roda no banco e continua
+sendo uma cópia, mas `src/lib/__tests__/categoryHeuristics.test.ts` lê o SQL e
+quebra se os dois lados divergirem. Ao acrescentar uma palavra, acrescente nos
+dois — o teste cobra.
+
+Detalhe que já custou caro: o limite de palavra no Postgres é `\y`, não o `\b`
+do PCRE. A versão anterior do trigger usava `bar\\b`, que nunca casava, e todo
+bar da base foi classificado como `servicos`.
 
 ### Planos
 
@@ -340,7 +347,8 @@ Rodam com Node, **fora** do app, e usam `process.env` (não `import.meta.env`):
 | Script | O que faz |
 | --- | --- |
 | `collect-places.mjs` | coleta comércios via Google Places API (New) → JSON + CSV em `data/places/` (git-ignored); aceita `--dry-run`, `--cities`, `--categories`, `--max-pages`, `--help` |
-| `import-businesses.mjs` | importa o JSON revisado para `businesses`, deduplicando por `google_place_id`; aceita `--dry-run`, `--update`, `--limit` |
+| `import-businesses.mjs` | importa o JSON revisado para `businesses`, deduplicando por `google_place_id`, por nome+cidade contra o banco **e entre os registros do próprio arquivo**; aceita `--dry-run`, `--update`, `--limit`, `--allow-name-duplicates` |
+| `fix-descriptions.mjs` | reescreve as descrições da carga inicial em pt-BR (tipo do Google traduzido por `lib/googleTypes.mjs`) e deixa a nota com 1 casa decimal; determinístico e idempotente, sem custo de API |
 | `translate-businesses.mjs` | traduz `description` para pt-BR via DeepL e normaliza `rating` |
 | `check-database-content.ts` | inspeciona categorias/contagens no banco |
 
@@ -378,7 +386,11 @@ Não "conserte" isso de passagem sem combinar; mas saiba que existe:
 - Clientes Supabase duplicados (`.ts` e `.js`) e módulos JS soltos em `src/`.
 - Arquivos `_old` mortos: `components/home/TrendingSection_old.tsx`,
   `components/home/blocks/ComerAgoraBlock_old.tsx`.
-- Heurística de categoria triplicada (front x2 + trigger SQL).
+- Heurística de categoria espelhada no trigger SQL (o front já usa fonte única
+  em `lib/categoryHeuristics.ts`; um teste compara os dois lados).
+- `import-businesses.mjs --update` sobrescreve a linha inteira, incluindo
+  `description`, `cover_images`, `is_verified` e `plan` — apaga curadoria
+  manual. Use só com registros que ninguém editou à mão.
 - Dois lockfiles (`package-lock.json` e `bun.lockb`).
 - Divergência de porta do dev server (8080 na config, 5173 no README/Playwright).
 - CI roda só os testes; `lint` e `build` não são verificados.

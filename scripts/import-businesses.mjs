@@ -27,6 +27,7 @@ import {
   ENRICHABLE_FIELDS,
   adaptRowToColumns,
   buildNameIndex,
+  dedupeIncoming,
   fetchTableColumns,
   findExistingByName,
   pickEnrichment,
@@ -163,13 +164,28 @@ const run = async () => {
     .filter((r) => r.name && r.google_place_id);
 
   let droppedFields = [];
-  const rows = canonicalRows.map((row) => {
+  const adaptedRows = canonicalRows.map((row) => {
     const { row: adapted, dropped } = adaptRowToColumns(row, columns);
     if (dropped.length > droppedFields.length) droppedFields = dropped;
     return adapted;
   });
 
+  // O arquivo da coleta pode trazer o mesmo comércio duas vezes (place_ids
+  // diferentes para a mesma fachada). Sem isso os dois entram.
+  const { unique: rows, duplicates } = allowNameDuplicates
+    ? { unique: adaptedRows, duplicates: [] }
+    : dedupeIncoming(adaptedRows);
+
   console.log(`Lidos ${records.length} registros; válidos para importar: ${rows.length}.`);
+  if (duplicates.length > 0) {
+    console.log(
+      `⚠ ${duplicates.length} repetido(s) dentro do próprio arquivo (ignorados; ` +
+        `use --allow-name-duplicates para importar assim mesmo):`,
+    );
+    for (const { dropped } of duplicates) {
+      console.log(`    "${dropped.name}" — ${dropped.city ?? "sem cidade"} (${dropped.google_place_id})`);
+    }
+  }
   if (droppedFields.length > 0) {
     console.log(
       `⚠ Campos ignorados por não existirem na tabela: ${droppedFields.join(", ")}.`,

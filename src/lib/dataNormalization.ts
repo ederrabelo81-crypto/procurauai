@@ -1,3 +1,5 @@
+import { guessCategorySlug as guessSlugFromText } from "@/lib/categoryHeuristics";
+
 export interface Review {
   id: string;
   author: string;
@@ -24,51 +26,40 @@ export interface Business {
   averageRating?: number;
   reviewCount?: number;
   reviews?: Review[];
-  plan?: 'free' | 'pro' | 'destaque';
+  plan?: "free" | "pro" | "destaque";
   website?: string;
   instagram?: string;
   logo?: string;
 }
 
-const DEFAULT_IMAGE = '/placeholder.svg';
+const DEFAULT_IMAGE = "/placeholder.svg";
 
-const GOOGLE_MAPS_TAG_BLACKLIST = new Set(['point_of_interest', 'establishment']);
+const GOOGLE_MAPS_TAG_BLACKLIST = new Set([
+  "point_of_interest",
+  "establishment",
+]);
 
 /**
  * Tenta adivinhar a "lesma" da categoria (categorySlug) com base no nome, categoria e descrição.
  * Esta função é um fallback crucial para garantir que os negócios sejam exibidos nas seções corretas,
  * mesmo que o campo `categorySlug` não esteja explicitamente definido no banco de dados.
  */
+// As funções abaixo recebem a linha crua do Supabase/Google Maps, cujo formato
+// varia conforme a origem (colunas do banco, payload do Places, mock). Enquanto
+// não houver schema Zod para essa entrada, o `any` fica isolado nas assinaturas
+// — ver CLAUDE.md §7.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function guessCategorySlug(rawData: any): string {
-  const name = (rawData.name || '').toLowerCase();
-  const category = (rawData.category || '').toLowerCase();
-  const description = (rawData.description || '').toLowerCase();
-  const textToSearch = `${name} ${category} ${description}`;
+  const textToSearch = [rawData.name, rawData.category, rawData.description]
+    .filter(Boolean)
+    .join(" ");
 
-  // Palavras-chave para a categoria 'comer-agora'
-  const foodKeywords = [
-    'restaurante', 'pizza', 'pizzaria', 'comer', 'lanchonete', 'comida', 
-    'bar', 'marmita', 'marmitex', 'espetinho', 'churrasco', 'açaí', 
-    'sorvete', 'hamburguer', 'delivery', 'fast food', 'refeição'
-  ];
-  if (foodKeywords.some(key => textToSearch.includes(key))) {
-    return 'comer-agora';
-  }
-
-  // Palavras-chave para a categoria 'servicos'
-  const serviceKeywords = [
-    'serviço', 'profissional', 'auto', 'mecânica', 'conserto', 'manutenção', 
-    'consultório', 'advogado', 'contador', 'eletricista', 'encanador', 
-    'pedreiro', 'salão', 'beleza', 'cabelo', 'estética', 'clínica'
-  ];
-  if (serviceKeywords.some(key => textToSearch.includes(key))) {
-    return 'servicos';
-  }
-
-  // Se não for comida nem serviço, assume-se que é uma loja ou negócio geral.
-  return 'negocios';
+  // Aqui o fallback é 'negocios': quem chega sem categorySlug por esta via
+  // costuma ser comércio importado de fora, não prestador de serviço.
+  return guessSlugFromText(textToSearch, "negocios");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractGoogleMapsTags(rawData: any): string[] {
   const tags: string[] = [];
   const sources = [
@@ -85,10 +76,10 @@ function extractGoogleMapsTags(rawData: any): string[] {
 
   sources.forEach((source) => {
     if (Array.isArray(source)) {
-      tags.push(...source.filter((value) => typeof value === 'string'));
+      tags.push(...source.filter((value) => typeof value === "string"));
       return;
     }
-    if (typeof source === 'string') {
+    if (typeof source === "string") {
       tags.push(source);
     }
   });
@@ -98,13 +89,16 @@ function extractGoogleMapsTags(rawData: any): string[] {
     const cleaned = tag.trim();
     if (!cleaned) return;
     if (GOOGLE_MAPS_TAG_BLACKLIST.has(cleaned)) return;
-    normalized.add(cleaned.replace(/\s+/g, ' '));
+    normalized.add(cleaned.replace(/\s+/g, " "));
   });
 
   return Array.from(normalized);
 }
 
-function parseRatingFromDescription(description?: string): { rating?: number; count?: number } {
+function parseRatingFromDescription(description?: string): {
+  rating?: number;
+  count?: number;
+} {
   if (!description) return {};
   const ratingMatch = description.match(/Nota\s+(\d+(?:\.\d+)?)\s*\((\d+)/i);
   if (!ratingMatch) return {};
@@ -114,6 +108,7 @@ function parseRatingFromDescription(description?: string): { rating?: number; co
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeReviews(rawData: any): Review[] {
   const source =
     rawData?.googleMaps?.reviews ||
@@ -123,37 +118,44 @@ function normalizeReviews(rawData: any): Review[] {
 
   if (!Array.isArray(source)) return [];
 
-  return source
-    .map((review: any, index: number) => {
-      const author =
-        review?.author_name ||
-        review?.authorName ||
-        review?.author ||
-        'Anônimo';
-      const rating = Number(review?.rating ?? review?.score ?? 0);
-      const text = review?.text || review?.comment || '';
-      const date =
-        review?.relative_time_description ||
-        review?.relativeTimeDescription ||
-        review?.date ||
-        '';
-      const id = String(review?.time || review?.id || `${author}-${index}`);
+  return (
+    source
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((review: any, index: number) => {
+        const author =
+          review?.author_name ||
+          review?.authorName ||
+          review?.author ||
+          "Anônimo";
+        const rating = Number(review?.rating ?? review?.score ?? 0);
+        const text = review?.text || review?.comment || "";
+        const date =
+          review?.relative_time_description ||
+          review?.relativeTimeDescription ||
+          review?.date ||
+          "";
+        const id = String(review?.time || review?.id || `${author}-${index}`);
 
-      return {
-        id,
-        author,
-        rating,
-        text,
-        date,
-      };
-    })
-    .filter((review) => review.author || review.text || review.rating);
+        return {
+          id,
+          author,
+          rating,
+          text,
+          date,
+        };
+      })
+      .filter((review) => review.author || review.text || review.rating)
+  );
 }
 
 // Função helper para normalizar dados da API
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function normalizeBusinessData(rawData: any): Business {
   const googleMapsTags = extractGoogleMapsTags(rawData);
-  const combinedTags = new Set<string>([...googleMapsTags, ...(rawData.tags || [])]);
+  const combinedTags = new Set<string>([
+    ...googleMapsTags,
+    ...(rawData.tags || []),
+  ]);
   const fallbackRatings = parseRatingFromDescription(rawData.description);
   const averageRating =
     rawData.averageRating ??
@@ -173,22 +175,30 @@ export function normalizeBusinessData(rawData: any): Business {
 
   return {
     id: rawData.id || `temp_${Date.now()}`,
-    name: rawData.name || 'Sem nome',
-    category: rawData.category || 'Não categorizado',
+    name: rawData.name || "Sem nome",
+    category: rawData.category || "Não categorizado",
     // Usa o `categorySlug` do banco de dados, se existir; caso contrário, usa a função para adivinhar.
     categorySlug: rawData.categorySlug || guessCategorySlug(rawData),
     tags: Array.from(combinedTags),
-    neighborhood: rawData.neighborhood || 'Sem bairro',
-    hours: rawData.hours || 'Consultar horários',
+    neighborhood: rawData.neighborhood || "Sem bairro",
+    hours: rawData.hours || "Consultar horários",
     phone: rawData.phone || undefined,
-    whatsapp: rawData.whatsapp || '5535990000000',
-    coverImages: rawData.coverImages?.length ? rawData.coverImages : [DEFAULT_IMAGE],
+    whatsapp: rawData.whatsapp || "5535990000000",
+    coverImages: rawData.coverImages?.length
+      ? rawData.coverImages
+      : [DEFAULT_IMAGE],
     isOpenNow: rawData.isOpenNow ?? false,
     isVerified: rawData.isVerified ?? false, // Corrigido: rawAta -> rawData
-    description: rawData.description || '',
-    address: rawData.address || '',
-    averageRating: typeof averageRating === 'number' && !Number.isNaN(averageRating) ? averageRating : undefined,
-    reviewCount: typeof reviewCount === 'number' && !Number.isNaN(reviewCount) ? reviewCount : undefined,
+    description: rawData.description || "",
+    address: rawData.address || "",
+    averageRating:
+      typeof averageRating === "number" && !Number.isNaN(averageRating)
+        ? averageRating
+        : undefined,
+    reviewCount:
+      typeof reviewCount === "number" && !Number.isNaN(reviewCount)
+        ? reviewCount
+        : undefined,
     reviews,
     plan: rawData.plan,
     website: rawData.website,
