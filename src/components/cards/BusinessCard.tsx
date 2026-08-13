@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils";
 import { getBusinessTags } from "@/lib/businessTags";
 import { isOpenNow } from "@/lib/tagUtils";
 import { normalizeBusinessData } from "@/lib/dataNormalization";
-import { PHOTO_PLACEHOLDER } from "@/lib/businessPhotos";
+import { PHOTO_PLACEHOLDER, resolveBusinessPhotos } from "@/lib/businessPhotos";
+import { useStreetViewProbe } from "@/hooks/useStreetViewProbe";
 import { buildPlaceQuery, toLatLng } from "@/lib/maps";
 
 interface BusinessCardProps {
@@ -38,13 +39,25 @@ export function BusinessCard({
     rawBusiness.longitude ?? business.longitude,
   );
 
-  // `normalizeBusinessData` já resolveu a foto (capa gravada, logo, acervo
-  // curado ou Street View) e fecha a lista com o placeholder. Aqui o
-  // placeholder sai: sem foto nenhuma, o mapa da localização é uma capa melhor
-  // do que o desenho vazio.
-  const photos = business.coverImages.filter(
-    (photo) => photo !== PHOTO_PLACEHOLDER,
-  );
+  // Foto própria do comércio: capa gravada, logo ou acervo curado. Não depende
+  // da consulta de cobertura, então é estável entre renders — é o que decide se
+  // vale consultar o Street View.
+  const ownPhotos = resolveBusinessPhotos(business, {
+    useStreetView: false,
+    fallbackToPlaceholder: false,
+  });
+
+  // Só consulta a cobertura de quem depende dela: quem já tem foto própria não
+  // precisa de fachada. Quando a resposta chega, o hook re-renderiza e
+  // `coverImages` passa a incluir o Street View.
+  useStreetViewProbe(ownPhotos.length === 0 ? position : null);
+
+  // Sem foto nenhuma, o mapa da localização é uma capa melhor do que o desenho
+  // vazio — por isso o placeholder sai da lista.
+  const photos =
+    ownPhotos.length > 0
+      ? ownPhotos
+      : business.coverImages.filter((photo) => photo !== PHOTO_PLACEHOLDER);
 
   const rating = business.averageRating;
   const reviewCount = business.reviewCount;

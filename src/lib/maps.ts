@@ -206,6 +206,30 @@ export function mapsStreetViewUrl(
   return `https://maps.googleapis.com/maps/api/streetview?${params.toString()}`;
 }
 
+/**
+ * Endpoint de **metadados** do Street View: diz se existe panorama no local,
+ * em JSON, **sem consumir cota de imagem** (é gratuito).
+ *
+ * Serve para não pedir a foto onde não há cobertura — economiza cota e evita o
+ * pisca do placeholder depois do 404. Devolve null sem chave.
+ *
+ * Respostas: `{ status: "OK" | "ZERO_RESULTS" | "REQUEST_DENIED" |
+ * "OVER_QUERY_LIMIT" | "INVALID_REQUEST" }`.
+ */
+export function mapsStreetViewMetadataUrl(
+  target: LatLng | string,
+): string | null {
+  if (!hasMapsKey) return null;
+
+  const location =
+    typeof target === "string" ? target : `${target.lat},${target.lng}`;
+  if (!location) return null;
+
+  const params = new URLSearchParams({ key: MAPS_API_KEY, location });
+
+  return `https://maps.googleapis.com/maps/api/streetview/metadata?${params.toString()}`;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────
    Distâncias
    ───────────────────────────────────────────────────────────────────────── */

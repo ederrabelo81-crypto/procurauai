@@ -13,8 +13,13 @@
  *   1. fotos gravadas na linha  (`cover_images`, `gallery`, `images`, …)
  *   2. logo do comércio         (`logo` / `logo_url`)
  *   3. índice de fotos curadas  (casa por nome + cidade com o acervo do mock)
- *   4. Street View das coordenadas (só quando há chave do Maps)
+ *   4. Street View das coordenadas (chave do Maps + cobertura confirmada)
  *   5. `/placeholder.svg`
+ *
+ * O passo 4 depende de uma consulta assíncrona (`lib/streetView.ts`), então a
+ * resolução aqui é **síncrona e otimista**: só inclui o Street View quando a
+ * cobertura já é conhecida. Quem renderiza chama `useStreetViewProbe()` para
+ * disparar a consulta e re-renderizar quando a resposta chegar.
  *
  * O passo 3 é uma ponte, não um destino: vale enquanto os comerciantes não
  * sobem as próprias fotos para o Supabase Storage. Quando a coluna
@@ -23,6 +28,7 @@
 
 import { businesses as curatedBusinesses } from "@/data/mockData";
 import { mapsStreetViewUrl, toLatLng } from "@/lib/maps";
+import { getStreetViewCoverage } from "@/lib/streetView";
 
 /** Imagem final quando não há absolutamente nenhuma foto. */
 export const PHOTO_PLACEHOLDER = "/placeholder.svg";
@@ -177,7 +183,13 @@ function collectStoredPhotos(source: PhotoSourceLike): string[] {
     ...parsePhotoList(source.gallery),
   ];
 
-  return Array.from(new Set(photos));
+  // O placeholder não é foto gravada. Ele reaparece aqui porque um registro já
+  // normalizado volta a passar por `resolveBusinessPhotos` (o BusinessCard
+  // renormaliza a prop a cada render); sem descartá-lo, a cadeia pararia no
+  // primeiro passo e nunca chegaria ao acervo curado nem ao Street View.
+  return Array.from(new Set(photos)).filter(
+    (photo) => photo !== PHOTO_PLACEHOLDER,
+  );
 }
 
 export interface ResolvePhotosOptions {
@@ -224,8 +236,18 @@ export function resolveBusinessPhotos(
       (source.latitude ?? source.lat) as number | string | null | undefined,
       (source.longitude ?? source.lng) as number | string | null | undefined,
     );
-    const streetView = position ? mapsStreetViewUrl(position) : null;
-    if (streetView) return [streetView];
+
+    // Só pede a foto onde o metadado (gratuito) confirmou cobertura — ou onde
+    // não deu para checar (`"assumida"`), aí vale tentar como antes.
+    // `"indisponivel"` é o Google dizendo que não há panorama: pedir a imagem
+    // ali é cota jogada fora. `undefined` (ainda não checado) espera o
+    // `useStreetViewProbe` disparar a consulta e re-renderizar; até lá o
+    // comércio mostra o mapa.
+    const coverage = position ? getStreetViewCoverage(position) : undefined;
+    if (position && (coverage === "disponivel" || coverage === "assumida")) {
+      const streetView = mapsStreetViewUrl(position);
+      if (streetView) return [streetView];
+    }
   }
 
   return fallbackToPlaceholder ? [PHOTO_PLACEHOLDER] : [];
