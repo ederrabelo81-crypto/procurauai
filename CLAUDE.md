@@ -210,12 +210,29 @@ descarta entradas vazias (`<img src="">` renderiza como imagem quebrada).
 
 A cadeia de resolução, em ordem: foto gravada (`cover_images`, e também
 `coverImage`/`gallery`/`images` dos tipos do mock) → `logo`/`logo_url` → acervo
-curado casado por nome → Street View das coordenadas (só com chave do Maps) →
-`/placeholder.svg`.
+curado casado por nome → Street View das coordenadas → `/placeholder.svg`.
 
 Ao renderizar, use `SmartImage` (`src/components/ui/SmartImage.tsx`) em vez de
 `<img>`: ele percorre as candidatas no `onError` e sempre termina no
 placeholder, então URL morta não deixa ícone quebrado na tela.
+
+**O degrau do Street View é meio síncrono, meio assíncrono.**
+`resolveBusinessPhotos()` é síncrona e só oferece a fachada quando a cobertura
+daquela coordenada já é conhecida — nem todo endereço tem panorama, e pedir a
+imagem onde não há gasta cota paga à toa. Quem descobre é
+`src/lib/streetView.ts`, pelo endpoint de **metadados** (JSON, gratuito),
+com cache por coordenada arredondada (~1 m) em memória + `sessionStorage`.
+
+Componente que exibe capa de comércio sem foto própria precisa chamar
+`useStreetViewProbe(position)`: ele dispara a consulta e re-renderiza quando a
+resposta chega. Sem o probe, o comércio nunca sai do mapa/placeholder.
+
+A checagem é **otimização, nunca requisito**: se a consulta falhar (CORS, rede),
+o resultado vira `"assumida"` e a imagem é pedida assim mesmo, com o `onError`
+do `SmartImage` cobrindo o resto. Nenhum comércio perde a capa porque a
+checagem não pôde rodar.
+
+Sem `VITE_GOOGLE_MAPS_API_KEY` nada disso acontece — nem consulta, nem imagem.
 
 **Clientes Supabase duplicados:** existem `src/lib/supabaseClient.ts` (valida as
 env vars e lança erro se faltarem) e `src/lib/supabaseClient.js` (sem

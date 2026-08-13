@@ -20,9 +20,18 @@ integração está organizada no código.
    | **Maps JavaScript API** | mapa interativo da rota `/mapa` |
    | **Maps Embed API** | mapas das páginas de detalhe (iframe) |
    | **Maps Static API** | miniaturas de mapa dentro dos cards |
+   | **Street View Static API** | fachada de comércio ainda sem foto própria |
 
    > A **Geocoding API** só é necessária se você for rodar os scripts de coleta
    > que convertem endereço em coordenadas (`scripts/`).
+
+   > ⚠️ Ativar a API na Biblioteca **não basta**: se a chave estiver com
+   > "Restrições de API" ligadas (etapa 2), a Street View Static API também
+   > precisa entrar naquela lista, senão a chave recusa a chamada. É o erro mais
+   > comum aqui.
+
+   > Cuidado com o nome: a **Street View Publish API** é outra coisa (upload de
+   > panoramas próprios). A que o app usa é a **Static**.
 
 5. Em **APIs e serviços → Credenciais**, clique em
    **Criar credenciais → Chave de API** e copie o valor gerado.
@@ -146,6 +155,8 @@ não exige chave. Use sempre esses helpers em botões "abrir no Maps" / "rota".
 | `mapsDirectionsUrl(alvo)` | link "traçar rota" (sem cota) |
 | `mapsEmbedUrl(alvo)` | URL do iframe; `null` sem chave |
 | `mapsStaticUrl(centro)` | URL da imagem estática; `null` sem chave |
+| `mapsStreetViewUrl(alvo)` | foto da fachada; `null` sem chave |
+| `mapsStreetViewMetadataUrl(alvo)` | consulta **gratuita** de cobertura (JSON) |
 | `distanceKm(a, b)` | distância em km (Haversine) |
 | `formatDistance(km)` | `"320 m"`, `"1,4 km"`, `"12 km"` |
 | `DEFAULT_CENTER` | praça matriz de Monte Santo de Minas |
@@ -164,6 +175,24 @@ não exige chave. Use sempre esses helpers em botões "abrir no Maps" / "rota".
 | Marca d'água "Demo" no mapa | rodando com `DEMO_MAP_ID`; configure `VITE_GOOGLE_MAPS_MAP_ID` |
 | Mapa vira malha quadriculada | não há chave configurada; é o `MapPlaceholder` |
 | Card sem mapa, só a foto | o registro não tem `latitude`/`longitude` no Supabase |
+| Comércio sem foto mostra o mapa, nunca a fachada | Street View Static API não ativada, ou fora da lista de "Restrições de API" da chave |
+| Fachada aparece em bairro sem cobertura | a consulta de metadados falhou (CORS/rede) e o app assumiu que valia tentar |
+
+### Diagnóstico do Street View
+
+O endpoint de metadados é **gratuito** e o campo `status` diz exatamente o que
+está errado — comece sempre por ele:
+
+```
+https://maps.googleapis.com/maps/api/streetview/metadata?location=-20.8903,-46.7029&key=SUA_CHAVE
+```
+
+| `status` | Significado | Ação |
+| --- | --- | --- |
+| `OK` | há panorama no local | funcionando |
+| `ZERO_RESULTS` | configuração certa, sem cobertura ali | normal; o card cai no mapa |
+| `REQUEST_DENIED` | API não ativada, fora das restrições da chave, ou faturamento | revisar etapas 1, 2 e o faturamento |
+| `OVER_QUERY_LIMIT` | cota estourada | revisar limites no console |
 
 ---
 
