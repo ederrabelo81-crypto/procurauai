@@ -18,16 +18,59 @@
  *   - category_slug é definido automaticamente pelo trigger do banco.
  */
 
+import { existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { formatEnvHelp, looksLikePublicSupabaseKey, readEnv } from "./lib/env.mjs";
+import { describeSupabaseFailure } from "./lib/supabase.mjs";
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.error("Env faltando. Defina SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY.");
+// A URL não é secreta: se só existir a do front-end (VITE_), serve.
+const supabaseUrl = readEnv(["SUPABASE_URL", "VITE_SUPABASE_URL"]);
+// Já a chave precisa ser a service_role — a anon é barrada pelas policies de RLS.
+const serviceRoleKey = readEnv(["SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY"]);
+
+if (!supabaseUrl.value || !serviceRoleKey.value) {
+  const missing = [];
+  if (!supabaseUrl.value) missing.push("SUPABASE_URL");
+  if (!serviceRoleKey.value) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+
+  console.error("✖ Credenciais do Supabase não encontradas.\n");
+  console.error(
+    formatEnvHelp({
+      missing,
+      script: "scripts/import-businesses.mjs",
+      vars: [
+        ["SUPABASE_URL", "https://SEU-PROJETO.supabase.co"],
+        ["SUPABASE_SERVICE_ROLE_KEY", "cole_aqui_a_service_role"],
+      ],
+    }),
+  );
+  console.error(
+    "\n  Onde achar: painel do Supabase → Settings → API Keys → service_role (secret).\n" +
+      "  Ela NÃO é a anon/publishable que está no .env.local para o front-end.\n" +
+      "  Essa chave ignora RLS: use só localmente e nunca commite.",
+  );
   process.exit(1);
 }
+
+if (looksLikePublicSupabaseKey(serviceRoleKey.value)) {
+  console.error(
+    `✖ ${serviceRoleKey.name} contém uma chave pública (anon/publishable), não a service_role.\n\n` +
+      "  Com ela a importação é bloqueada pelas policies de RLS.\n" +
+      "  Pegue a correta em Settings → API Keys → service_role (secret).",
+  );
+  process.exit(1);
+}
+
+const SUPABASE_URL = supabaseUrl.value;
+const SUPABASE_SERVICE_ROLE_KEY = serviceRoleKey.value;
+
+console.log(
+  `Supabase: ${SUPABASE_URL} (${supabaseUrl.name} de ${supabaseUrl.source}, ` +
+    `chave de ${serviceRoleKey.source})`,
+);
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
@@ -42,6 +85,21 @@ if (!fileArg) {
 
 const filePath = fileArg.replace("--file=", "");
 const limit = limitArg ? Number(limitArg.replace("--limit=", "")) : Infinity;
+
+if (!existsSync(filePath)) {
+  console.error(`✖ Arquivo não encontrado: ${filePath}`);
+  const placesDir = path.join("data", "places");
+  if (existsSync(placesDir)) {
+    const found = readdirSync(placesDir).filter((f) => f.endsWith(".json"));
+    if (found.length > 0) {
+      console.error("\n  Arquivos disponíveis em data/places:");
+      for (const file of found) console.error(`    --file=${path.join(placesDir, file)}`);
+    }
+  } else {
+    console.error("\n  Rode antes a coleta: node scripts/collect-places.mjs");
+  }
+  process.exit(1);
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -149,6 +207,12 @@ const run = async () => {
 };
 
 run().catch((error) => {
-  console.error("Falha no script:", error);
+  const described = describeSupabaseFailure(error, { supabaseUrl: SUPABASE_URL });
+  if (described) {
+    console.error(`✖ ${described.title}`);
+    console.error(`\n  ${described.hint}`);
+  } else {
+    console.error("Falha no script:", error);
+  }
   process.exit(1);
 });

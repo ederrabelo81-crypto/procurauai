@@ -1,14 +1,42 @@
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const DEEPL_API_KEY = process.env.DEEPL_API_KEY;
+import { formatEnvHelp, looksLikePublicSupabaseKey, readEnv } from "./lib/env.mjs";
+
+const supabaseUrl = readEnv(["SUPABASE_URL", "VITE_SUPABASE_URL"]);
+const serviceRoleKey = readEnv(["SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_SERVICE_KEY"]);
+const deeplKey = readEnv("DEEPL_API_KEY");
+
+const SUPABASE_URL = supabaseUrl.value;
+const SUPABASE_SERVICE_ROLE_KEY = serviceRoleKey.value;
+const DEEPL_API_KEY = deeplKey.value;
 const DEEPL_API_URL =
-  process.env.DEEPL_API_URL ?? "https://api-free.deepl.com/v2/translate";
+  readEnv("DEEPL_API_URL").value || "https://api-free.deepl.com/v2/translate";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !DEEPL_API_KEY) {
+  const missing = [];
+  if (!SUPABASE_URL) missing.push("SUPABASE_URL");
+  if (!SUPABASE_SERVICE_ROLE_KEY) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  if (!DEEPL_API_KEY) missing.push("DEEPL_API_KEY");
+
+  console.error("✖ Credenciais não encontradas.\n");
   console.error(
-    "Env faltando. Defina SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY e DEEPL_API_KEY."
+    formatEnvHelp({
+      missing,
+      script: "scripts/translate-businesses.mjs",
+      vars: [
+        ["SUPABASE_URL", "https://SEU-PROJETO.supabase.co"],
+        ["SUPABASE_SERVICE_ROLE_KEY", "cole_aqui_a_service_role"],
+        ["DEEPL_API_KEY", "cole_aqui_a_chave_do_deepl"],
+      ],
+    }),
+  );
+  process.exit(1);
+}
+
+if (looksLikePublicSupabaseKey(SUPABASE_SERVICE_ROLE_KEY)) {
+  console.error(
+    `✖ ${serviceRoleKey.name} contém uma chave pública (anon/publishable), não a service_role.\n` +
+      "  Pegue a correta em Settings → API Keys → service_role (secret).",
   );
   process.exit(1);
 }
