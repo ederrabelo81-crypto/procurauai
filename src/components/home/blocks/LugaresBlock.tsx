@@ -1,14 +1,15 @@
-import { Link } from 'react-router-dom';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { places } from '@/data/mockData';
-import { MapPin, Star } from 'lucide-react';
+import { Link } from "react-router-dom";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { places } from "@/data/mockData";
+import { formatRating } from "@/lib/formatters";
+import { MapPin, Star } from "lucide-react";
 
 // Formata tags em snake_case para exibição humanizada
 function formatTag(tag: string): string {
   return tag
-    .split('_')
+    .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .join(" ");
 }
 
 export function LugaresBlock() {
@@ -25,7 +26,7 @@ export function LugaresBlock() {
         title="Lugares para Conhecer"
         icon={MapPin}
         iconVariant="success"
-        action={{ label: 'Ver todos', to: '/lugares' }}
+        action={{ label: "Ver todos", to: "/lugares" }}
       />
 
       <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide fade-edges">
@@ -44,7 +45,7 @@ export function LugaresBlock() {
               />
               <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs font-medium px-2 py-0.5 rounded-full">
                 <Star className="w-3 h-3 fill-yellow-400 text-accent" />
-                {place.rating}
+                {formatRating(place.rating)}
               </div>
             </div>
             <div className="p-3">

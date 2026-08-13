@@ -123,6 +123,36 @@ export function findExistingByName(row, index) {
   return index.get(matchKey(row.name, row.city));
 }
 
+/**
+ * Separa, dentro do próprio arquivo, as linhas repetidas. A dedup por nome
+ * compara o registro novo com o que já está no banco, mas dois registros do
+ * mesmo JSON — mesmo nome e cidade, `google_place_id` diferente — passavam os
+ * dois e viravam duas linhas. Aconteceu na carga de 2026-08-13 com
+ * "Sorveteria Pingo de Mel", "Branca" e um comércio cadastrado com o endereço
+ * no lugar do nome.
+ *
+ * A primeira ocorrência vence; as demais voltam em `duplicates` para o script
+ * relatar em vez de gravar em silêncio.
+ */
+export function dedupeIncoming(rows) {
+  const unique = [];
+  const duplicates = [];
+  const seen = new Map();
+
+  for (const row of rows) {
+    const key = matchKey(row.name, row.city);
+    const first = seen.get(key);
+
+    if (first) duplicates.push({ kept: first, dropped: row });
+    else {
+      seen.set(key, row);
+      unique.push(row);
+    }
+  }
+
+  return { unique, duplicates };
+}
+
 const isEmpty = (value) =>
   value === null ||
   value === undefined ||

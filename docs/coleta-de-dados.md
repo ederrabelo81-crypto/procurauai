@@ -129,8 +129,41 @@ preenchimento automático ("Consultar horários", "Centro") também não são gr
 em registro existente. Para desligar o casamento por nome, use
 `--allow-name-duplicates`.
 
-> Confira sempre no `--dry-run` a linha "Já cadastrados com o mesmo nome" antes
-> de rodar a importação de verdade.
+**Repetidos dentro do próprio arquivo.** A coleta às vezes devolve o mesmo
+comércio duas vezes, com `google_place_id` diferente para a mesma fachada — foi o
+que aconteceu na carga de 2026-08-13 com "Sorveteria Pingo de Mel" e "Branca".
+O script também deduplica os registros do arquivo entre si (mesmo nome + cidade),
+mantém a primeira ocorrência e lista as descartadas. Se as duas linhas forem
+unidades reais e diferentes, ajuste o nome no JSON ou rode com
+`--allow-name-duplicates`.
+
+> Confira sempre no `--dry-run` as linhas "Já cadastrados com o mesmo nome" e
+> "repetido(s) dentro do próprio arquivo" antes de rodar a importação de verdade.
+
+> ⚠️ **`--update` é destrutivo.** Ele reescreve a linha inteira com o que veio do
+> Google, incluindo `description`, `cover_images`, `is_verified` e `plan` — ou
+> seja, apaga a curadoria feita à mão. Use apenas em registros que ninguém editou.
+
+### Etapa 3b — Descrições em pt-BR
+
+A carga inicial da base gravou descrições no formato
+`"Beauty salon em Centro. Nota: 4.400000 (21 avaliações)."`: o tipo do lugar veio
+em inglês e a nota trouxe as seis casas decimais do Postgres. A coleta atual já
+pede `languageCode: "pt-BR"` ao Google, então registros novos não têm o problema.
+
+Para normalizar o que já está no banco:
+
+```bash
+node scripts/fix-descriptions.mjs --dry-run   # mostra antes/depois
+node scripts/fix-descriptions.mjs             # aplica
+```
+
+Resultado: `"Salão de beleza em Centro. Nota 4,4 (21 avaliações)."` — tipo
+traduzido, nota com uma casa e vírgula, plural de "avaliação" correto e a frase
+da nota omitida quando ninguém avaliou. O script é determinístico (não usa DeepL,
+não custa nada) e idempotente. Tipos fora do mapa de
+`scripts/lib/googleTypes.mjs` são mantidos como estão e listados ao final para
+você acrescentar a tradução.
 
 **Definindo as variáveis direto no terminal** (em vez do `.env.local`), atenção à
 sintaxe — a forma `VAR=valor node script.mjs` é do bash e **não funciona no PowerShell**:
@@ -204,5 +237,6 @@ Regra do manual continua valendo: **só entre numa cidade nova quando a anterior
 - [ ] CSV revisado no Sheets (categorias, duplicados, WhatsApp conhecidos)
 - [ ] Índice único de `google_place_id` criado no Supabase
 - [ ] `node scripts/import-businesses.mjs --dry-run` conferido, depois importado
+- [ ] `node scripts/fix-descriptions.mjs --dry-run` conferido, depois aplicado
 - [ ] Rotina de campo iniciada (WhatsApp + fotos + confirmação = prospecção)
 - [ ] Lista complementar de MEIs/serviços montada via Casa dos Dados
