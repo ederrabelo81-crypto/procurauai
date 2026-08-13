@@ -91,6 +91,86 @@ export async function fetchTableColumns(supabaseUrl, apiKey, table = "businesses
   }
 }
 
+/**
+ * Normaliza nome/cidade para comparação: minúsculas, sem acento e sem
+ * pontuação. Serve para reconhecer o mesmo comércio já cadastrado por outra
+ * via — parte da base foi carregada à mão, sem `google_place_id`, e sem isso a
+ * importação criaria uma segunda linha para cada um.
+ */
+export function normalizeForMatch(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const matchKey = (name, city) => `${normalizeForMatch(name)}@${normalizeForMatch(city)}`;
+
+/** Índice nome+cidade → linha existente. A primeira ocorrência vence. */
+export function buildNameIndex(existingRows) {
+  const index = new Map();
+  for (const row of existingRows ?? []) {
+    const key = matchKey(row.name, row.city);
+    if (!index.has(key)) index.set(key, row);
+  }
+  return index;
+}
+
+/** Acha a linha já cadastrada equivalente, ou undefined. */
+export function findExistingByName(row, index) {
+  return index.get(matchKey(row.name, row.city));
+}
+
+const isEmpty = (value) =>
+  value === null ||
+  value === undefined ||
+  (typeof value === "string" && value.trim() === "") ||
+  (Array.isArray(value) && value.length === 0);
+
+/**
+ * Textos que `toBusinessRow` usa como preenchimento quando o Google não
+ * informou nada. Valem para inserir uma linha nova, mas não são informação:
+ * não devem sobrescrever nem "completar" um registro já cadastrado.
+ */
+const PLACEHOLDERS = new Set(["consultar horários", "centro", "serviços"]);
+
+const isPlaceholder = (value) =>
+  typeof value === "string" && PLACEHOLDERS.has(value.trim().toLowerCase());
+
+/**
+ * Campos que a coleta do Google pode acrescentar a um registro já existente.
+ * Fora daqui nada é tocado — em especial `whatsapp`, `phone` e `is_verified`,
+ * que são trabalho de campo e não podem ser sobrescritos por dado do Google.
+ */
+export const ENRICHABLE_FIELDS = [
+  "google_place_id",
+  "latitude",
+  "longitude",
+  "lat",
+  "lng",
+  "address",
+  "website",
+  "hours",
+  "hours_text",
+];
+
+/**
+ * Devolve só os campos que estão vazios no registro atual e preenchidos no novo.
+ * Objeto vazio = não há o que atualizar.
+ */
+export function pickEnrichment(existingRow, incomingRow, fields = ENRICHABLE_FIELDS) {
+  const patch = {};
+  for (const field of fields) {
+    if (!(field in incomingRow)) continue;
+    if (isEmpty(incomingRow[field]) || isPlaceholder(incomingRow[field])) continue;
+    if (!isEmpty(existingRow?.[field])) continue;
+    patch[field] = incomingRow[field];
+  }
+  return patch;
+}
+
 /** Aceita OpenAPI 2 (`definitions`) e 3 (`components.schemas`), conforme a versão do PostgREST. */
 export function columnsFromOpenApi(spec, table = "businesses") {
   const properties =

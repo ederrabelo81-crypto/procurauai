@@ -115,6 +115,23 @@ Importe o CSV no Google Sheets e revise linha a linha:
      `docs/database/schema.sql` (`latitude`/`longitude`, `city`), que é o que está
      no projeto de produção. Campos sem coluna correspondente são ignorados com aviso.
 
+**Comércios que já estavam cadastrados sem `google_place_id`.** Parte da base foi
+carregada à mão (com WhatsApp, sem coordenadas). Como a deduplicação principal é
+por `google_place_id`, esses registros não seriam reconhecidos e virariam
+duplicatas. O script casa também por **nome + cidade** (ignorando acento,
+caixa e pontuação) e, nesses casos, em vez de inserir de novo, **completa só os
+campos vazios** — coordenadas, endereço, site, horário e o próprio
+`google_place_id`.
+
+Nunca são tocados: `whatsapp`, `phone`, `is_verified` e qualquer campo já
+preenchido — isso é trabalho de campo e vale mais que o dado do Google. Textos de
+preenchimento automático ("Consultar horários", "Centro") também não são gravados
+em registro existente. Para desligar o casamento por nome, use
+`--allow-name-duplicates`.
+
+> Confira sempre no `--dry-run` a linha "Já cadastrados com o mesmo nome" antes
+> de rodar a importação de verdade.
+
 **Definindo as variáveis direto no terminal** (em vez do `.env.local`), atenção à
 sintaxe — a forma `VAR=valor node script.mjs` é do bash e **não funciona no PowerShell**:
 

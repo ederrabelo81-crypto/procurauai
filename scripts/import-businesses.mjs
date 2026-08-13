@@ -23,7 +23,15 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
-import { adaptRowToColumns, fetchTableColumns, toBusinessRow } from "./lib/businessRow.mjs";
+import {
+  ENRICHABLE_FIELDS,
+  adaptRowToColumns,
+  buildNameIndex,
+  fetchTableColumns,
+  findExistingByName,
+  pickEnrichment,
+  toBusinessRow,
+} from "./lib/businessRow.mjs";
 import { formatEnvHelp, looksLikePublicSupabaseKey, readEnv } from "./lib/env.mjs";
 import { describeSupabaseFailure } from "./lib/supabase.mjs";
 
@@ -76,6 +84,7 @@ console.log(
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const doUpdate = args.includes("--update");
+const allowNameDuplicates = args.includes("--allow-name-duplicates");
 const fileArg = args.find((a) => a.startsWith("--file="));
 const limitArg = args.find((a) => a.startsWith("--limit="));
 
@@ -105,6 +114,30 @@ if (!existsSync(filePath)) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
+
+/**
+ * Traz os registros já cadastrados para o casamento por nome. Só as colunas
+ * necessárias, paginado, porque a tabela cresce com o tempo.
+ */
+async function fetchExistingForMatching(client, columns) {
+  const wanted = ["id", "name", "city", "google_place_id", ...ENRICHABLE_FIELDS];
+  const select = [...new Set(wanted)]
+    .filter((column) => !columns || columns.has(column))
+    .join(",");
+
+  const all = [];
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await client
+      .from("businesses")
+      .select(select)
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    all.push(...(data ?? []));
+    if (!data || data.length < PAGE) break;
+  }
+  return all;
+}
 
 const run = async () => {
   const raw = await readFile(filePath, "utf8");
@@ -156,18 +189,52 @@ const run = async () => {
     for (const row of data ?? []) existing.add(row.google_place_id);
   }
 
-  const toInsert = rows.filter((r) => !existing.has(r.google_place_id));
+  // Parte da base foi carregada à mão, sem google_place_id: sem casar por nome,
+  // cada um desses viraria uma segunda linha do mesmo comércio.
+  const nameIndex = allowNameDuplicates
+    ? new Map()
+    : buildNameIndex(await fetchExistingForMatching(supabase, columns));
+
+  const toInsert = [];
+  const nameMatches = [];
+  for (const row of rows) {
+    if (existing.has(row.google_place_id)) continue;
+
+    const match = findExistingByName(row, nameIndex);
+    if (match) nameMatches.push({ existing: match, incoming: row });
+    else toInsert.push(row);
+  }
+
   const toUpdate = doUpdate ? rows.filter((r) => existing.has(r.google_place_id)) : [];
 
+  // Só enriquece campo vazio: whatsapp, phone e is_verified vêm de campo e ficam intactos.
+  const toEnrich = nameMatches
+    .map(({ existing: current, incoming }) => ({
+      id: current.id,
+      name: current.name,
+      patch: pickEnrichment(current, incoming),
+    }))
+    .filter(({ patch }) => Object.keys(patch).length > 0);
+
   console.log(
-    `Novos: ${toInsert.length} | Já existentes: ${existing.size}` +
+    `Novos: ${toInsert.length} | Já existentes por place_id: ${existing.size}` +
       (doUpdate ? ` (serão atualizados)` : ` (ignorados; use --update para atualizar)`),
   );
+  if (nameMatches.length > 0) {
+    console.log(
+      `Já cadastrados com o mesmo nome: ${nameMatches.length} ` +
+        `(não serão duplicados; ${toEnrich.length} têm campo vazio a completar)`,
+    );
+  }
 
   if (dryRun) {
     console.log("\n(dry-run) Exemplo do primeiro registro que seria inserido:");
     console.log(JSON.stringify(toInsert[0] ?? toUpdate[0] ?? null, null, 2));
-    return;
+    if (toEnrich.length > 0) {
+      console.log("\n(dry-run) Exemplo de complemento em registro já existente:");
+      console.log(JSON.stringify(toEnrich[0], null, 2));
+    }
+    return 0;
   }
 
   let inserted = 0;
@@ -183,6 +250,18 @@ const run = async () => {
       console.log(`Inseridos ${inserted}/${toInsert.length}...`);
     }
   }
+
+  let enriched = 0;
+  for (const { id, name, patch } of toEnrich) {
+    const { error } = await supabase.from("businesses").update(patch).eq("id", id);
+    if (error) {
+      firstError ??= error;
+      console.error(`Erro ao complementar "${name}":`, error.message);
+    } else {
+      enriched += 1;
+    }
+  }
+  if (enriched > 0) console.log(`Complementados ${enriched} registros já existentes.`);
 
   let updated = 0;
   for (const row of toUpdate) {
@@ -200,14 +279,16 @@ const run = async () => {
   }
 
   // Nada gravado com erros pelo caminho não é "concluído": sinaliza a falha.
-  if (inserted === 0 && updated === 0 && firstError) {
+  if (inserted === 0 && updated === 0 && enriched === 0 && firstError) {
     console.error(`\n✖ Nenhum registro gravado. Primeiro erro: ${firstError.message}`);
     const described = describeSupabaseFailure(firstError, { supabaseUrl: SUPABASE_URL });
     if (described) console.error(`\n  ${described.hint}`);
     return 1;
   }
 
-  console.log(`\nConcluído: ${inserted} inseridos, ${updated} atualizados.`);
+  console.log(
+    `\nConcluído: ${inserted} inseridos, ${enriched} complementados, ${updated} atualizados.`,
+  );
   if (firstError) {
     console.log("⚠ Parte dos lotes falhou — reveja os erros acima e rode de novo (é idempotente).");
   }

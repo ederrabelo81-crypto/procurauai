@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { adaptRowToColumns, columnsFromOpenApi, toBusinessRow } from "../lib/businessRow.mjs";
+import {
+  adaptRowToColumns,
+  buildNameIndex,
+  columnsFromOpenApi,
+  findExistingByName,
+  normalizeForMatch,
+  pickEnrichment,
+  toBusinessRow,
+} from "../lib/businessRow.mjs";
 
 const record = {
   google_place_id: "ChIJexemplo",
@@ -104,6 +112,132 @@ describe("adaptRowToColumns", () => {
     const original = toBusinessRow(record);
     expect(adaptRowToColumns(original, null)).toEqual({ row: original, dropped: [] });
     expect(adaptRowToColumns(original, new Set())).toEqual({ row: original, dropped: [] });
+  });
+});
+
+describe("casamento por nome com a base já cadastrada", () => {
+  // Registros carregados à mão: têm WhatsApp, não têm google_place_id nem coordenadas.
+  const jaCadastrados = [
+    {
+      id: "uuid-1",
+      name: "4 patas pet shop banho e tosa",
+      city: "Monte Santo de Minas",
+      google_place_id: null,
+      latitude: null,
+      longitude: null,
+      address: null,
+      whatsapp: "+5535999246070",
+    },
+    {
+      id: "uuid-2",
+      name: "ABC da Construção Monte Santo de Minas",
+      city: "Monte Santo de Minas",
+      google_place_id: null,
+      latitude: null,
+      longitude: null,
+      address: "Av. Principal, 10",
+    },
+  ];
+
+  it("normaliza acento, caixa e pontuação", () => {
+    expect(normalizeForMatch("ABC da Construção — Monte Santo!")).toBe(
+      "abc da construcao monte santo",
+    );
+    expect(normalizeForMatch("Café  do   Zé")).toBe("cafe do ze");
+  });
+
+  it("reconhece o mesmo comércio mesmo com acento e caixa diferentes", () => {
+    const index = buildNameIndex(jaCadastrados);
+    const vindoDoGoogle = toBusinessRow({
+      google_place_id: "ChIJnovo",
+      name: "ABC DA CONSTRUCAO MONTE SANTO DE MINAS",
+      city: "Monte Santo de Minas",
+      lat: -21.19,
+      lng: -46.99,
+    });
+    expect(findExistingByName(vindoDoGoogle, index)?.id).toBe("uuid-2");
+  });
+
+  it("não confunde comércios de cidades diferentes", () => {
+    const index = buildNameIndex(jaCadastrados);
+    const outraCidade = toBusinessRow({
+      google_place_id: "ChIJoutro",
+      name: "4 patas pet shop banho e tosa",
+      city: "Arceburgo",
+    });
+    expect(findExistingByName(outraCidade, index)).toBeUndefined();
+  });
+
+  it("trata nome novo como novo", () => {
+    const index = buildNameIndex(jaCadastrados);
+    const novo = toBusinessRow({ google_place_id: "x", name: "Padaria Nova", city: "Monte Santo de Minas" });
+    expect(findExistingByName(novo, index)).toBeUndefined();
+  });
+});
+
+describe("pickEnrichment", () => {
+  const incoming = toBusinessRow({
+    google_place_id: "ChIJnovo",
+    name: "4 patas pet shop banho e tosa",
+    city: "Monte Santo de Minas",
+    address: "Rua das Flores, 50",
+    lat: -21.19,
+    lng: -46.99,
+    phone: "(35) 3591-0000",
+    hours: "seg: 08:00-18:00",
+  });
+
+  it("preenche só o que está vazio no registro atual", () => {
+    const patch = pickEnrichment(
+      { google_place_id: null, latitude: null, longitude: null, address: null, hours: null },
+      incoming,
+    );
+    expect(patch).toEqual({
+      google_place_id: "ChIJnovo",
+      latitude: -21.19,
+      longitude: -46.99,
+      address: "Rua das Flores, 50",
+      hours: "seg: 08:00-18:00",
+    });
+  });
+
+  it("nunca sobrescreve valor já preenchido", () => {
+    const patch = pickEnrichment(
+      { google_place_id: "ChIJantigo", address: "Av. Principal, 10", latitude: -21.0, longitude: -46.0, hours: "8h" },
+      incoming,
+    );
+    expect(patch).toEqual({});
+  });
+
+  it("não toca em whatsapp, phone nem is_verified — são trabalho de campo", () => {
+    const patch = pickEnrichment(
+      { whatsapp: null, phone: null, is_verified: false, latitude: null, longitude: null },
+      incoming,
+    );
+    expect(patch).not.toHaveProperty("whatsapp");
+    expect(patch).not.toHaveProperty("phone");
+    expect(patch).not.toHaveProperty("is_verified");
+    expect(patch).toMatchObject({ latitude: -21.19, longitude: -46.99 });
+  });
+
+  it("considera string vazia como campo vazio", () => {
+    expect(pickEnrichment({ address: "   " }, incoming)).toMatchObject({
+      address: "Rua das Flores, 50",
+    });
+  });
+
+  it("não grava o texto de fallback como se fosse dado do Google", () => {
+    const semHorario = toBusinessRow({
+      google_place_id: "ChIJx",
+      name: "Adega Central",
+      city: "Monte Santo de Minas",
+      lat: -21.19,
+      lng: -46.99,
+    });
+    expect(semHorario.hours).toBe("Consultar horários"); // ok para inserir linha nova
+    const patch = pickEnrichment({ hours: null, latitude: null, longitude: null }, semHorario);
+    expect(patch).not.toHaveProperty("hours"); // mas não para completar registro existente
+    expect(patch).toMatchObject({ latitude: -21.19, longitude: -46.99 });
   });
 });
 
