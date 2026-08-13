@@ -1,4 +1,5 @@
 import { guessBusinessCategorySlug } from "@/lib/categoryHeuristics";
+import { resolveBusinessPhotos } from "@/lib/businessPhotos";
 
 export interface Review {
   id: string;
@@ -30,9 +31,20 @@ export interface Business {
   website?: string;
   instagram?: string;
   logo?: string;
+  /**
+   * Coordenadas normalizadas. Os tipos de origem divergem — o banco usa
+   * `latitude`/`longitude` e Place/RealEstate do mock usam `lat`/`lng` —, então
+   * quem consome o registro normalizado lê sempre estes dois campos.
+   */
+  latitude?: number;
+  longitude?: number;
 }
 
-const DEFAULT_IMAGE = "/placeholder.svg";
+function toOptionalNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
 
 const GOOGLE_MAPS_TAG_BLACKLIST = new Set([
   "point_of_interest",
@@ -186,7 +198,10 @@ export function normalizeBusinessData(rawData: any): Business {
 
   return {
     id: rawData.id || `temp_${Date.now()}`,
-    name: rawData.name || "Sem nome",
+    // /carros e /empregos passam Car e Job direto para o BusinessCard, e esses
+    // tipos nomeiam o registro em `title`/`jobTitle` — sem isto o card mostra
+    // "Sem nome" e o casamento com o acervo de fotos não acha nada.
+    name: rawData.name || rawData.title || rawData.jobTitle || "Sem nome",
     category: rawData.category || "Não categorizado",
     // Usa o `categorySlug` do banco de dados, se existir; caso contrário, usa a função para adivinhar.
     categorySlug: rawData.categorySlug || guessCategorySlug(rawData),
@@ -195,9 +210,10 @@ export function normalizeBusinessData(rawData: any): Business {
     hours: rawData.hours || "Consultar horários",
     phone: rawData.phone || undefined,
     whatsapp: rawData.whatsapp || "5535990000000",
-    coverImages: rawData.coverImages?.length
-      ? rawData.coverImages
-      : [DEFAULT_IMAGE],
+    // `resolveBusinessPhotos` cobre as várias chaves de foto em circulação
+    // (`cover_images` do banco, `coverImage`/`gallery` de Place/Car/RealEstate,
+    // `logo` de Job) e só cai no placeholder quando não há nenhuma.
+    coverImages: resolveBusinessPhotos(rawData),
     isOpenNow: rawData.isOpenNow ?? false,
     isVerified: rawData.isVerified ?? false, // Corrigido: rawAta -> rawData
     description: rawData.description || "",
@@ -214,6 +230,8 @@ export function normalizeBusinessData(rawData: any): Business {
     plan: rawData.plan,
     website: rawData.website,
     instagram: rawData.instagram,
-    logo: rawData.logo,
+    logo: rawData.logo ?? rawData.logo_url,
+    latitude: toOptionalNumber(rawData.latitude ?? rawData.lat),
+    longitude: toOptionalNumber(rawData.longitude ?? rawData.lng),
   };
 }

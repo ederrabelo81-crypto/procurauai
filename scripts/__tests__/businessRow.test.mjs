@@ -8,6 +8,7 @@ import {
   findExistingByName,
   normalizeForMatch,
   pickEnrichment,
+  pickUpdatableFields,
   toBusinessRow,
 } from "../lib/businessRow.mjs";
 
@@ -300,5 +301,59 @@ describe("columnsFromOpenApi", () => {
     expect(columnsFromOpenApi({ definitions: { outra: { properties } } })).toBeNull();
     expect(columnsFromOpenApi({})).toBeNull();
     expect(columnsFromOpenApi(null)).toBeNull();
+  });
+});
+
+describe("pickUpdatableFields", () => {
+  it("nunca devolve os campos de curadoria — --update não pode apagar foto", () => {
+    const patch = pickUpdatableFields({
+      name: "Padaria Central",
+      cover_images: [],
+      description: null,
+      is_verified: false,
+      plan: "free",
+      whatsapp: "5535998983994",
+      phone: "3599898399",
+      address: "R. Antenor Carvalhaes, 663",
+    });
+
+    expect(patch).not.toHaveProperty("cover_images");
+    expect(patch).not.toHaveProperty("description");
+    expect(patch).not.toHaveProperty("is_verified");
+    expect(patch).not.toHaveProperty("plan");
+    expect(patch).not.toHaveProperty("whatsapp");
+    expect(patch).not.toHaveProperty("phone");
+  });
+
+  it("mantém o que a coleta realmente apurou", () => {
+    const patch = pickUpdatableFields({
+      address: "R. Antenor Carvalhaes, 663",
+      website: "https://exemplo.com.br",
+      latitude: -20.8903,
+      longitude: -46.7029,
+    });
+
+    expect(patch).toEqual({
+      address: "R. Antenor Carvalhaes, 663",
+      website: "https://exemplo.com.br",
+      latitude: -20.8903,
+      longitude: -46.7029,
+    });
+  });
+
+  it("descarta vazios e textos de preenchimento", () => {
+    const patch = pickUpdatableFields({
+      address: "",
+      website: null,
+      hours: "Consultar horários",
+      neighborhood: "Centro",
+      city: "Monte Santo de Minas",
+    });
+
+    expect(patch).toEqual({ city: "Monte Santo de Minas" });
+  });
+
+  it("devolve objeto vazio quando não há nada a atualizar", () => {
+    expect(pickUpdatableFields({ cover_images: [], description: null })).toEqual({});
   });
 });

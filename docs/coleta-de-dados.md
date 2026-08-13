@@ -140,9 +140,12 @@ unidades reais e diferentes, ajuste o nome no JSON ou rode com
 > Confira sempre no `--dry-run` as linhas "Já cadastrados com o mesmo nome" e
 > "repetido(s) dentro do próprio arquivo" antes de rodar a importação de verdade.
 
-> ⚠️ **`--update` é destrutivo.** Ele reescreve a linha inteira com o que veio do
-> Google, incluindo `description`, `cover_images`, `is_verified` e `plan` — ou
-> seja, apaga a curadoria feita à mão. Use apenas em registros que ninguém editou.
+> **`--update` preserva a curadoria.** Ele grava só o que a coleta apurou
+> (endereço, site, coordenadas, horário) e nunca escreve `cover_images`,
+> `description`, `plan`, `is_verified`, `whatsapp`, `phone`, `logo` nem
+> `instagram` — a lista está em `UPDATE_PROTECTED_FIELDS`
+> (`scripts/lib/businessRow.mjs`). Antes ele reescrevia a linha inteira e uma
+> passada zerava a foto de todo comércio já cadastrado.
 
 ### Etapa 3b — Descrições em pt-BR
 

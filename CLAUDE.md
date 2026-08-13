@@ -201,6 +201,22 @@ Consequências práticas:
   escondendo lacunas de dados de propósito enquanto a base é populada
   (`docs/manual-proximo-passo.md`, `docs/coleta-de-dados.md`).
 
+### Fotos (`src/lib/businessPhotos.ts`)
+
+Toda foto de comércio passa por `resolveBusinessPhotos()`. Nunca leia
+`row.cover_images` direto: a coluna é `jsonb` e a base tem array de strings,
+array de objetos e JSON dentro de string — `parsePhotoList()` entende as três e
+descarta entradas vazias (`<img src="">` renderiza como imagem quebrada).
+
+A cadeia de resolução, em ordem: foto gravada (`cover_images`, e também
+`coverImage`/`gallery`/`images` dos tipos do mock) → `logo`/`logo_url` → acervo
+curado casado por nome → Street View das coordenadas (só com chave do Maps) →
+`/placeholder.svg`.
+
+Ao renderizar, use `SmartImage` (`src/components/ui/SmartImage.tsx`) em vez de
+`<img>`: ele percorre as candidatas no `onError` e sempre termina no
+placeholder, então URL morta não deixa ícone quebrado na tela.
+
 **Clientes Supabase duplicados:** existem `src/lib/supabaseClient.ts` (valida as
 env vars e lança erro se faltarem) e `src/lib/supabaseClient.js` (sem
 validação), além de `src/hooks/useSupabase.js` e `src/lib/supabaseStorage.js`
@@ -411,9 +427,10 @@ Não "conserte" isso de passagem sem combinar; mas saiba que existe:
   `components/home/blocks/ComerAgoraBlock_old.tsx`.
 - Heurística de categoria espelhada no trigger SQL (o front já usa fonte única
   em `lib/categoryHeuristics.ts`; um teste compara os dois lados).
-- `import-businesses.mjs --update` sobrescreve a linha inteira, incluindo
-  `description`, `cover_images`, `is_verified` e `plan` — apaga curadoria
-  manual. Use só com registros que ninguém editou à mão.
+- A carga inicial gravou 351 comércios sem foto (`cover_images: []`, por
+  política de fotos do Google). Enquanto os comerciantes não sobem as próprias
+  imagens, a capa vem do acervo curado em `mockData.ts` por casamento de nome —
+  ver `src/lib/businessPhotos.ts`. É uma ponte, não um destino.
 - Dois lockfiles (`package-lock.json` e `bun.lockb`).
 - Divergência de porta do dev server (8080 na config, 5173 no README/Playwright).
 - CI roda só os testes; `lint` e `build` não são verificados.

@@ -1,7 +1,9 @@
-import { useState, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight, Grid } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import useEmblaCarousel from 'embla-carousel-react';
+import { useState, useCallback, useMemo } from "react";
+import { X, ChevronLeft, ChevronRight, Grid } from "lucide-react";
+import { cn } from "@/lib/utils";
+import useEmblaCarousel from "embla-carousel-react";
+import { SmartImage } from "@/components/ui/SmartImage";
+import { parsePhotoList } from "@/lib/businessPhotos";
 
 interface AirbnbGalleryProps {
   images: string[];
@@ -13,11 +15,23 @@ interface AirbnbGalleryProps {
  * Airbnb-style mosaic gallery with 1 large + 4 small thumbnails
  * and a "Show all photos" button that opens a fullscreen lightbox
  */
-export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) {
+export function AirbnbGallery({
+  images: rawImages,
+  title,
+  className,
+}: AirbnbGalleryProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, startIndex: currentIndex });
+
+  // Descarta entradas vazias/inválidas antes de contar: a grade do desktop
+  // indexa `displayImages[0..4]` e renderizava <img src={undefined}> quando a
+  // lista tinha buraco.
+  const images = useMemo(() => parsePhotoList(rawImages), [rawImages]);
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    startIndex: currentIndex,
+  });
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
@@ -35,9 +49,9 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowRight') emblaApi?.scrollNext();
-    if (e.key === 'ArrowLeft') emblaApi?.scrollPrev();
-    if (e.key === 'Escape') setLightboxOpen(false);
+    if (e.key === "ArrowRight") emblaApi?.scrollNext();
+    if (e.key === "ArrowLeft") emblaApi?.scrollPrev();
+    if (e.key === "Escape") setLightboxOpen(false);
   };
 
   // Mobile: horizontal scroll carousel
@@ -47,7 +61,7 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
   return (
     <>
       {/* Mobile Carousel */}
-      <div className={cn('md:hidden relative', className)}>
+      <div className={cn("md:hidden relative", className)}>
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {images.map((img, idx) => (
@@ -56,8 +70,8 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
                   onClick={() => openLightbox(idx)}
                   className="w-full aspect-[4/3] relative"
                 >
-                  <img
-                    src={img}
+                  <SmartImage
+                    sources={[img]}
                     alt={`${title} - Foto ${idx + 1}`}
                     className="w-full h-full object-cover"
                     loading={idx === 0 ? "eager" : "lazy"}
@@ -67,12 +81,12 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
             ))}
           </div>
         </div>
-        
+
         {/* Image counter */}
         <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/70 rounded-full text-white text-sm font-medium">
           {currentIndex + 1} / {images.length}
         </div>
-        
+
         {/* Show all button */}
         <button
           onClick={() => openLightbox(0)}
@@ -84,20 +98,25 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
       </div>
 
       {/* Desktop Mosaic Grid */}
-      <div className={cn('hidden md:block relative rounded-lg overflow-hidden', className)}>
+      <div
+        className={cn(
+          "hidden md:block relative rounded-lg overflow-hidden",
+          className,
+        )}
+      >
         <div className="grid grid-cols-4 grid-rows-2 gap-2 aspect-[2.5/1]">
           {/* Large main image */}
           <button
             onClick={() => openLightbox(0)}
             className="col-span-2 row-span-2 relative group"
           >
-            <img
-              src={displayImages[0]}
+            <SmartImage
+              sources={[displayImages[0]]}
               alt={`${title} - Principal`}
               className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
             />
           </button>
-          
+
           {/* 4 smaller images */}
           {displayImages.slice(1, 5).map((img, idx) => (
             <button
@@ -105,8 +124,8 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
               onClick={() => openLightbox(idx + 1)}
               className="relative group"
             >
-              <img
-                src={img}
+              <SmartImage
+                sources={[img]}
                 alt={`${title} - Foto ${idx + 2}`}
                 className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
                 loading="lazy"
@@ -114,7 +133,7 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
             </button>
           ))}
         </div>
-        
+
         {/* Show all photos button */}
         {images.length > 5 && (
           <button
@@ -129,7 +148,7 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
 
       {/* Fullscreen Lightbox */}
       {lightboxOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
           onKeyDown={handleKeyDown}
           tabIndex={0}
@@ -173,9 +192,12 @@ export function AirbnbGallery({ images, title, className }: AirbnbGalleryProps) 
           <div className="overflow-hidden w-full max-w-5xl mx-4" ref={emblaRef}>
             <div className="flex">
               {images.map((img, idx) => (
-                <div key={idx} className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4">
-                  <img
-                    src={img}
+                <div
+                  key={idx}
+                  className="flex-[0_0_100%] min-w-0 flex items-center justify-center px-4"
+                >
+                  <SmartImage
+                    sources={[img]}
                     alt={`Foto ${idx + 1}`}
                     className="max-w-full max-h-[85vh] object-contain"
                     draggable={false}

@@ -8,7 +8,9 @@
  * Opções:
  *   --file=caminho.json   (obrigatório; JSON gerado pela coleta, já revisado)
  *   --dry-run             (mostra o que faria sem gravar)
- *   --update              (além de inserir novos, atualiza registros existentes com mesmo google_place_id)
+ *   --update              (além de inserir novos, atualiza registros existentes com mesmo
+ *                          google_place_id — só com o que a coleta apurou; foto, descrição,
+ *                          plano, verificação, WhatsApp e telefone ficam intactos)
  *   --limit=N             (processa só os N primeiros — bom para testar)
  *
  * Regras:
@@ -31,6 +33,7 @@ import {
   fetchTableColumns,
   findExistingByName,
   pickEnrichment,
+  pickUpdatableFields,
   toBusinessRow,
 } from "./lib/businessRow.mjs";
 import { formatEnvHelp, looksLikePublicSupabaseKey, readEnv } from "./lib/env.mjs";
@@ -282,9 +285,14 @@ const run = async () => {
   let updated = 0;
   for (const row of toUpdate) {
     const { google_place_id, ...fields } = row;
+    // Só o que a coleta apurou. Sem isto o update gravava a linha inteira e
+    // zerava `cover_images`, `description`, `plan` e `is_verified`.
+    const patch = pickUpdatableFields(fields);
+    if (Object.keys(patch).length === 0) continue;
+
     const { error } = await supabase
       .from("businesses")
-      .update(fields)
+      .update(patch)
       .eq("google_place_id", google_place_id);
     if (error) {
       firstError ??= error;
