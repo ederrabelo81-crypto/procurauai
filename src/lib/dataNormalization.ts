@@ -100,10 +100,15 @@ function parseRatingFromDescription(description?: string): {
   count?: number;
 } {
   if (!description) return {};
-  const ratingMatch = description.match(/Nota\s+(\d+(?:\.\d+)?)\s*\((\d+)/i);
+  // Aceita os dois formatos que existem na base: o antigo "Nota: 4.400000 (46"
+  // e o normalizado "Nota 4,4 (46". O regex anterior exigia espaço logo após
+  // "Nota" e ponto decimal, então não casava com nenhum dos dois.
+  const ratingMatch = description.match(
+    /Nota:?\s*(\d+(?:[.,]\d+)?)\s*\((\d+)/i,
+  );
   if (!ratingMatch) return {};
   return {
-    rating: parseFloat(ratingMatch[1]),
+    rating: parseFloat(ratingMatch[1].replace(",", ".")),
     count: parseInt(ratingMatch[2]),
   };
 }
