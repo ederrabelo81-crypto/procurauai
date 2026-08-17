@@ -163,6 +163,26 @@ Guia de configuração: [`docs/google-maps.md`](docs/google-maps.md).
 
 ---
 
+## 📊 Documentação de Negócio e Expansão
+
+-   **[Resumo Executivo](docs/RESUMO-EXECUTIVO.md)** — Visão geral do modelo de negócio, mercado e potencial financeiro
+-   **[Análise Completa de Negócio](docs/analise-negocio-expansao.md)** — Validação da ideia, expansão regional, monetização e riscos
+-   **[Implementação Técnica - Otimização API](docs/implementacao-otimizacao-api.md)** — Guia passo-a-passo para eliminar consumo recorrente da API Google Maps
+
+### Plano de Expansão Regional
+
+| Fase | Cidades | Habitantes | Período |
+|------|---------|-----------|---------|
+| Base | Monte Santo de Minas | 22 mil | Agora |
+| 1 | Arceburgo + Itamogi | 20 mil | Mês 2-3 |
+| 2 | Guaranésia | 19 mil | Mês 3-4 |
+| 3 | São Sebastião do Paraíso + Guaxupé | 123 mil | Mês 4-6 |
+| 4 | Passos (futuro) | 114 mil | Ano 2 |
+
+**Total região:** ~298.000 habitantes | ~10.400 estabelecimentos potenciais
+
+---
+
 ## 🗺️ Roadmap do Projeto
 
 -   [ ] **Módulo de Anúncios:** Sistema de banners e destaques pagos.
