@@ -33,6 +33,7 @@ IA fica em [`CLAUDE.md`](../CLAUDE.md), na raiz.
 
 | Documento | Sobre |
 | --- | --- |
+| [rotina-semanal.md](rotina-semanal.md) | Ciclo semanal automatizado: o que roda sozinho e o que cabe a você |
 | [manual-proximo-passo.md](manual-proximo-passo.md) | Próximos passos manuais (popular a base) |
 | [production-implementation-plan.md](production-implementation-plan.md) | Plano de produção |
 
