@@ -191,42 +191,38 @@ Criar `scripts/validate-businesses.mjs`:
 // Atualiza verification_status para 'verified'
 ```
 
-**C. Componente de Mapa Offline-First**
+**C. Reduzir o consumo de mapas**
 
-Modificar `src/components/maps/StaticMap.tsx`:
+Detalhamento em
+[`docs/implementacao-otimizacao-api.md`](implementacao-otimizacao-api.md#3-frontend--componentes-de-mapa).
+Resumo do que vale saber aqui:
 
-```typescript
-// ANTES: Chamada direta à API do Google para cada renderização
-<MapComponent apiKey={VITE_GOOGLE_MAPS_API_KEY} />
+- Não existe `StaticMap.tsx`. Os componentes de mapa são `MapEmbed`, `MiniMap`,
+  `MapPlaceholder` e `MapsProvider`, e toda URL do Maps é montada em
+  `src/lib/maps.ts`.
+- O app **já funciona com custo zero de API**: sem `VITE_GOOGLE_MAPS_API_KEY`,
+  `hasMapsKey` é `false` e a UI cai no `MapPlaceholder` desenhado em CSS. A
+  decisão não é técnica, é de produto — quanto mapa vale o que custa.
+- Nem toda API do Maps é cobrada: Embed (uso básico), URLs e o endpoint de
+  metadados do Street View são gratuitos. Static, Street View Static e a Maps
+  JavaScript API são as que pesam.
 
-// DEPOIS: Usa coordenadas salvas + mapa estático ou fallback
-<StaticMap 
-  latitude={business.latitude} 
-  longitude={business.longitude}
-  useGoogleEmbed={false} // Só true se usuário clicar em "ver no mapa"
-/>
-```
+**D. Cache das imagens estáticas**
 
-**D. Cache Estratégico (se precisar usar Google Maps)**
+O caminho é guardar a imagem no Supabase Storage na primeira vez e servir de lá
+nas seguintes — não `caches.match()` no cliente, que se perde a cada limpeza de
+navegador e não reduz custo para o próximo visitante.
 
-```typescript
-// src/lib/maps.ts
-const MAP_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 dias
-
-async function getStaticMapUrl(lat: number, lng: number) {
-  const cached = await caches.match(`map-${lat}-${lng}`);
-  if (cached && !isCacheExpired(cached)) {
-    return cached;
-  }
-  
-  // Só chama API se não tiver cache
-  const url = buildGoogleStaticMapUrl(lat, lng);
-  await caches.put(`map-${lat}-${lng}`, response);
-  return url;
-}
-```
+`src/lib/cache.ts` já tem cache em memória com TTL para dados, e
+`src/lib/streetView.ts` já cacheia a checagem de cobertura por coordenada
+(memória + `sessionStorage`). O que falta é persistir a **imagem**, não a URL.
 
 #### Economia Estimada
+
+> ⚠️ **Números projetados, não medidos.** O volume de requisições por dia é
+> suposição, não leitura de fatura. Confira o consumo real em Google Cloud
+> Console → Billing → Reports (filtrando por SKU do Maps Platform) antes de usar
+> estes valores para decidir qualquer coisa.
 
 | Cenário | Modelo Atual | Modelo Otimizado | Economia Anual |
 |---------|-------------|------------------|----------------|

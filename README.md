@@ -165,9 +165,13 @@ Guia de configuração: [`docs/google-maps.md`](docs/google-maps.md).
 
 ## 📊 Documentação de Negócio e Expansão
 
--   **[Resumo Executivo](docs/RESUMO-EXECUTIVO.md)** — Visão geral do modelo de negócio, mercado e potencial financeiro
--   **[Análise Completa de Negócio](docs/analise-negocio-expansao.md)** — Validação da ideia, expansão regional, monetização e riscos
--   **[Implementação Técnica - Otimização API](docs/implementacao-otimizacao-api.md)** — Guia passo-a-passo para eliminar consumo recorrente da API Google Maps
+-   **[Resumo Executivo](docs/resumo-executivo.md)** — visão geral do modelo de negócio, mercado e potencial financeiro
+-   **[Análise de Negócio e Expansão](docs/analise-negocio-expansao.md)** — validação da ideia, monetização e riscos
+-   **[Expansão Multi-Cidades](docs/expansao-multi-cidades.md)** — passo a passo operacional para entrar numa cidade nova
+-   **[Otimização do Uso da API](docs/implementacao-otimizacao-api.md)** — onde o Google Maps custa e o que dá para reduzir
+
+> Os números de mercado, receita e custo desses documentos são **estimativas de
+> planejamento**, não medições. Trate-os como hipótese a validar.
 
 ### Plano de Expansão Regional
 

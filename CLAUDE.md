@@ -87,7 +87,7 @@ src/
 ├── types/               # ids "branded", featureFlags, errors
 └── test/setup.ts        # setup do Vitest (jest-dom + stub de matchMedia)
 
-docs/          # guias em pt-BR (design system, Maps, banco, coleta de dados)
+docs/          # guias em pt-BR (índice em docs/README.md)
 scripts/       # scripts Node avulsos (coleta/import/tradução) — rodam fora do app
 supabase/      # schema.sql aplicado no projeto Supabase
 ```
@@ -368,6 +368,12 @@ arquivos de schema divergem e o front-end ainda referencia os dois nomes.
 
 - Vitest com `environment: "jsdom"`, `globals: true`, setup em
   `src/test/setup.ts` (jest-dom + stub de `matchMedia`).
+- **As variáveis de ambiente dos testes ficam em `vitest.config.ts`** (bloco
+  `test.env`), com valores de mentira. `src/config/env.ts` valida com Zod e
+  derruba o processo se faltar alguma, então sem isso todo teste que importe um
+  módulo que use `env` quebra na coleta. Antes o CI passava porque havia um
+  `.env.local` versionado no repositório — não faça isso voltar: é o arquivo
+  onde os scripts mandam gravar a `SUPABASE_SERVICE_ROLE_KEY`.
 - Padrão de arquivo: `src/**/__tests__/*.test.ts(x)` ou `*.test.ts` ao lado.
 - Cobertura atual é pequena: `services/__tests__/businesses.test.ts`,
   `components/__tests__/ListingCard.test.tsx`, três testes de hooks e
@@ -405,6 +411,7 @@ Rodam com Node, **fora** do app, e usam `process.env` (não `import.meta.env`):
 | `collect-places.mjs` | coleta comércios via Google Places API (New) → JSON + CSV em `data/places/` (git-ignored); aceita `--dry-run`, `--cities`, `--categories`, `--max-pages`, `--help` |
 | `import-businesses.mjs` | importa o JSON revisado para `businesses`, deduplicando por `google_place_id`, por nome+cidade contra o banco **e entre os registros do próprio arquivo**; aceita `--dry-run`, `--update`, `--limit`, `--allow-name-duplicates` |
 | `fix-descriptions.mjs` | reescreve as descrições da carga inicial em pt-BR (tipo do Google traduzido por `lib/googleTypes.mjs`) e deixa a nota com 1 casa decimal; determinístico e idempotente, sem custo de API |
+| `validate-businesses.mjs` | curadoria manual: exporta os pendentes para CSV, o revisor decide em planilha (`action` = verified/rejected/needs_update) e reimporta; aceita `--dry-run`, `--export-csv`, `--import-csv`, `--city`, `--status`, `--limit`, `--verified-by`, `--help` |
 | `translate-businesses.mjs` | traduz `description` para pt-BR via DeepL e normaliza `rating` |
 | `check-database-content.ts` | inspeciona categorias/contagens no banco |
 
@@ -428,6 +435,24 @@ exportado no shell. Dois detalhes que já causaram confusão:
 Erros de conexão/permissão do Supabase passam por
 `describeSupabaseFailure()` (`scripts/lib/supabase.mjs`). Testes dos helpers
 puros ficam em `scripts/__tests__/` (incluídos no `vitest.config.ts`).
+
+**Curadoria por planilha (`validate-businesses.mjs`):** a Places API não entrega
+WhatsApp, que é o dado que converte. Por isso o que vai ao ar é o que passou por
+revisão humana: o script exporta os pendentes, a pessoa revisa no Excel/Sheets e
+o script reimporta. Três detalhes que o formato exige:
+
+- **O CSV é lido pelo nome do cabeçalho, não pela posição.** O revisor reordena
+  colunas sem quebrar a importação. O parser fica em `scripts/lib/csv.mjs` e
+  segue RFC 4180 — endereço com vírgula (`"Rua São João, 320 - Centro"`) não
+  parte a linha no meio. Um `split(",")` ingênuo lê a coluna errada como decisão
+  e grava status trocado sem reclamar; foi assim na primeira versão.
+- **`verified_by` só entra com `--verified-by=UUID`.** A coluna é FK para
+  `auth.users` e um UUID inventado derruba a gravação inteira.
+- **Só `phone` e `whatsapp` voltam da planilha.** As outras colunas viajam para
+  o revisor se localizar; nome, categoria e endereço se corrigem no painel.
+
+O módulo exporta `planUpdate()` e só chama `main()` quando executado direto, para
+os testes poderem exercitar a decisão sem tocar no banco.
 Documentação:
 [`docs/coleta-de-dados.md`](docs/coleta-de-dados.md) e
 [`docs/supabase/translation-script.md`](docs/supabase/translation-script.md).

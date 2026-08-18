@@ -60,7 +60,25 @@ Este documento descreve como expandir o Procurauai de Monte Santo de Minas para 
 
 ### Problema Atual
 
-O consumo contínuo da API do Google para exibição de mapas gera custos recorrentes desnecessários:
+O app consome a API do Google a cada visita, e isso escala com o tráfego, não
+com o número de cadastros. Hoje quem gera cobrança é:
+
+| Uso no código | API | Cobrança |
+| --- | --- | --- |
+| `MapsProvider` (carrega o mapa interativo) | Maps JavaScript API | por carregamento |
+| `MiniMap` → `mapsStaticUrl()` | Maps Static API | por imagem |
+| `businessPhotos` → `mapsStreetViewUrl()` | Street View Static API | por imagem |
+| `MapEmbed` → `mapsEmbedUrl()` | Maps Embed API | grátis (uso básico) |
+| `mapsSearchUrl()` / `mapsDirectionsUrl()` | Maps URLs API | grátis, sem chave |
+
+> ⚠️ **Os valores abaixo são estimativa, não medição.** Antes de usá-los para
+> decidir qualquer coisa, confira o consumo real em
+> Google Cloud Console → Billing → Reports, filtrando por SKU do Maps Platform.
+> O projeto já reduz consumo em dois pontos: a checagem de cobertura do Street
+> View usa o endpoint de **metadados** (gratuito, com cache por coordenada), e
+> sem `VITE_GOOGLE_MAPS_API_KEY` a UI cai no `MapPlaceholder` desenhado em CSS.
+
+Ordem de grandeza projetada, mantido o padrão de uso atual:
 - 1 cidade: ~R$ 3.100/ano
 - 7 cidades: ~R$ 21.700/ano
 - 20 cidades: ~R$ 62.000/ano
@@ -117,7 +135,7 @@ O consumo contínuo da API do Google para exibição de mapas gera custos recorr
 ```
 
 Conteúdo do migration em:
-`/workspace/supabase/migrations/20250817_add_verification_fields.sql`
+`supabase/migrations/20260817_add_verification_fields.sql`
 
 **Campos adicionados:**
 - `data_source`: Origem do dado (google_places, manual, user_submission, partnership)
@@ -135,50 +153,70 @@ node scripts/validate-businesses.mjs
 # Filtrar por cidade específica
 node scripts/validate-businesses.mjs --city="Monte Santo de Minas"
 
-# Exportar para CSV (revisão offline)
+# Exportar para CSV (revisão offline) → data/validation/pending-AAAA-MM-DD.csv
 node scripts/validate-businesses.mjs --export-csv
 
-# Importar validações feitas no CSV
-node scripts/validate-businesses.mjs --import-csv=data/validation/pending-2025-08-17.csv
+# Prévia da importação: mostra o que mudaria, sem gravar
+node scripts/validate-businesses.mjs --import-csv=data/validation/pending-AAAA-MM-DD.csv --dry-run
+
+# Aplicando de verdade
+node scripts/validate-businesses.mjs --import-csv=data/validation/pending-AAAA-MM-DD.csv
 ```
 
 **Fluxo de trabalho recomendado:**
-1. Exporte todos os estabelecimentos pendentes
-2. Revise no Excel/Google Sheets
-3. Adicione WhatsApps (informação mais valiosa!)
-4. Corrija categorias e horários
-5. Marque como "verified" ou "rejected"
-6. Importe as validações
+1. Exporte os estabelecimentos pendentes.
+2. Revise no Excel/Google Sheets.
+3. Preencha a coluna `whatsapp` (informação mais valiosa) e corrija `phone`.
+4. Escreva na coluna `action`: `verified`, `rejected` ou `needs_update`.
+   Linha com `action` vazia fica como está.
+5. Salve como CSV e rode a importação com `--dry-run`.
+6. Confira a prévia e repita sem `--dry-run` para gravar.
+
+A importação casa as colunas **pelo nome do cabeçalho**, então reordenar colunas
+na planilha não quebra nada. Só `phone` e `whatsapp` voltam para o banco — as
+demais colunas vão no arquivo para o revisor se localizar. Correção de nome,
+categoria ou endereço é feita direto no painel do Supabase.
 
 ### Passo 3: Coletar Dados das Novas Cidades
 
-```bash
-# Editar scripts/collect-places.mjs para incluir novas cidades
-const cities = [
-  { name: 'Monte Santo de Minas', lat: -21.9339, lng: -46.9947 },
-  { name: 'Arceburgo', lat: -21.9419, lng: -47.0689 },
-  { name: 'Itamogi', lat: -21.9556, lng: -46.9153 },
-  { name: 'Guaranésia', lat: -21.3056, lng: -46.8156 },
-  { name: 'São Sebastião do Paraíso', lat: -20.9167, lng: -46.9833 },
-  { name: 'Guaxupé', lat: -21.3019, lng: -46.7139 },
-  { name: 'Passos', lat: -20.7156, lng: -46.6128 }
-];
+Não é preciso editar o script: `collect-places.mjs` recebe as cidades por
+argumento, como **texto de busca** (a Places API resolve o nome), não como
+coordenada.
 
-// Executar coleta
-node scripts/collect-places.mjs
+```bash
+# Sempre comece pelo dry-run: mostra o plano de busca sem gastar cota.
+node scripts/collect-places.mjs --cities="Arceburgo - MG" --dry-run
+
+# Uma cidade por vez, para revisar o resultado antes de seguir.
+node scripts/collect-places.mjs --cities="Arceburgo - MG"
+
+# Várias de uma vez (separadas por vírgula).
+node scripts/collect-places.mjs --cities="Arceburgo - MG,Itamogi - MG,Guaranésia - MG"
+
+# Opções úteis: --categories, --max-pages (1 a 3), --out
+node scripts/collect-places.mjs --help
 ```
+
+A saída vai para `data/places/` (git-ignored), em JSON e CSV, para revisão
+antes da importação.
 
 ### Passo 4: Importar Dados Coletados
 
-```bash
-# Importar para o Supabase
-node scripts/import-businesses.mjs
+`import-businesses.mjs` exige o arquivo gerado na coleta (`--file`) e deduplica
+por `google_place_id`, por nome + cidade contra o banco e entre os registros do
+próprio arquivo.
 
-# Os novos registros virão com:
-# - data_source: 'google_places'
-# - verification_status: 'pending'
-# - last_synced_at: timestamp atual
+```bash
+# Prévia: mostra o que inseriria, sem gravar.
+node scripts/import-businesses.mjs --file=data/places/places-AAAA-MM-DD.json --dry-run
+
+# Gravando de verdade.
+node scripts/import-businesses.mjs --file=data/places/places-AAAA-MM-DD.json
 ```
+
+Os novos registros entram com `data_source = 'google_places'` e
+`verification_status = 'pending'` (padrões da migração), ou seja, já caem na
+fila de revisão.
 
 ### Passo 5: Repetir Validação Manual para Cada Cidade
 
@@ -190,22 +228,30 @@ node scripts/validate-businesses.mjs --city="Guaranésia" --export-csv
 # ... etc
 ```
 
-### Passo 6: Modificar Componentes de Mapa (Opcional mas Recomendado)
+### Passo 6: Reduzir o Consumo de Mapas (Opcional)
 
-Para eliminar completamente a dependência da API Google:
+> Este passo ainda **não foi implementado** — é proposta, não estado atual.
 
-1. **Modificar `src/lib/maps.ts`** para usar OpenStreetMap como padrão
-2. **Atualizar `src/components/maps/StaticMap.tsx`** para usar coordenadas salvas
-3. **Implementar cache** de 7 dias para mapas estáticos
+Toda integração de mapa passa por `src/lib/maps.ts` e `src/components/maps/`
+(ver [`docs/google-maps.md`](google-maps.md)). Os componentes existentes são
+`MapEmbed`, `MiniMap`, `MapPlaceholder` e `MapsProvider`; **não existe
+`StaticMap.tsx`**. Qualquer mudança entra nesses arquivos, nunca lendo a chave
+direto num componente.
 
-Exemplo de uso:
-```typescript
-<StaticMap 
-  latitude={business.latitude} 
-  longitude={business.longitude}
-  useGoogleEmbed={false} // Padrão: false (usa OSM)
-/>
-```
+Caminhos possíveis, do mais barato ao mais invasivo:
+
+1. **Preferir `MapEmbed` a `MiniMap`** onde um iframe resolve: a Maps Embed API
+   não é cobrada no uso básico, a Static API é cobrada por imagem.
+2. **Não montar o `MapsProvider`** em páginas que só exibem uma imagem estática
+   — a Maps JavaScript API cobra por carregamento, mesmo sem interação.
+3. **Cachear as imagens estáticas** (Supabase Storage) em vez de pedir a mesma
+   fachada a cada visita.
+4. **Trocar o provedor de tiles** (OpenStreetMap, MapTiler, Stadia) para o mapa
+   de navegação. É a mudança maior: exige biblioteca de mapa nova e revisão do
+   design system, e a licença de cada provedor pede atribuição visível.
+
+Nos quatro casos, `hasMapsKey === false` precisa continuar caindo no
+`MapPlaceholder`, que é o comportamento que mantém o app de pé sem chave.
 
 ---
 
@@ -287,10 +333,10 @@ Exemplo de uso:
 4. **Mês que vem:** Lançar campanha regional
 
 **Documentação complementar:**
-- `/workspace/docs/ANALISE-COMPLETA-NEGOCIO.md` - Análise detalhada do negócio
-- `/workspace/docs/implementacao-otimizacao-api.md` - Detalhes técnicos da API
-- `/workspace/scripts/validate-businesses.mjs` - Script de validação
-- `/workspace/supabase/migrations/20250817_add_verification_fields.sql` - Migration
+- `docs/analise-negocio-expansao.md` - Análise detalhada do negócio
+- `docs/implementacao-otimizacao-api.md` - Detalhes técnicos da API
+- `scripts/validate-businesses.mjs` - Script de validação
+- `supabase/migrations/20260817_add_verification_fields.sql` - Migration
 
 ---
 
