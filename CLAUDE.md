@@ -368,6 +368,12 @@ arquivos de schema divergem e o front-end ainda referencia os dois nomes.
 
 - Vitest com `environment: "jsdom"`, `globals: true`, setup em
   `src/test/setup.ts` (jest-dom + stub de `matchMedia`).
+- **As variáveis de ambiente dos testes ficam em `vitest.config.ts`** (bloco
+  `test.env`), com valores de mentira. `src/config/env.ts` valida com Zod e
+  derruba o processo se faltar alguma, então sem isso todo teste que importe um
+  módulo que use `env` quebra na coleta. Antes o CI passava porque havia um
+  `.env.local` versionado no repositório — não faça isso voltar: é o arquivo
+  onde os scripts mandam gravar a `SUPABASE_SERVICE_ROLE_KEY`.
 - Padrão de arquivo: `src/**/__tests__/*.test.ts(x)` ou `*.test.ts` ao lado.
 - Cobertura atual é pequena: `services/__tests__/businesses.test.ts`,
   `components/__tests__/ListingCard.test.tsx`, três testes de hooks e
