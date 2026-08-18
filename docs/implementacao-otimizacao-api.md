@@ -72,50 +72,29 @@ ON businesses (city, verification_status);
 ```
 
 #### Script SQL Completo
-Criar arquivo `supabase/migrations/XXXX_add_verification_fields.sql`:
 
-```sql
--- Migration: Add verification fields to businesses
--- Date: 2025-08-17
--- Purpose: Support manual validation workflow without Google API dependency
+O SQL de verdade está em
+[`supabase/migrations/20260817_add_verification_fields.sql`](../supabase/migrations/20260817_add_verification_fields.sql)
+— aplique-o pelo SQL Editor do Supabase. É idempotente: pode rodar de novo sem
+efeito colateral.
 
--- Add new columns
-ALTER TABLE businesses 
-ADD COLUMN IF NOT EXISTS data_source TEXT DEFAULT 'google_places',
-ADD COLUMN IF NOT EXISTS verification_status TEXT DEFAULT 'pending',
-ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES auth.users(id),
-ADD COLUMN IF NOT EXISTS last_synced_at TIMESTAMPTZ;
+Além das colunas e índices acima, a migração faz duas coisas que o esboço não
+fazia:
 
--- Add comment for documentation
-COMMENT ON COLUMN businesses.data_source IS 'Origem do dado: google_places, manual, user_submission, partnership';
-COMMENT ON COLUMN businesses.verification_status IS 'Status de validação: pending, verified, rejected, needs_update';
-COMMENT ON COLUMN businesses.verified_at IS 'Data/hora da validação manual';
-COMMENT ON COLUMN businesses.verified_by IS 'ID do usuário que validou (admin)';
-COMMENT ON COLUMN businesses.last_synced_at IS 'Última sincronização com Google Places (se aplicável)';
+- **`check` nos valores permitidos** de `data_source` e `verification_status`,
+  em vez de `enum`. Com `text` + `check`, aceitar um valor novo é um `alter`
+  simples; com `enum` seria migração de tipo.
+- **Backfill de quem já estava aprovado.** `add column ... default` preenche as
+  linhas antigas com `'pending'`, então não sobra nenhum `null` para filtrar:
+  quem já tinha `is_verified = true` precisa ser promovido explicitamente, ou
+  volta para a fila de revisão sem motivo.
 
--- Create indexes for performance
-CREATE INDEX IF NOT EXISTS businesses_verification_status_idx 
-ON businesses (verification_status)
-WHERE verification_status != 'verified';
-
-CREATE INDEX IF NOT EXISTS businesses_city_status_idx 
-ON businesses (city, verification_status);
-
--- Create enum type for data sources (optional, for stricter validation)
-DO $$ BEGIN
-  CREATE TYPE business_data_source AS ENUM ('google_places', 'manual', 'user_submission', 'partnership');
-EXCEPTION
-  WHEN duplicate_object THEN null;
-END $$;
-
--- Future: migrate to enum type
--- ALTER TABLE businesses 
---   ALTER COLUMN data_source TYPE business_data_source 
---   USING data_source::business_data_source;
-```
+⚠️ O banco de produção **não segue** `supabase/schema.sql` (ver §11 do
+`CLAUDE.md`). Confira no painel se as colunas `city` e `is_verified` existem com
+esses nomes antes de rodar.
 
 ---
+
 
 ### 2. Scripts de Coleta e Importação
 
@@ -197,368 +176,145 @@ const businessRow = {
 };
 ```
 
-#### C. Novo Script: `validate-businesses.mjs`
+#### C. Script `validate-businesses.mjs` (implementado)
 
-Criar script para revisão manual em lote:
+O script existe em [`scripts/validate-businesses.mjs`](../scripts/validate-businesses.mjs).
+A referência é o próprio arquivo — este documento não repete o código, para não
+divergir dele.
 
-```javascript
-#!/usr/bin/env node
-/**
- * validate-businesses.mjs
- * 
- * Gera relatório de estabelecimentos pendentes de validação
- * Permite aprovação/rejeição em lote via CLI ou CSV
- */
+O fluxo é de mão dupla e passa por planilha, porque a revisão é humana:
 
-import { createClient } from '@supabase/supabase-js';
-import readline from 'readline';
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-
-dotenv.config({ path: '.env.local' });
-
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Faltam credenciais do Supabase no .env.local');
-  console.error('Necessário: SUPABASE_SERVICE_ROLE_KEY');
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Parse arguments
-const args = process.argv.slice(2);
-const cityFilter = args.find(a => a.startsWith('--city='))?.split('=')[1];
-const exportCsv = args.includes('--export-csv');
-const importCsv = args.find(a => a.startsWith('--import-csv='))?.split('=')[1];
-
-async function main() {
-  console.log('🔍 Buscando estabelecimentos pendentes de validação...\n');
-  
-  let query = supabase
-    .from('businesses')
-    .select('id, name, address, city, category, phone, whatsapp, google_place_id, verification_status, data_source')
-    .eq('verification_status', 'pending')
-    .order('created_at', { ascending: false });
-  
-  if (cityFilter) {
-    query = query.eq('city', cityFilter);
-    console.log(`Filtro: cidade = ${cityFilter}`);
-  }
-  
-  const { data: businesses, error } = await query;
-  
-  if (error) {
-    console.error('❌ Erro ao buscar dados:', error.message);
-    process.exit(1);
-  }
-  
-  console.log(`📊 Encontrados ${businesses.length} estabelecimentos pendentes\n`);
-  
-  if (businesses.length === 0) {
-    console.log('✅ Nenhum estabelecimento pendente!');
-    return;
-  }
-  
-  // Exportar CSV para revisão offline
-  if (exportCsv) {
-    const csvPath = `data/validation/pending-${new Date().toISOString().split('T')[0]}.csv`;
-    fs.mkdirSync(path.dirname(csvPath), { recursive: true });
-    
-    const csvContent = [
-      ['id', 'name', 'address', 'city', 'category', 'phone', 'whatsapp', 'google_place_id', 'action'],
-      ...businesses.map(b => [
-        b.id,
-        b.name,
-        b.address,
-        b.city,
-        b.category,
-        b.phone,
-        b.whatsapp || '',
-        b.google_place_id,
-        'pending'
-      ])
-    ].map(row => row.join(',')).join('\n');
-    
-    fs.writeFileSync(csvPath, csvContent);
-    console.log(`📄 CSV exportado: ${csvPath}`);
-    console.log('   Edite a coluna "action" para: verified, rejected, ou leave as pending');
-    console.log(`   Depois execute: node scripts/validate-businesses.mjs --import-csv=${csvPath}\n`);
-  }
-  
-  // Importar CSV com validações
-  if (importCsv) {
-    console.log(`📥 Importando validações de ${importCsv}...`);
-    const content = fs.readFileSync(importCsv, 'utf-8');
-    const lines = content.split('\n').slice(1); // Skip header
-    
-    const updates = [];
-    const stats = { verified: 0, rejected: 0, skipped: 0 };
-    
-    for (const line of lines) {
-      const [id, , , , , , , , action] = line.split(',');
-      if (!id || action === 'pending') {
-        stats.skipped++;
-        continue;
-      }
-      
-      updates.push({
-        id,
-        updates: {
-          verification_status: action === 'verified' ? 'verified' : 'rejected',
-          verified_at: action === 'verified' ? new Date().toISOString() : null,
-          verified_by: '00000000-0000-0000-0000-000000000000' // Admin system
-        }
-      });
-      
-      stats[action === 'verified' ? 'verified' : 'rejected']++;
-    }
-    
-    // Batch update
-    for (const update of updates) {
-      await supabase
-        .from('businesses')
-        .update(update.updates)
-        .eq('id', update.id);
-    }
-    
-    console.log('✅ Validações aplicadas:');
-    console.log(`   Verificados: ${stats.verified}`);
-    console.log(`   Rejeitados: ${stats.rejected}`);
-    console.log(`   Ignorados: ${stats.skipped}\n`);
-    return;
-  }
-  
-  // Modo interativo (padrão)
-  console.log('📋 Amostra dos primeiros 10 estabelecimentos:\n');
-  
-  for (let i = 0; i < Math.min(10, businesses.length); i++) {
-    const b = businesses[i];
-    console.log(`${i + 1}. ${b.name}`);
-    console.log(`   📍 ${b.address} - ${b.city}`);
-    console.log(`   🏷️  ${b.category}`);
-    console.log(`   📞 ${b.phone || 'Sem telefone'}`);
-    console.log(`   💬 ${b.whatsapp || 'Sem WhatsApp'} ⚠️`);
-    console.log(`   🔗 google_place_id: ${b.google_place_id}`);
-    console.log('');
-  }
-  
-  console.log('💡 Para validar em massa, use: --export-csv');
-  console.log('   Ou filtre por cidade: --city="Monte Santo de Minas"\n');
-}
-
-main().catch(console.error);
-```
-
-**Uso do script:**
 ```bash
-# Ver pendentes
+# 1. Ver o que está pendente
 node scripts/validate-businesses.mjs
+node scripts/validate-businesses.mjs --city="Guaxupé" --limit=200
 
-# Filtrar por cidade
-node scripts/validate-businesses.mjs --city="Guaxupé"
-
-# Exportar para CSV (revisão offline)
+# 2. Exportar para revisão offline → data/validation/pending-AAAA-MM-DD.csv
 node scripts/validate-businesses.mjs --export-csv
 
-# Importar validações feitas no CSV
-node scripts/validate-businesses.mjs --import-csv=data/validation/pending-2025-08-17.csv
+# 3. Revisar no Excel/Sheets, depois conferir a prévia
+node scripts/validate-businesses.mjs --import-csv=data/validation/ARQUIVO.csv --dry-run
+
+# 4. Aplicar
+node scripts/validate-businesses.mjs --import-csv=data/validation/ARQUIVO.csv
+
+node scripts/validate-businesses.mjs --help
 ```
+
+Na planilha, a coluna `action` recebe `verified`, `rejected` ou `needs_update`
+(vazio = decidir depois), e as colunas `phone` e `whatsapp` voltam para o banco
+quando o revisor as altera. As demais colunas vão junto só para o revisor se
+localizar.
+
+Três decisões de implementação que valem registro:
+
+- **A planilha é lida pelo nome do cabeçalho, não pela posição.** O revisor abre
+  no Excel e pode reordenar colunas sem que a importação passe a gravar a coluna
+  errada. O parser fica em [`scripts/lib/csv.mjs`](../scripts/lib/csv.mjs) e
+  segue RFC 4180 — endereço com vírgula (`"Rua São João, 320 - Centro"`) não
+  quebra a linha no meio, que era o defeito da primeira versão.
+- **`verified_by` só é gravado com `--verified-by=UUID`.** A coluna é FK para
+  `auth.users`; um UUID inventado derruba a gravação inteira com erro de chave
+  estrangeira.
+- **`--dry-run` mostra o que mudaria sem gravar.** É o passo obrigatório antes de
+  qualquer escrita, como nos demais scripts de carga.
 
 ---
 
-### 3. Frontend - Componentes de Mapa
 
-#### A. Modificar `src/lib/maps.ts`
+### 3. Frontend — Componentes de Mapa
 
-```typescript
-// src/lib/maps.ts
-// Adicionar funções para mapa estático sem API call
+> **Status: proposta, não implementado.** Nada nesta seção existe no código hoje.
+> Antes de escrever qualquer coisa aqui, leia [`docs/google-maps.md`](google-maps.md)
+> e o §9 do [`CLAUDE.md`](../CLAUDE.md).
 
-export interface MapOptions {
-  latitude: number;
-  longitude: number;
-  zoom?: number;
-  width?: number;
-  height?: number;
-  useGoogleEmbed?: boolean; // Default: false
-}
+#### O que já existe
 
-/**
- * Gera URL de mapa estático usando coordenadas salvas
- * Opções:
- * 1. OpenStreetMap + Leaflet (grátis, sem API key)
- * 2. Google Static Maps (só se necessário, com cache)
- * 3. Placeholder desenhado em CSS (fallback)
- */
-export function getStaticMapUrl(options: MapOptions): string {
-  const { latitude, longitude, zoom = 15, width = 400, height = 300 } = options;
-  
-  // Opção 1: OpenStreetMap (recomendado)
-  const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${calculateBbox(latitude, longitude, zoom)}&layer=mapnik`;
-  
-  // Opção 2: Google Static Maps (só se useGoogleEmbed=true)
-  if (options.useGoogleEmbed && import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
-    return `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=${zoom}&size=${width}x${height}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-  }
-  
-  // Opção 3: Stadia Maps (alternativa gratuita)
-  const stadiaApiKey = import.meta.env.VITE_STADIA_MAPS_API_KEY;
-  if (stadiaApiKey) {
-    return `https://tiles.stadiamaps.com/tiles/alidade_smooth/${zoom}/${Math.floor((longitude + 180) / 360 * Math.pow(2, zoom))}/${Math.floor((1 - Math.log(Math.tan(latitude * Math.PI / 180) + 1 / Math.cos(latitude * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom))}.png?key=${stadiaApiKey}`;
-  }
-  
-  // Fallback: OSM direto
-  return osmUrl;
-}
+Toda integração de mapa passa por `src/lib/maps.ts` e `src/components/maps/`.
+Nenhum componente lê `import.meta.env.VITE_GOOGLE_MAPS_API_KEY` nem monta URL do
+Maps na mão — e código novo não deve começar a fazer isso.
 
-/**
- * Calcula bounding box para um zoom level
- */
-function calculateBbox(lat: number, lng: number, zoom: number): string {
-  const delta = 0.01 / Math.pow(2, zoom - 10);
-  return `${lng - delta},${lat - delta},${lng + delta},${lat + delta}`;
-}
+| Arquivo | Papel | API | Cobrança |
+| --- | --- | --- | --- |
+| `MapsProvider` | carrega a Maps JavaScript API uma vez, na raiz | Maps JavaScript | por carregamento |
+| `MiniMap` | imagem estática + link de rota | Maps Static | por imagem |
+| `MapEmbed` | iframe de localização | Maps Embed | grátis (uso básico) |
+| `MapPlaceholder` | fallback em CSS, sem chave | — | grátis |
+| `mapsSearchUrl` / `mapsDirectionsUrl` | links "abrir no Maps" | Maps URLs | grátis, sem chave |
+| `mapsStreetViewUrl` | fachada do comércio | Street View Static | por imagem |
+| `mapsStreetViewMetadataUrl` | checa cobertura antes de pedir a foto | Street View Metadata | grátis |
 
-/**
- * Cache helper para evitar chamadas repetidas
- */
-const mapCache = new Map<string, { url: string; timestamp: number }>();
-const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 dias
+`hasMapsKey` já é `false` quando não há chave, e `mapsEmbedUrl`/`mapsStaticUrl`
+devolvem `null` — a UI cai no `MapPlaceholder`. Ou seja: **o app já roda com
+custo zero de API**, ao preço de não mostrar mapa. A questão não é "como parar
+de depender do Google", é "quanto mapa vale o que custa".
 
-export async function getCachedMapUrl(options: MapOptions): Promise<string> {
-  const cacheKey = `${options.latitude}-${options.longitude}-${options.zoom}`;
-  const cached = mapCache.get(cacheKey);
-  
-  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    return cached.url;
-  }
-  
-  const url = getStaticMapUrl(options);
-  mapCache.set(cacheKey, { url, timestamp: Date.now() });
-  
-  return url;
-}
+#### Onde dá para economizar, em ordem de esforço
 
-/**
- * Gera link para abrir no Google Maps app (não usa API, só deep link)
- */
-export function getGoogleMapsLink(options: { latitude: number; longitude: number; query?: string }): string {
-  const { latitude, longitude, query } = options;
-  const base = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-  return query ? `${base}&destination_place_id=${query}` : base;
-}
-```
+**1. Trocar `MiniMap` por `MapEmbed` onde couber (barato, sem código novo)**
 
-#### B. Modificar Componente `StaticMap.tsx`
+A Embed API não é cobrada no uso básico; a Static API é cobrada por imagem. Em
+tela que só precisa mostrar "onde fica", o iframe resolve.
 
-```tsx
-// src/components/maps/StaticMap.tsx
-import React from 'react';
-import { getStaticMapUrl, getGoogleMapsLink } from '../../lib/maps';
+**2. Não montar o `MapsProvider` em rota que não usa mapa interativo (barato)**
 
-interface StaticMapProps {
-  latitude: number;
-  longitude: number;
-  businessName?: string;
-  width?: number;
-  height?: number;
-  showMarker?: boolean;
-  className?: string;
-}
+A Maps JavaScript API cobra por carregamento, mesmo que o usuário não interaja.
+Hoje o provider está na raiz, em `App.tsx`: vale medir quantas rotas realmente
+precisam dele antes de deixar assim.
 
-export function StaticMap({
-  latitude,
-  longitude,
-  businessName,
-  width = 400,
-  height = 300,
-  showMarker = true,
-  className = ''
-}: StaticMapProps) {
-  // Usar OpenStreetMap como padrão (zero custo)
-  const mapUrl = getStaticMapUrl({
-    latitude,
-    longitude,
-    zoom: 15,
-    width,
-    height,
-    useGoogleEmbed: false // ← Importante: false por default
-  });
-  
-  const googleMapsLink = getGoogleMapsLink({ latitude, longitude });
-  
-  return (
-    <div className={`relative overflow-hidden rounded-lg ${className}`} style={{ width, height }}>
-      {/* Mapa OSM embed */}
-      <iframe
-        src={mapUrl}
-        width={width}
-        height={height}
-        style={{ border: 0 }}
-        loading="lazy"
-        title={`Mapa de ${businessName || 'localização'}`}
-        className="w-full h-full"
-      />
-      
-      {/* Marker overlay (opcional) */}
-      {showMarker && (
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-          <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg" />
-        </div>
-      )}
-      
-      {/* Link para abrir no app */}
-      <a
-        href={googleMapsLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute bottom-2 right-2 bg-white px-3 py-1.5 rounded-md shadow-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors pointer-events-auto"
-      >
-        Abrir no Google Maps →
-      </a>
-    </div>
-  );
-}
-```
+**3. Cachear a imagem estática (médio)**
 
-#### C. Atualizar Página de Detalhes do Negócio
+Guardar a fachada e o mapa estático no Supabase Storage na primeira vez e servir
+de lá nas seguintes. Elimina o custo por visita, mantendo a imagem. Casa com o
+que `src/lib/businessPhotos.ts` já faz: a foto do comerciante, quando existe,
+tem prioridade sobre o Street View.
 
-```tsx
-// src/pages/BusinessDetail.tsx
-// Substituir componente de mapa
+**4. Trocar o provedor de tiles (caro, decisão de produto)**
 
-// ANTES:
-import { GoogleMapComponent } from '@/components/maps/GoogleMapComponent';
-<GoogleMapComponent apiKey={VITE_GOOGLE_MAPS_API_KEY} placeId={business.google_place_id} />
+OpenStreetMap, MapTiler ou Stadia no lugar do mapa interativo do Google. Exige
+biblioteca de mapa nova (`@vis.gl/react-google-maps` sai), revisão do design
+system e atribuição visível conforme a licença de cada provedor. Só faz sentido
+depois de medir que os itens 1-3 não bastaram.
 
-// DEPOIS:
-import { StaticMap } from '@/components/maps/StaticMap';
-{business.latitude && business.longitude ? (
-  <StaticMap
-    latitude={business.latitude}
-    longitude={business.longitude}
-    businessName={business.name}
-    width={400}
-    height={300}
-    showMarker={true}
-  />
-) : (
-  <div className="text-center py-8 bg-gray-100 rounded-lg">
-    <p className="text-gray-500">Mapa não disponível</p>
-    <p className="text-sm text-gray-400">Endereço: {business.address}</p>
-  </div>
-)}
-```
+#### Regras para qualquer mudança aqui
+
+- Função nova de mapa entra em `src/lib/maps.ts`, não num componente.
+- O caminho sem chave (`hasMapsKey === false`) precisa continuar funcionando.
+- Sem cor crua no Tailwind: use os tokens (`bg-muted`, `text-muted-foreground`),
+  nunca `bg-gray-100`.
+- Coordenada vem de `latitude`/`longitude` da tabela `businesses` (o schema de
+  produção não usa `lat`/`lng` — ver §11 do `CLAUDE.md`).
+
+#### Medir antes de mexer
+
+Nenhuma das economias acima vale a pena no escuro. O primeiro passo é abrir
+Google Cloud Console → Billing → Reports, filtrar por SKU do Maps Platform e
+descobrir qual das APIs realmente pesa na fatura. Pode ser que a resposta seja
+"nenhuma, o tráfego ainda é baixo demais" — e aí esta seção inteira espera.
 
 ---
 
 ### 4. Painel Administrativo (Esboço)
 
-Criar estrutura básica para validação manual:
+> **Esboço, não código pronto para colar.** O trecho abaixo mostra a ideia do
+> fluxo; do jeito que está, ele quebra três convenções do projeto. Antes de virar
+> arquivo em `src/`:
+>
+> 1. **Cor crua não passa.** `bg-blue-50`, `text-gray-600`, `bg-green-600` viram
+>    tokens semânticos (`bg-card`, `text-muted-foreground`, `bg-primary`) — ver
+>    [`docs/design-system.md`](design-system.md).
+> 2. **Componente não chama `supabase.from()` direto.** A query vai para
+>    `src/services/`, embrulhada em `executeSupabase()` (timeout + retry), e o
+>    componente consome por um hook em `src/hooks/`.
+> 3. **Link do Maps não se monta na mão.** Use `mapsSearchUrl()` de
+>    `src/lib/maps.ts` no lugar da URL literal.
+>
+> Também não existe rota de admin hoje: criar a página exige registrar a rota em
+> `src/App.tsx` **e** o link de origem, além de decidir como proteger o acesso
+> (RLS + papel de admin). Enquanto isso não existe, a validação é feita pelo
+> `scripts/validate-businesses.mjs`, que já cobre o fluxo por planilha.
+
+Estrutura básica para validação manual:
 
 ```tsx
 // src/pages/admin/ValidationPanel.tsx

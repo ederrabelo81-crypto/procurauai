@@ -60,8 +60,15 @@ Cenário Otimista (15% conversão):    R$ 75.000-100.000/mês
 
 **Consumo contínuo da API do Google Maps = Custos recorrentes altos**
 
+> ⚠️ **Estimativa, não medição.** Nem toda API do Maps é cobrada: Embed (uso
+> básico), URLs e o endpoint de metadados do Street View são gratuitos, e o app
+> já cai no `MapPlaceholder` em CSS quando não há chave configurada. O que
+> realmente pesa é Maps JavaScript, Static e Street View Static. Confira o
+> consumo real em Google Cloud Console → Billing → Reports antes de decidir
+> com base nestes números.
+
 ```
-❌ ANTES: Cada visualização de mapa = chamada API paga
+❌ HOJE (projetado): visualização de mapa consome API paga
    • 1 cidade: R$ 255/mês → R$ 3.060/ano
    • 7 cidades: R$ 1.785/mês → R$ 21.420/ano
    • 20 cidades: R$ 5.100/mês → R$ 61.200/ano
@@ -92,7 +99,8 @@ FLUXO OTIMIZADO:
 
 4. APP EM PRODUÇÃO (ZERO API GOOGLE)
    └─→ Leitura direta do Supabase
-   └─→ Mapas: OpenStreetMap (grátis) ou coordenadas salvas
+   └─→ Mapas: coordenadas salvas + placeholder em CSS sem chave
+   └─→ (trocar o provedor de tiles é proposta, não decisão tomada)
    └─→ Custo recorrente: R$ 0
 ```
 
