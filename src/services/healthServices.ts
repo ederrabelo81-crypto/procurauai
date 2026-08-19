@@ -53,12 +53,15 @@ const healthServiceRowSchema = z.object({
 
 /**
  * O script de extração marca todo contato institucional como
- * `"pendente_validacao_manual"` — nada publicável sem a curadoria manual que
- * o projeto já define (confirmar telefone e horário com o próprio serviço).
- * Só o que alguém revisou e marcou `"validado"` em
- * `data/whatsapp-insights/saude-e-servicos.json` aparece na página pública.
+ * `"pendente_validacao_manual"` — o número veio de contato salvo por morador
+ * no WhatsApp, não de uma ligação de confirmação com o próprio serviço.
+ * Decisão do Eder (founder): publicar tudo assim mesmo, sem selo de "não
+ * confirmado" na UI — os contatos já são os que a cidade usa informalmente.
+ * `"rejeitado"` continua sendo um jeito de tirar uma entrada específica do ar
+ * (editando só o JSON) sem precisar mexer em código, para quando alguém
+ * confirmar que um número está errado.
  */
-const PUBLISHED_STATUSES = new Set(["validado"]);
+const HIDDEN_STATUSES = new Set(["rejeitado"]);
 
 function parseHealthServiceRows(rows: unknown): HealthService[] {
   if (!Array.isArray(rows)) return [];
@@ -67,13 +70,13 @@ function parseHealthServiceRows(rows: unknown): HealthService[] {
   for (const row of rows) {
     const result = healthServiceRowSchema.safeParse(row);
     if (result.success) parsed.push(result.data);
-    else reportError(result.error, { scope: "getValidatedHealthServices row" });
+    else reportError(result.error, { scope: "getHealthServices row" });
   }
   return parsed;
 }
 
-export function getValidatedHealthServices(): HealthService[] {
-  return parseHealthServiceRows(saudeEServicosData).filter((service) =>
-    PUBLISHED_STATUSES.has(service.status),
+export function getHealthServices(): HealthService[] {
+  return parseHealthServiceRows(saudeEServicosData).filter(
+    (service) => !HIDDEN_STATUSES.has(service.status),
   );
 }

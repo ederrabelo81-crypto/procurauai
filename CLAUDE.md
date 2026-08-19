@@ -181,7 +181,9 @@ Todas em `src/App.tsx`. Padrão de URLs em português:
 `/carros`, `/empregos`, `/imoveis` com detalhes `/lugares/:slug` etc.,
 `/saude-e-servicos` (contatos de saúde/serviço público, ver
 `docs/whatsapp-insights.md`), `/mapa`, `/publicar`, `/perfil`,
-`/debug-env` (diagnóstico de env) e `*`.
+`/debug-env` (diagnóstico de env), `/painel/mais-buscados` (ranking interno
+de negócios pedidos no WhatsApp — sem link na navegação, mesmo padrão de
+`/debug-env`, ver `docs/whatsapp-insights.md`) e `*`.
 Ao criar uma página, registre a rota aqui **e** o link de origem — rotas órfãs
 já causaram 404 neste projeto.
 

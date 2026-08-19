@@ -35,6 +35,7 @@ import JobDetail from "./pages/JobDetail";
 import RealEstateDetail from "./pages/RealEstateDetail";
 import DebugEnv from "./pages/DebugEnv";
 import HealthServices from "./pages/HealthServices";
+import MostSearchedPanel from "./pages/MostSearchedPanel";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -89,6 +90,10 @@ const App = () => (
                 <Route path="/empregos/:id" element={<JobDetail />} />
                 <Route path="/imoveis/:id" element={<RealEstateDetail />} />
                 <Route path="/debug-env" element={<DebugEnv />} />
+                <Route
+                  path="/painel/mais-buscados"
+                  element={<MostSearchedPanel />}
+                />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <BottomNav />
