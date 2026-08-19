@@ -36,7 +36,7 @@ export function HealthServiceCard({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Telefone não confirmado ainda.
+          Telefone não disponível.
         </p>
       )}
     </article>

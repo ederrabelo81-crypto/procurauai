@@ -59,9 +59,7 @@ export default function HealthServices() {
 
         {!isLoading && !error && services.length === 0 && (
           <div className="py-12 text-center text-sm text-muted-foreground">
-            Nenhum contato validado ainda. Os contatos de saúde e serviço
-            público passam por conferência manual (telefone e horário
-            confirmados com o próprio serviço) antes de aparecer aqui.
+            Nenhum contato encontrado.
           </div>
         )}
 

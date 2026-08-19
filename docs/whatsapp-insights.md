@@ -54,11 +54,19 @@ contatos), `businessMatching.mjs` (agrupamento de negócios "fantasma"),
 ## 4. "Ranking dos Mais Buscados" — uso interno, não é feature de consumidor
 
 Ferramenta de priorização de vendas/curadoria para o Eder: negócios pedidos
-várias vezes no grupo e ainda não listados no app são leads prontos. Hoje sai
-como `mais-buscados.md` (tabela markdown, filtrada a 2+ pedidos) porque **não
-existe painel administrativo no código ainda**. Quando existir, o próximo
-passo é uma tela ali lendo `mais-buscados.json` (ordenado por `vezes_pedido`,
-com filtro por `status: "nao_listado"`) em vez desta tabela estática.
+várias vezes no grupo e ainda não listados no app são leads prontos.
+
+Duas formas de consultar:
+
+- **`/painel/mais-buscados`** — página no próprio app (`src/pages/MostSearchedPanel.tsx`),
+  lendo `mais-buscados.json` via `import()` dinâmico (não entra no bundle
+  principal). Não tem link em lugar nenhum da navegação — mesmo padrão de
+  `/debug-env`, é pra abrir direto pela URL. Sem autenticação: qualquer um com
+  o link acessa. Dados nela são contagens agregadas e nomes de negócio (sem
+  telefone nem remetente de pergunta), risco de exposição é baixo, mas não é
+  para divulgar o link.
+- **`mais-buscados.md`** — tabela markdown estática (filtrada a 2+ pedidos),
+  pra quem prefere olhar direto no repositório/GitHub sem abrir o app.
 
 ## 5. Privacidade (LGPD) — não é opcional
 
@@ -71,11 +79,11 @@ com filtro por `status: "nao_listado"`) em vez desta tabela estática.
   de qualquer texto virar `exemplos_pedido` — ver `lib/privacy.mjs`.
 - Contatos `.vcf` **institucionais/comerciais** (farmácia, PSF, CRAS, ...) são
   diferentes: são contatos já divulgados publicamente pelo próprio negócio ou
-  serviço, então podem virar dado estruturado — mas saem sempre com
-  `status: "pendente_validacao_manual"`. Nada disso vai ao ar (nem no app, nem
-  no Supabase de produção) sem a curadoria manual que o projeto já define:
-  contato com o comerciante/serviço, confirmação do telefone, correção de
-  categoria.
+  serviço, então podem virar dado estruturado. O script sempre marca a saída
+  com `status: "pendente_validacao_manual"` (o número vem de contato salvo por
+  morador, não de ligação de confirmação com o próprio serviço) — decisão
+  explícita do founder (Eder) foi publicar em `/saude-e-servicos` assim mesmo,
+  sem esperar confirmação um a um; ver §6.
 - Alguns `.vcf` da prefeitura amarram um apelido pessoal a uma função pública
   (ex.: "Gordo Prefeitura") — esses ficam de fora de `saude-e-servicos.json`
   por precaução (não são uma linha institucional divulgada pelo próprio
@@ -84,8 +92,13 @@ com filtro por `status: "nao_listado"`) em vez desta tabela estática.
 ## 6. Publicação em `/saude-e-servicos`
 
 `src/services/healthServices.ts` lê `data/whatsapp-insights/saude-e-servicos.json`
-e só devolve registros com `status: "validado"` — ninguém marca isso
-automaticamente, é um campo que se edita à mão no JSON depois de confirmar o
-contato. Com tudo `"pendente_validacao_manual"` (estado logo após rodar o
-script), a página `/saude-e-servicos` mostra a lista vazia por design, não um
-bug.
+e publica **tudo** — não há selo de "não confirmado" na UI (decisão explícita
+do founder: os números já são os que a cidade usa informalmente, mesmo sem
+confirmação por telefone). O único filtro é `status: "rejeitado"`, que não sai
+do script sozinho — é um jeito de tirar uma entrada específica do ar editando
+só o JSON (sem precisar mexer em código), para quando alguém confirmar que um
+contato está errado ou desatualizado. Depois de rodar o script de novo, revise
+o diff de `saude-e-servicos.json` antes de commitar: uma unidade que sumiu do
+grupo não vira `"rejeitado"` sozinha, e uma que só perdeu menções não deveria
+ser removida — o campo é para "esse contato está errado", não para "esse
+contato está menos popular".
