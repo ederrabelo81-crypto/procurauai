@@ -7,6 +7,7 @@ import {
   Store,
   Tag,
   Utensils,
+  Car,
 } from "lucide-react";
 
 import { CityMasthead } from "@/components/home/CityMasthead";
@@ -16,6 +17,7 @@ import { HomeFooter } from "@/components/home/HomeFooter";
 // Blocos da Home - cada um renderiza condicionalmente se tiver dados
 import {
   ComerAgoraBlock,
+  MaisProcuradosBlock,
   OfertasBlock,
   NegociosServicosBlock,
   AgendaBlock,
@@ -34,7 +36,8 @@ const SHORTCUTS = [
   { to: "/categoria/agenda", label: "Agenda", icon: CalendarDays },
   { to: "/imoveis", label: "Imóveis", icon: HomeIcon },
   { to: "/empregos", label: "Vagas", icon: Briefcase },
-  { to: "/saude-e-servicos", label: "Saúde", icon: HeartPulse },
+  { to: "/saude-e-servicos", label: "Saúde e Serviços", icon: HeartPulse },
+  { to: "/transporte", label: "Transporte", icon: Car },
 ];
 
 export default function Index() {
@@ -67,6 +70,7 @@ export default function Index() {
 
       {/* Conteúdo principal — 9 blocos de descoberta, revelados em cascata */}
       <main className="reveal-stagger space-y-10 px-4 pb-4">
+        <MaisProcuradosBlock />
         <ComerAgoraBlock />
         <OfertasBlock />
         <NegociosServicosBlock />
