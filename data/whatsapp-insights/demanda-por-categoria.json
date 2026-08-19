@@ -1,0 +1,62 @@
+[
+  {
+    "categoria": "transporte",
+    "mensagens": 597
+  },
+  {
+    "categoria": "saude_medico",
+    "mensagens": 505
+  },
+  {
+    "categoria": "comida",
+    "mensagens": 494
+  },
+  {
+    "categoria": "aluguel_imovel",
+    "mensagens": 383
+  },
+  {
+    "categoria": "roupa_loja",
+    "mensagens": 357
+  },
+  {
+    "categoria": "reparos_casa",
+    "mensagens": 246
+  },
+  {
+    "categoria": "pet_veterinario",
+    "mensagens": 137
+  },
+  {
+    "categoria": "documentos_juridico",
+    "mensagens": 115
+  },
+  {
+    "categoria": "outros_servicos",
+    "mensagens": 97
+  },
+  {
+    "categoria": "auto_mecanico",
+    "mensagens": 87
+  },
+  {
+    "categoria": "beleza_estetica",
+    "mensagens": 84
+  },
+  {
+    "categoria": "educacao",
+    "mensagens": 80
+  },
+  {
+    "categoria": "servico_domestico",
+    "mensagens": 59
+  },
+  {
+    "categoria": "gas_agua",
+    "mensagens": 54
+  },
+  {
+    "categoria": "construcao",
+    "mensagens": 30
+  }
+]

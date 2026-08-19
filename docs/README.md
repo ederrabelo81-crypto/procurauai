@@ -10,6 +10,7 @@ IA fica em [`CLAUDE.md`](../CLAUDE.md), na raiz.
 | [design-system.md](design-system.md) | Design system "Almanaque": tokens, tipografia, classes utilitárias |
 | [google-maps.md](google-maps.md) | Integração com o Google Maps e o caminho sem chave de API |
 | [coleta-de-dados.md](coleta-de-dados.md) | Coleta via Places API e importação para o Supabase |
+| [whatsapp-insights.md](whatsapp-insights.md) | Extração de insights dos grupos de WhatsApp: negócios "fantasma", demanda por categoria, saúde/serviço público |
 | [database/README.md](database/README.md) | Schema proposto (PostGIS, chips, painéis de mini-site) |
 | [supabase/troubleshooting.md](supabase/troubleshooting.md) | Erros conhecidos do banco e como corrigir |
 | [supabase/translation-script.md](supabase/translation-script.md) | Script de tradução de descrições |
