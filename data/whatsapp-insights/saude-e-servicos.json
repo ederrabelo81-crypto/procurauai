@@ -1,0 +1,749 @@
+[
+  {
+    "nome": "Farmácia Pública",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-5183",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 495,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácia Zé",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9230-5361",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 495,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmacia Monte Santo de Minas",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-5183",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 495,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Pronto Socorro Cel",
+    "categoria_servico": "pronto_socorro",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 298,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Call Center Prefeitura Monte Santo",
+    "categoria_servico": "prefeitura",
+    "telefone": "+55 35 3591-5130",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 297,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Prefeitura Monte Santo MG",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 297,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Prefeitura de Monte Santo Transporte de Minas",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 297,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Prefeitura....",
+    "categoria_servico": "prefeitura",
+    "telefone": "+55 35 9991-4623",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 297,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Transporte Prefeitura",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 297,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "call Center Prefeitura",
+    "categoria_servico": "prefeitura",
+    "telefone": "+55 35 9994-4503",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 297,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "call Center",
+    "categoria_servico": "prefeitura",
+    "telefone": "+55 35 9994-4503",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 297,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Conselho Tutelar Plant� �o",
+    "categoria_servico": "conselho_tutelar",
+    "telefone": "+55 35 9991-0467",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 289,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "RX Santa Casa",
+    "categoria_servico": "pronto_socorro",
+    "telefone": "+55 35 9239-7064",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 262,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Santa Casa De Monte Santo",
+    "categoria_servico": "pronto_socorro",
+    "telefone": "+55 35 3591-1444",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 262,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Santa Santa Casa",
+    "categoria_servico": "pronto_socorro",
+    "telefone": "+55 35 9175-9448",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 262,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Pronto Socorro De Monte Santo 🤕😷🤒🤧",
+    "categoria_servico": "pronto_socorro",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 262,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Americana Farmácia",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9187-0018",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 228,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmacia Americana Matriz",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9206-2115",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 228,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Santa Casa Paraíso",
+    "categoria_servico": "pronto_socorro",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 217,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Paulo Farmácia",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9230-5361",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 177,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácia Nova Minas Do",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9216-7413",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 168,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Ambulatório Monte Santo de Minas",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 3591-5163",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 164,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Ambulatório Municipal",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 3591-5163",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 164,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Ambulatório",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 3591-5163",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 164,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Call Center - Ambulatório",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 3591-5163",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 164,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "PSF Zap Celular",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7398",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 164,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Psf",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7095",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 164,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmacia Do Pedro",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9113-6471",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 132,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmacia Pedro Zap",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9113-6471",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 132,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "CRAS - Monte Santo de Minas",
+    "categoria_servico": "assistencia_social",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 128,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "CRAS",
+    "categoria_servico": "assistencia_social",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 128,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Cras Monte Santo",
+    "categoria_servico": "assistencia_social",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 128,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Vacina",
+    "categoria_servico": "vacina",
+    "telefone": "+55 35 93300-1897",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 92,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Prefeitura Ambulância",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 57,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácia Da Bianca",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-1049",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 53,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farma Zé Basílio Zé",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9159-6800",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 51,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Ze Basilio Farmacia",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9159-6800",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 51,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "CAPS",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 41,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Caps Prefeitura",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 41,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmacia São Geraldo",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-4000",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 41,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Psf Italianos",
+    "categoria_servico": "posto_saude",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 34,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Garagem Prefeitura",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 31,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Posto De Vacina Zap",
+    "categoria_servico": "vacina",
+    "telefone": "+55 35 93300-1897",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 28,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Conselho Tutelar Monte Santo",
+    "categoria_servico": "conselho_tutelar",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 25,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Conselho Tutelar Plantão Celular",
+    "categoria_servico": "conselho_tutelar",
+    "telefone": "+55 35 9991-0467",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 25,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Conselho Tutelar Fixo",
+    "categoria_servico": "conselho_tutelar",
+    "telefone": "+55 35 9991-0467",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 25,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "PSF Mariucha",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7105",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 25,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "PSF Jardim Brasil",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7398",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 23,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Psf Juvenal",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7398",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 20,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Defensoria Pública do Estado de Minas Gerais",
+    "categoria_servico": "defensoria",
+    "telefone": "+55 31 8400-9394",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 19,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Dsg Farma Monte Santo",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-4000",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 18,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Dsg Farmacia",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-4000",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 18,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácinha Da Prefeitura",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-5183",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 15,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "PSF João Furlan",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7402",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 14,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Vigilância Sanitária",
+    "categoria_servico": "vigilancia_sanitaria",
+    "telefone": "+55 35 9991-9172",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 14,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Defensoria Publica",
+    "categoria_servico": "defensoria",
+    "telefone": "+55 31 8400-9394",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 13,
+    "confianca_contagem": "baixa_soma_categoria",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Postinho Vacina",
+    "categoria_servico": "posto_saude",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 13,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácia Bem Popular",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9230-5361",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 12,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Lú Regulação",
+    "categoria_servico": "prefeitura",
+    "telefone": "+55 35 9106-9618",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 12,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "PSF São Camilo",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-5163",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 12,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Regulação - Prefeitura de Monte Santo de Minas",
+    "categoria_servico": "prefeitura",
+    "telefone": "+55 35 3591-5151",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 12,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Belpharma Farmacia",
+    "categoria_servico": "farmacia",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 11,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "PSF Ana Carolina",
+    "categoria_servico": "posto_saude",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 8,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Psf Maria Barbosinha ZAP",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7095",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 8,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Dose Certa Farmácia",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9759-3007",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 7,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Ambulatório Ortopedista",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 3591-5163",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 7,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácia Do José Basilio",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9159-6800",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 6,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Santa Casa SSP",
+    "categoria_servico": "pronto_socorro",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 5,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmacia Do Pedro (Ultra popular)",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9113-6471",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 3,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Posto De Vacina Whats",
+    "categoria_servico": "vacina",
+    "telefone": "+55 35 93300-1897",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 3,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Ambulatório Operariaa",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 3591-5163",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 2,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Centro de Referência Especializado de Assistência Social de Monte Santo/MG",
+    "categoria_servico": "assistencia_social",
+    "telefone": "+55 35 9991-6861",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 2,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácia Do Paulo Bem Popular Brasil",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9230-5361",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 2,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Psf Barbozinha",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7095",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 2,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Psf Maria De Lourdes",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7899",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 2,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Psf dona mariucha",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7105",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 2,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Bruninha Regulação",
+    "categoria_servico": "prefeitura",
+    "telefone": "",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 1,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Defensoria Pública Mon te Santo Fórum",
+    "categoria_servico": "defensoria",
+    "telefone": "+55 31 8400-9394",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 1,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmacia Frank ( Juliana)",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9759-3007",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 1,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Farmácias Dose Certa",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 9759-3007",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 1,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "PSF JOAO FURLAN Postinho",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9991-7402",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 1,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "Consultório Odontologico Psf Maria Barbosinha",
+    "categoria_servico": "posto_saude",
+    "telefone": "+55 35 9734-8201",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 1,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  },
+  {
+    "nome": "farmacinha De Graça",
+    "categoria_servico": "farmacia",
+    "telefone": "+55 35 3591-5183",
+    "fonte": "vcf",
+    "vezes_mencionado_no_grupo": 1,
+    "confianca_contagem": "alta",
+    "status": "pendente_validacao_manual"
+  }
+]

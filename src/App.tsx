@@ -22,7 +22,6 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import MapPage from "./pages/MapPage";
 
-
 // List pages (novos tipos)
 import PlacesList from "./pages/PlacesList";
 import CarsList from "./pages/CarsList";
@@ -35,6 +34,7 @@ import CarDetail from "./pages/CarDetail";
 import JobDetail from "./pages/JobDetail";
 import RealEstateDetail from "./pages/RealEstateDetail";
 import DebugEnv from "./pages/DebugEnv";
+import HealthServices from "./pages/HealthServices";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,7 +62,10 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/buscar" element={<Search />} />
                 <Route path="/categoria/:categoryId" element={<Category />} />
-                <Route path="/comercio/:categorySlug/:id" element={<BusinessDetail />} />
+                <Route
+                  path="/comercio/:categorySlug/:id"
+                  element={<BusinessDetail />}
+                />
                 <Route path="/comercio/:id" element={<BusinessDetail />} />
                 <Route path="/anuncio/:id" element={<ListingDetail />} />
                 <Route path="/oferta/:id" element={<DealDetail />} />
@@ -78,6 +81,7 @@ const App = () => (
                 <Route path="/carros" element={<CarsList />} />
                 <Route path="/empregos" element={<JobsList />} />
                 <Route path="/imoveis" element={<RealEstateList />} />
+                <Route path="/saude-e-servicos" element={<HealthServices />} />
 
                 {/* Novos tipos - DETALHE (isso resolve o 404) */}
                 <Route path="/lugares/:slug" element={<PlaceDetail />} />

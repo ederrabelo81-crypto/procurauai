@@ -23,6 +23,13 @@ data/places/
 # Planilhas de validação exportadas (scripts/validate-businesses.mjs)
 data/validation/
 
+# Exports brutos de grupos de WhatsApp (dados pessoais — LGPD) e qualquer
+# saída intermediária do scripts/whatsapp-insights/extract-insights.mjs que
+# ainda contenha números de telefone de pessoas físicas.
+data/whatsapp-raw/
+data/whatsapp-insights/*.jsonl
+data/whatsapp-insights/*-com-remetente.json
+
 # Logs e temporários
 *.log
 *.tmp

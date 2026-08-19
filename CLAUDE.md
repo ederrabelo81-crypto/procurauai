@@ -179,7 +179,9 @@ Todas em `src/App.tsx`. Padrão de URLs em português:
 `/buscar`, `/categoria/:categoryId`, `/comercio/:categorySlug?/:id`,
 `/anuncio|/oferta|/evento|/noticia|/falecimento/:id`, listas `/lugares`,
 `/carros`, `/empregos`, `/imoveis` com detalhes `/lugares/:slug` etc.,
-`/mapa`, `/publicar`, `/perfil`, `/debug-env` (diagnóstico de env) e `*`.
+`/saude-e-servicos` (contatos de saúde/serviço público, ver
+`docs/whatsapp-insights.md`), `/mapa`, `/publicar`, `/perfil`,
+`/debug-env` (diagnóstico de env) e `*`.
 Ao criar uma página, registre a rota aqui **e** o link de origem — rotas órfãs
 já causaram 404 neste projeto.
 
@@ -414,6 +416,7 @@ Rodam com Node, **fora** do app, e usam `process.env` (não `import.meta.env`):
 | `validate-businesses.mjs` | curadoria manual: exporta os pendentes para CSV, o revisor decide em planilha (`action` = verified/rejected/needs_update) e reimporta; aceita `--dry-run`, `--export-csv`, `--import-csv`, `--city`, `--status`, `--limit`, `--verified-by`, `--help` |
 | `translate-businesses.mjs` | traduz `description` para pt-BR via DeepL e normaliza `rating` |
 | `check-database-content.ts` | inspeciona categorias/contagens no banco |
+| `whatsapp-insights/extract-insights.mjs` | extrai demanda (negócios "fantasma", categorias, saúde/serviço público) de exports de grupos de WhatsApp; ver `docs/whatsapp-insights.md` |
 
 Os três primeiros exigem `SUPABASE_SERVICE_ROLE_KEY` e/ou
 `GOOGLE_MAPS_API_KEY` / `DEEPL_API_KEY`. Sempre ofereça `--dry-run` antes de
