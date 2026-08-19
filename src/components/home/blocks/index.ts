@@ -1,5 +1,6 @@
 // Barrel export de todos os blocos da Home
 export { ComerAgoraBlock } from './ComerAgoraBlock';
+export { MaisProcuradosBlock } from './MaisProcuradosBlock';
 export { OfertasBlock } from './OfertasBlock';
 export { NegociosServicosBlock } from './NegociosServicosBlock';
 export { AgendaBlock } from './AgendaBlock';
